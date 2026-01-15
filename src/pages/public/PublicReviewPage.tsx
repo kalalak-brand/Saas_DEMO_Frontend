@@ -222,7 +222,6 @@ const PublicReviewPage: React.FC = () => {
     yesNoAnswerText,
     isSubmitting,
     isLoading: isQuestionsLoading,
-    fetchQuestions,
     setAnswer,
     setYesNoAnswerText,
     resetReview,
