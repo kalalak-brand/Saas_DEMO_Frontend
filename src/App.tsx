@@ -24,13 +24,9 @@ const HotelsManagementPage = lazy(
 const GuestIssuesPage = lazy(
   () => import("./pages/management/YesNoResponsesPage")
 );
-const SelectCategoryPage = lazy(
-  () => import("./pages/review/SelectCategoryPage")
-);
 const ReviewRouter = lazy(() => import("./pages/review/ReviewRouter"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
 const ProtectedRoute = lazy(() => import("./components/auth/ProtectedRoute"));
-const StaffProtectedRoute = lazy(() => import("./components/auth/StaffProtectedRoute"));
 import { useCompositeStore } from "./stores/compositeStore";
 import { useFilterStore } from "./stores/filterStore";
 import { useAnalyticsStore } from "./stores/analyticsStore";
@@ -48,9 +44,8 @@ const CategoriesPage = lazy(
   () => import("./pages/management/CategoriesPage")
 );
 
-const StaffDashboard = lazy(() => import("./pages/review/StaffDashboard"));
-const GenerateLinkPage = lazy(() => import("./pages/review/GenerateLinkPage"));
-const PublicReviewPage = lazy(() => import("./pages/public/PublicReviewPage"));
+
+
 
 // Loading Fallback - Premium design
 const LoadingFallback: React.FC = () => (
@@ -129,7 +124,6 @@ function App() {
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/public/review/:token" element={<PublicReviewPage />} />
             {/* Admin & Viewer Routes */}
             <Route
               element={<ProtectedRoute allowedRoles={["super_admin", "admin", "viewer"]} />}
@@ -163,17 +157,8 @@ function App() {
               </Route>
             </Route>
 
-            {/* Staff Routes - Uses dynamic roles from categories */}
-            <Route element={<StaffProtectedRoute />}>
-              <Route path="/review/dashboard" element={<StaffDashboard />} />
-              <Route path="/review/generate" element={<GenerateLinkPage />} />
-              <Route path="/review/select" element={<SelectCategoryPage />} />
-              <Route path="/review/:category" element={<ReviewRouter />} />
-              <Route
-                path="/review"
-                element={<Navigate to="/review/dashboard" replace />}
-              />
-            </Route>
+            {/* Public Review Routes - No Auth Required */}
+            <Route path="/:category" element={<ReviewRouter />} />
 
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>

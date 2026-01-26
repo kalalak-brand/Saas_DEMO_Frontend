@@ -8,32 +8,12 @@ export interface IUser {
   _id: string;
   fullName: string;
   username: string;
-  role: string; // Dynamic: 'super_admin' | 'admin' | 'viewer' | 'staff' | 'staff_[category-slug]'
-  staffCategory?: string;
-  // <-- MODIFIED: This now matches the populated object from the backend -->
+  role: 'super_admin' | 'admin' | 'viewer';
   hotelId?: {
     _id: string;
     name: string;
   };
 }
-
-/**
- * Helper to check if a role is any type of staff role
- */
-export const isStaffRole = (role: string): boolean => {
-  return role === 'staff' || role.startsWith('staff_');
-};
-
-/**
- * Helper to get the category slug from a staff role
- * @returns category slug (e.g., 'room', 'f&b', 'cfc') or null if not a staff role
- */
-export const getCategoryFromRole = (role: string): string | null => {
-  if (role.startsWith('staff_')) {
-    return role.replace('staff_', '');
-  }
-  return null;
-};
 
 /**
  * Helper to check if a role is an admin-type role

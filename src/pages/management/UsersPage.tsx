@@ -4,7 +4,6 @@ import { Edit, Trash2, PlusCircle, Home } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 import { useAuthStore, IUser } from '../../stores/authStore';
 import { useHotelStore } from '../../stores/hotelStore';
-import { useActiveCategories } from '../../stores/categoryStore';
 
 type UserRole = IUser['role'];
 
@@ -22,9 +21,6 @@ const UsersPage: React.FC = () => {
   const { hotels, fetchHotels, getHotelNameById } = useHotelStore();
   const loggedInUser = useAuthStore((state) => state.user);
   const currentAdminId = loggedInUser?._id;
-
-  // Get active categories for dynamic staff role options
-  const activeCategories = useActiveCategories();
 
   // Check if the logged-in user is a Super Admin (no hotelId)
   const isSuperAdmin = loggedInUser && !loggedInUser.hotelId;
@@ -80,11 +76,7 @@ const UsersPage: React.FC = () => {
       return;
     }
 
-    // <-- ADDED: If Super Admin is creating a user (not viewer/admin), hotel is required
-    if (isSuperAdmin && !editingUser && role !== 'admin' && role !== 'viewer' && !hotelId) {
-      alert('Please assign a hotel for this staff user.');
-      return;
-    }
+
 
     if (editingUser) {
       if (editingUser._id === currentAdminId && editingUser.role === 'admin' && role !== 'admin') {
@@ -189,18 +181,11 @@ const UsersPage: React.FC = () => {
             <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
             <select
               name="role" id="role"
-              defaultValue={editingUser?.role || 'staff'}
+              defaultValue={editingUser?.role || 'viewer'}
               className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               disabled={editingUser?._id === currentAdminId && editingUser?.role === 'admin'}
             >
-              <option value="staff">Supervisor</option>
-              {/* Dynamic staff roles from categories */}
-              {activeCategories.map(category => (
-                <option key={category.slug} value={`staff_${category.slug}`}>
-                  Associate ({category.name})
-                </option>
-              ))}
-              <option value="viewer">Manager</option>
+              <option value="viewer">Manager (Viewer)</option>
               <option value="admin">Admin</option>
             </select>
           </div>

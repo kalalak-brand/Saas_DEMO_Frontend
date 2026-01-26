@@ -1,7 +1,6 @@
 // src/stores/reviewStore.ts
 import { create } from 'zustand';
 import axios from 'axios';
-import { useAuthStore } from './authStore';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -39,6 +38,7 @@ interface ReviewState {
   isLoading: boolean;
   isSubmitting: boolean;
   error: string | null;
+  categoryInfo: { name: string; guestInfoFields?: { roomNumber?: boolean } } | null;
 
   fetchQuestions: (category: string) => Promise<void>;
   setAnswer: (questionId: string, answer: number | boolean) => void;
@@ -47,15 +47,6 @@ interface ReviewState {
   resetReview: () => void;
 }
 
-const getAuthHeader = () => {
-  const token = useAuthStore.getState().token;
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return { headers };
-};
-
 export const useReviewStore = create<ReviewState>((set, get) => ({
   questions: [],
   answers: {},
@@ -63,16 +54,16 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   isLoading: false,
   isSubmitting: false,
   error: null,
+  categoryInfo: null,
 
+  // Fetch questions using public API (no auth required)
   fetchQuestions: async (category: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await axios.get(
-        `${BASE_URL}/questions?category=${category}`,
-        getAuthHeader()
-      );
+      const res = await axios.get(`${BASE_URL}/public/questions/${category}`);
       set({
         questions: res.data.data.questions || [],
+        categoryInfo: res.data.data.category || null,
         isLoading: false,
         error: null
       });
@@ -97,10 +88,11 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
     }));
   },
 
+  // Submit review using public API (no auth required)
   submitReview: async (payload) => {
     set({ isSubmitting: true, error: null });
     try {
-      await axios.post(`${BASE_URL}/reviews`, payload, getAuthHeader());
+      await axios.post(`${BASE_URL}/public/reviews`, payload);
       set({ isSubmitting: false });
       return true;
     } catch (err) {
@@ -109,5 +101,5 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
     }
   },
 
-  resetReview: () => set({ answers: {}, questions: [], yesNoAnswerText: {} }),
+  resetReview: () => set({ answers: {}, questions: [], yesNoAnswerText: {}, categoryInfo: null }),
 }));

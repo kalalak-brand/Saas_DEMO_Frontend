@@ -79,8 +79,8 @@ export const Sidebar = ({
                 key={`${item.type}-${item.id}-${index}`}
                 onClick={() => onSelectItem(item.id, item.name, item.type)}
                 className={clsx(
-                    "flex items-center w-[calc(100%-1rem)] px-2 py-2 mx-auto mt-1 rounded-lg hover:bg-secondary hover:text-white transition-colors duration-200 text-pink-100 text-left",
-                    { "bg-secondary text-white font-semibold": isActive }
+                    "flex items-center w-[calc(100%-1rem)] px-2 py-2 mx-auto mt-1 rounded-lg hover:bg-[#E4B580]/10 hover:text-white transition-colors duration-200 text-pink-100 text-left",
+                    { "bg-[#E4B587] text-white font-semibold": isActive }
                 )}
                 title={item.name}
             >
@@ -105,14 +105,14 @@ export const Sidebar = ({
                 <div className="flex p-2 border-b border-secondary flex-shrink-0">
                     <button
                         onClick={() => setSidebarMode('composite')}
-                        className={`flex-1 py-2 px-1 text-center font-medium rounded-l-md transition-colors ${sidebarMode === 'composite' ? 'bg-secondary text-white' : 'text-pink-100 hover:bg-secondary/70'
+                        className={`flex-1 py-2 px-1 text-center font-medium rounded-l-md transition-colors ${sidebarMode === 'composite' ? 'bg-[#E4B587] text-white' : 'text-pink-100 hover:bg-[#E4B580]/10 '
                             }`}
                     >
                         Comp
                     </button>
                     <button
                         onClick={() => setSidebarMode('question')}
-                        className={`flex-1 py-2 px-1 text-center font-medium rounded-r-md transition-colors ${sidebarMode === 'question' ? 'bg-secondary text-white' : 'text-pink-100 hover:bg-secondary/70'
+                        className={`flex-1 py-2 px-1 text-center font-medium rounded-r-md transition-colors ${sidebarMode === 'question' ? 'bg-[#E4B580] text-white' : 'text-pink-100hover:bg-[#E4B580]/10 '
                             }`}
                     >
                         Ques

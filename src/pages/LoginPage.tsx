@@ -1,11 +1,10 @@
 // src/pages/LoginPage.tsx
-import React, { useState, useEffect } from 'react'; // ✅ Import useEffect
-import { useAuthStore, isStaffRole, isAdminRole } from '../stores/authStore';
-import { useNavigate } from 'react-router-dom'; // ❌ Remove Navigate from import
+import React, { useState, useEffect } from 'react';
+import { useAuthStore } from '../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo/Kalalak.png';
 import { Eye, EyeOff } from 'lucide-react';
 
-// ... (Keep BRAND and getRedirectPath defined as they were) ...
 const BRAND = {
   primary: '#1E3A5F',
   primaryHover: '#2A4A73',
@@ -13,9 +12,8 @@ const BRAND = {
   background: '#F0F4F8',
 };
 
-const getRedirectPath = (role: string): string => {
-  if (isAdminRole(role)) return '/';
-  if (isStaffRole(role)) return '/review/dashboard';
+// All admin users go to the main dashboard
+const getRedirectPath = (): string => {
   return '/';
 };
 
@@ -26,16 +24,10 @@ const LoginPage: React.FC = () => {
   const { login, isLoading, error, user } = useAuthStore();
   const navigate = useNavigate();
 
-  // ✅ FIX: Use useEffect for redirection instead of returning <Navigate>
-  // This handles both "Already Logged In" and "Just Logged In" scenarios safely
+  // Redirect to dashboard on login
   useEffect(() => {
     if (user && !isLoading) {
-      // 🛑 Debugging: Log instead of redirecting
-      console.log("LoginPage: User is logged in:", user);
-      console.log("LoginPage: Attempting to redirect to:", getRedirectPath(user.role));
-
-      // UNCOMMENT THIS ONLY AFTER YOU CHECK THE CONSOLE
-      const path = getRedirectPath(user.role);
+      const path = getRedirectPath();
       navigate(path, { replace: true });
     }
   }, [user, isLoading, navigate]);

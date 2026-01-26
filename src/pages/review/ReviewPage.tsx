@@ -1,26 +1,20 @@
 // src/pages/review/ReviewPage.tsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useReviewStore, ReviewPayload } from "../../stores/reviewStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { useCategoryStore } from "../../stores/categoryStore";
 import { PlaceholderLogo } from "../../components/common/PlaceholderLogo";
 import { QuestionCard } from "../../components/ui/QuestionCard";
 import toast from 'react-hot-toast';
-import { useAuthStore } from "../../stores/authStore";
-import { Send, Loader2, LogOut, ChevronLeft, Star } from "lucide-react";
+import { Send, Loader2, ChevronLeft, Star } from "lucide-react";
 import clsx from "clsx";
 
 // --- Main Review Page Component ---
 const ReviewPage: React.FC = () => {
     const { category } = useParams<{ category: string }>();
-    const navigate = useNavigate();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
     const { theme, ratingScale } = useSettingsStore();
-    const { getCategoryBySlug } = useCategoryStore();
-    const logout = useAuthStore((state) => state.logout);
-    const user = useAuthStore((state) => state.user);
 
     const [guestName, setGuestName] = useState("");
     const [guestPhone, setGuestPhone] = useState("");
@@ -38,11 +32,11 @@ const ReviewPage: React.FC = () => {
         setYesNoAnswerText,
         submitReview,
         resetReview,
+        categoryInfo,
     } = useReviewStore();
 
-    const currentCategory = useMemo(() => {
-        return category ? getCategoryBySlug(category) : undefined;
-    }, [category, getCategoryBySlug]);
+    // Use category info from reviewStore (fetched from public API)
+    const currentCategory = categoryInfo;
 
     useEffect(() => {
         resetReview();
@@ -109,10 +103,7 @@ const ReviewPage: React.FC = () => {
         }
     };
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
+
 
     // Loading state
     if (isLoading) {
@@ -148,7 +139,7 @@ const ReviewPage: React.FC = () => {
                     </h1>
                     <p className="text-gray-600 mb-6">{theme.thankYouMessage}</p>
                     <button
-                        onClick={() => navigate("/review/dashboard")}
+                        onClick={() => { resetReview(); setPage("review"); }}
                         className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
                         style={{ backgroundColor: theme.primaryColor }}
                     >
@@ -271,20 +262,13 @@ const ReviewPage: React.FC = () => {
                         <PlaceholderLogo size="sm" showText={false} />
                         <div>
                             <h1 className="text-lg md:text-xl font-semibold">
-                                {user?.hotelId?.name || "Guest Feedback"}
+                                Guest Feedback
                             </h1>
                             {currentCategory && (
                                 <p className="text-white/70 text-sm">{currentCategory.name}</p>
                             )}
                         </div>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                        title="Logout"
-                    >
-                        <LogOut size={20} />
-                    </button>
                 </div>
             </header>
 
