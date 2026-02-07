@@ -43,6 +43,9 @@ const SettingsPage = lazy(
 const CategoriesPage = lazy(
   () => import("./pages/management/CategoriesPage")
 );
+const QRCodesPage = lazy(
+  () => import("./pages/management/QRCodesPage")
+);
 
 
 
@@ -153,6 +156,7 @@ function App() {
                   />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="categories" element={<CategoriesPage />} />
+                  <Route path="qr-codes" element={<QRCodesPage />} />
                 </Route>
               </Route>
             </Route>

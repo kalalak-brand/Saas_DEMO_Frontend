@@ -16,6 +16,7 @@ import {
     ChevronDown,
     FileText,
     Shield,
+    QrCode,
     type LucideIcon,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -58,6 +59,7 @@ const formBuilderItems: NavItem[] = [
 const systemAdminItems: NavItem[] = [
     { href: '/management/hotels', icon: Building2, label: 'Hotels' },
     { href: '/management/categories', icon: Layers, label: 'Categories' },
+    { href: '/management/qr-codes', icon: QrCode, label: 'QR Codes' },
     { href: '/management/users', icon: Users, label: 'Users' },
     { href: '/management/settings', icon: Settings, label: 'Settings' },
 ];
