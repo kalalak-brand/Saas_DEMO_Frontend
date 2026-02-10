@@ -103,7 +103,12 @@ const generateColorVariants = (baseColor: string) => {
  * Injects CSS variables for runtime theming based on settings store
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-    const { theme, ratingScale, setTheme, setRatingScale, resetTheme } = useSettingsStore();
+    const { theme, ratingScale, setTheme, setRatingScale, resetTheme, fetchSettings } = useSettingsStore();
+
+    // Fetch settings on mount to get admin-configured theme
+    useEffect(() => {
+        fetchSettings();
+    }, [fetchSettings]);
 
     // Generate CSS variables from theme
     const cssVariables = useMemo(() => {
