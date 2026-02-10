@@ -1,6 +1,7 @@
 // src/components/theme/ThemeProvider.tsx
 import React, { useEffect, useMemo, createContext, useContext, ReactNode } from 'react';
 import { useSettingsStore, ThemeConfig } from '../../stores/settingsStore';
+import { useAuthStore } from '../../stores/authStore';
 
 /**
  * Theme context for accessing theme values in components
@@ -104,11 +105,14 @@ const generateColorVariants = (baseColor: string) => {
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const { theme, ratingScale, setTheme, setRatingScale, resetTheme, fetchSettings } = useSettingsStore();
+    const token = useAuthStore((state) => state.token);
 
-    // Fetch settings on mount to get admin-configured theme
+    // Only fetch settings when user is authenticated
     useEffect(() => {
-        fetchSettings();
-    }, [fetchSettings]);
+        if (token) {
+            fetchSettings();
+        }
+    }, [token, fetchSettings]);
 
     // Generate CSS variables from theme
     const cssVariables = useMemo(() => {
