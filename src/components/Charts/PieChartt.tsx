@@ -73,8 +73,7 @@ export const PieChartt: React.FC<DynamicPieChartProps> = ({
         <div className={clsx('rounded-lg', style)}>
             {title && (
                 <h2
-                    className="text-xl font-semibold  text-center"
-                    style={{ color: '#650933' }}
+                    className="text-xl font-semibold text-center text-primary"
                 >
                     {title}
                 </h2>

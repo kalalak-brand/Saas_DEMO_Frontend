@@ -5,16 +5,16 @@ import { Edit, Trash2, PlusCircle, Building } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 
 const HotelManagementPage: React.FC = () => {
-  const { 
-    hotels, 
-    isLoading, 
-    error, 
-    fetchHotels, 
-    createHotel, 
-    updateHotel, 
-    deleteHotel 
+  const {
+    hotels,
+    isLoading,
+    error,
+    fetchHotels,
+    createHotel,
+    updateHotel,
+    deleteHotel
   } = useHotelStore();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHotel, setEditingHotel] = useState<IHotel | null>(null);
   const [hotelName, setHotelName] = useState('');
@@ -68,12 +68,12 @@ const HotelManagementPage: React.FC = () => {
   };
 
   return (
-    <div style={{ color: '#650933' }}>
+    <div className="text-text-primary">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Manage Hotels</h1>
+        <h1 className="text-3xl font-bold text-primary">Manage Hotels</h1>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 bg-[#650933] text-white px-4 py-2 rounded-lg hover:bg-opacity-90"
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light transition-colors"
         >
           <PlusCircle size={20} />
           Add Hotel
@@ -88,11 +88,11 @@ const HotelManagementPage: React.FC = () => {
           {hotels.map(hotel => (
             <li key={hotel._id} className="flex items-center justify-between p-3">
               <div className="flex items-center gap-3">
-                <Building size={18} className="text-gray-500" />
+                <Building size={18} className="text-primary" />
                 <span className="font-medium text-gray-800">{hotel.name}</span>
               </div>
               <div className="flex items-center gap-4">
-                <button onClick={() => openEditModal(hotel)} className="text-blue-500 hover:text-blue-700" title="Edit">
+                <button onClick={() => openEditModal(hotel)} className="text-primary hover:text-primary-light" title="Edit">
                   <Edit size={18} />
                 </button>
                 <button onClick={() => handleDelete(hotel)} className="text-red-500 hover:text-red-700" title="Delete">
@@ -106,7 +106,7 @@ const HotelManagementPage: React.FC = () => {
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-primary">
             {editingHotel ? 'Edit Hotel' : 'Add New Hotel'}
           </h2>
           <div>
@@ -117,14 +117,14 @@ const HotelManagementPage: React.FC = () => {
               id="hotelName"
               value={hotelName}
               onChange={(e) => setHotelName(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#650933] focus:ring-[#650933] py-2 px-4"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-2 px-4"
               required
               autoFocus
             />
           </div>
           <div className="mt-6 flex justify-end gap-3">
             <button type="button" onClick={closeModal} className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="px-4 py-2 rounded-lg bg-[#650933] text-white hover:bg-opacity-90" disabled={isLoading}>
+            <button type="submit" className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-light transition-colors" disabled={isLoading}>
               {isLoading ? 'Saving...' : 'Save'}
             </button>
           </div>

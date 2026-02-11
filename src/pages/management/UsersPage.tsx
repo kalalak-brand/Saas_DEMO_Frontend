@@ -101,12 +101,12 @@ const UsersPage: React.FC = () => {
   }
 
   return (
-    <div style={{ color: '#650933' }}>
+    <div className="text-text-primary">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Manage Users</h1>
+        <h1 className="text-3xl font-bold text-primary">Manage Users</h1>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 bg-[#650933] text-white px-4 py-2 rounded-lg hover:bg-opacity-90"
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light transition-colors"
         >
           <PlusCircle size={20} />
           Add User
@@ -120,7 +120,7 @@ const UsersPage: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <span className="font-medium text-gray-800">{user.fullName}</span>
                 <span className="text-sm text-gray-500 ml-2">(@{user.username})</span>
-                <span className="ml-2 text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full capitalize">
+                <span className="ml-2 text-xs font-semibold bg-primary-50 text-primary px-2 py-0.5 rounded-full capitalize">
                   {user.role.replace('_', ' ')}
                 </span>
                 {/* <-- ADDED: Display hotel name --> */}
@@ -135,7 +135,7 @@ const UsersPage: React.FC = () => {
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                   {user.isActive ? 'Active' : 'Inactive'}
                 </span>
-                <button onClick={() => openEditModal(user)} className="text-blue-500 hover:text-blue-700" title="Edit">
+                <button onClick={() => openEditModal(user)} className="text-primary hover:text-primary-light" title="Edit">
                   <Edit size={18} />
                 </button>
                 <button
@@ -155,7 +155,7 @@ const UsersPage: React.FC = () => {
       {/* --- MODAL FOR CREATE/EDIT --- */}
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-primary">
             {editingUser ? 'Edit User' : 'Add New User'}
           </h2>
           <div>
@@ -163,7 +163,7 @@ const UsersPage: React.FC = () => {
             <input
               type="text" name="fullName" id="fullName"
               defaultValue={editingUser?.fullName || ''}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#650933] focus:ring-[#650933] py-2 px-4"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-2 px-4"
               required autoFocus
             />
           </div>
@@ -172,7 +172,7 @@ const UsersPage: React.FC = () => {
             <input
               type="text" name="username" id="username"
               defaultValue={editingUser?.username || ''}
-              className="mt-1 block w-full rounded-md border-gray-300 py-2 px-4 shadow-sm focus:border-[#650933] focus:ring-[#650933]"
+              className="mt-1 block w-full rounded-md border-gray-300 py-2 px-4 shadow-sm focus:border-primary focus:ring-primary"
               required
             />
           </div>
@@ -182,7 +182,7 @@ const UsersPage: React.FC = () => {
             <select
               name="role" id="role"
               defaultValue={editingUser?.role || 'viewer'}
-              className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               disabled={editingUser?._id === currentAdminId && editingUser?.role === 'admin'}
             >
               <option value="viewer">Manager (Viewer)</option>
@@ -200,7 +200,7 @@ const UsersPage: React.FC = () => {
               <select
                 name="hotelId" id="hotelId"
                 defaultValue={editingUser?.hotelId || ''}
-                className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               >
                 <option value="">Assign a Hotel...</option>
                 {/* Staff roles must have a hotel. Admin/Viewer can be global. */}
@@ -224,14 +224,14 @@ const UsersPage: React.FC = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
               <input
                 type="password" name="password" id="password"
-                className="mt-1 block w-full rounded-md border-gray-300 py-2 px-4 shadow-sm focus:border-[#650933] focus:ring-[#650933]"
+                className="mt-1 block w-full rounded-md border-gray-300 py-2 px-4 shadow-sm focus:border-primary focus:ring-primary"
                 required
               />
             </div>
           )}
           <div className="mt-6 flex justify-end gap-3">
             <button type="button" onClick={closeModal} className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="px-4 py-2 rounded-lg bg-[#650933] text-white hover:bg-opacity-90">Save</button>
+            <button type="submit" className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-light transition-colors">Save</button>
           </div>
         </form>
       </Modal>
