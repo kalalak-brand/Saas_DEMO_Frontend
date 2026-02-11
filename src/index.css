@@ -5,20 +5,20 @@
    * Premium Hospitality Color Palette
    * ======================================== */
   
-  /* Primary: Deep Navy Blue - Trust & Sophistication */
-  --color-primary: #1e3a5f;
-  --color-primary-light: #2d5a8b;
-  --color-primary-dark: #0f2744;
-  --color-primary-50: #f0f5fa;
-  --color-primary-100: #dce8f3;
-  --color-primary-200: #b9d1e7;
+  /* Primary: Forest Green - Trust & Sophistication */
+  --color-primary: #1d4d4f;
+  --color-primary-light: #2b6b6e;
+  --color-primary-dark: #0f3233;
+  --color-primary-50: #f0f7f7;
+  --color-primary-100: #dceced;
+  --color-primary-200: #b9d9db;
   
-  /* Accent: Warm Gold - Luxury & Premium Feel */
-  --color-accent: #c9a962;
-  --color-accent-light: #dac07a;
-  --color-accent-dark: #a08942;
-  --color-accent-50: #fdf9f0;
-  --color-accent-100: #f9f0db;
+  /* Accent: Warm Brown - Luxury & Premium Feel */
+  --color-accent: #d4a574;
+  --color-accent-light: #e0bb93;
+  --color-accent-dark: #b8864f;
+  --color-accent-50: #fdf7f0;
+  --color-accent-100: #f9ebdb;
   
   /* Secondary: Slate Gray - Professional & Clean */
   --color-secondary: #64748b;

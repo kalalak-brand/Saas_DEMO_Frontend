@@ -52,8 +52,8 @@ interface SettingsState {
  * Default theme configuration
  */
 const defaultTheme: ThemeConfig = {
-  primaryColor: '#1e3a5f',
-  accentColor: '#c9a962',
+  primaryColor: '#1d4d4f',
+  accentColor: '#d4a574',
   fontFamily: 'inter',
   logoUrl: null,
   welcomeMessage:
