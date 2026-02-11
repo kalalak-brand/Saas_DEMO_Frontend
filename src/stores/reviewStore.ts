@@ -29,6 +29,7 @@ export interface ReviewPayload {
   answers: AnswerPayload[];
   description?: string;
   guestInfo?: GuestInfoPayload;
+  hotelCode?: string; // Hotel code for multi-tenancy isolation
 }
 
 interface ReviewState {
@@ -39,8 +40,9 @@ interface ReviewState {
   isSubmitting: boolean;
   error: string | null;
   categoryInfo: { name: string; guestInfoFields?: { roomNumber?: boolean } } | null;
+  hotelInfo: { _id: string; name: string; code: string } | null;
 
-  fetchQuestions: (category: string) => Promise<void>;
+  fetchQuestions: (category: string, hotelCode: string) => Promise<void>;
   setAnswer: (questionId: string, answer: number | boolean) => void;
   setYesNoAnswerText: (questionId: string, text: string) => void;
   submitReview: (payload: ReviewPayload) => Promise<boolean>;
@@ -55,15 +57,23 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   isSubmitting: false,
   error: null,
   categoryInfo: null,
+  hotelInfo: null,
 
-  // Fetch questions using public API (no auth required)
-  fetchQuestions: async (category: string) => {
+  /**
+   * Fetch questions using public API (no auth required)
+   * Now requires hotelCode for multi-tenancy isolation
+   * Time: O(1) API call, Space: O(n) questions
+   */
+  fetchQuestions: async (category: string, hotelCode: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await axios.get(`${BASE_URL}/public/questions/${category}`);
+      const res = await axios.get(`${BASE_URL}/public/questions/${category}`, {
+        params: { hotel: hotelCode }
+      });
       set({
         questions: res.data.data.questions || [],
         categoryInfo: res.data.data.category || null,
+        hotelInfo: res.data.data.hotel || null,
         isLoading: false,
         error: null
       });
@@ -88,7 +98,11 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
     }));
   },
 
-  // Submit review using public API (no auth required)
+  /**
+   * Submit review using public API (no auth required)
+   * Includes hotelCode for multi-tenancy isolation
+   * Time: O(1) API call, Space: O(n) answers
+   */
   submitReview: async (payload) => {
     set({ isSubmitting: true, error: null });
     try {
@@ -101,5 +115,5 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
     }
   },
 
-  resetReview: () => set({ answers: {}, questions: [], yesNoAnswerText: {}, categoryInfo: null }),
+  resetReview: () => set({ answers: {}, questions: [], yesNoAnswerText: {}, categoryInfo: null, hotelInfo: null }),
 }));

@@ -1,6 +1,5 @@
 // src/stores/settingsStore.ts
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import apiClient from '../utils/apiClient';
 
 /**
@@ -69,127 +68,116 @@ const CACHE_DURATION = 5 * 60 * 1000;
  * Settings store with backend sync and local persistence
  */
 export const useSettingsStore = create<SettingsState>()(
-  persist(
-    (set, get) => ({
-      ratingScale: 5,
-      reviewDesign: 'classic' as ReviewDesign,
-      theme: { ...defaultTheme },
-      isLoading: false,
-      error: null,
-      isSynced: false,
-      lastFetched: null,
+  (set, get) => ({
+    ratingScale: 5,
+    reviewDesign: 'classic' as ReviewDesign,
+    theme: { ...defaultTheme },
+    isLoading: false,
+    error: null,
+    isSynced: false,
+    lastFetched: null,
 
-      /**
-       * Fetch settings from backend with caching
-       */
-      fetchSettings: async (force = false) => {
-        const { lastFetched, isLoading } = get();
+    /**
+     * Fetch settings from backend with caching
+     */
+    fetchSettings: async (force = false) => {
+      const { lastFetched, isLoading } = get();
 
-        // Skip if already loading
-        if (isLoading) return;
+      // Skip if already loading
+      if (isLoading) return;
 
-        // Use cache if not forcing and cache is fresh
-        if (!force && lastFetched && Date.now() - lastFetched < CACHE_DURATION) {
-          return;
-        }
+      // Use cache if not forcing and cache is fresh
+      if (!force && lastFetched && Date.now() - lastFetched < CACHE_DURATION) {
+        return;
+      }
 
-        set({ isLoading: true, error: null });
+      set({ isLoading: true, error: null });
 
-        try {
-          const response = await apiClient.get('/settings');
-          const settings = response.data.data?.settings || response.data.data;
+      try {
+        const response = await apiClient.get('/settings');
+        const settings = response.data.data?.settings || response.data.data;
 
-          if (settings) {
-            set({
-              ratingScale: settings.ratingScale || 5,
-              reviewDesign: settings.reviewDesign || 'classic',
-              theme: settings.theme ? { ...defaultTheme, ...settings.theme } : defaultTheme,
-              isLoading: false,
-              isSynced: true,
-              lastFetched: Date.now(),
-            });
-          } else {
-            set({ isLoading: false, lastFetched: Date.now() });
-          }
-        } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : 'Failed to fetch settings';
-          set({ error: message, isLoading: false });
-          console.error('Failed to fetch settings:', error);
-        }
-      },
-
-      /**
-       * Save current settings to backend
-       */
-      saveSettings: async () => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const { ratingScale, reviewDesign, theme } = get();
-
-          await apiClient.put('/settings', { ratingScale, reviewDesign, theme });
-
-          set({ isLoading: false, isSynced: true, lastFetched: Date.now() });
-          return true;
-        } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : 'Failed to save settings';
-          set({ error: message, isLoading: false });
-          return false;
-        }
-      },
-
-      setRatingScale: (scale) => {
-        set({ ratingScale: scale, isSynced: false });
-      },
-
-      setReviewDesign: (design) => {
-        set({ reviewDesign: design, isSynced: false });
-      },
-
-      setTheme: (themeUpdates) => {
-        set((state) => ({
-          theme: { ...state.theme, ...themeUpdates },
-          isSynced: false,
-        }));
-      },
-
-      resetTheme: async () => {
-        set({ isLoading: true });
-
-        try {
-          await apiClient.post('/settings/reset');
-
+        if (settings) {
           set({
-            theme: { ...defaultTheme },
-            ratingScale: 5,
-            reviewDesign: 'classic',
+            ratingScale: settings.ratingScale || 5,
+            reviewDesign: settings.reviewDesign || 'classic',
+            theme: settings.theme ? { ...defaultTheme, ...settings.theme } : defaultTheme,
             isLoading: false,
             isSynced: true,
             lastFetched: Date.now(),
           });
-        } catch (error) {
-          // Fallback to local reset
-          set({
-            theme: { ...defaultTheme },
-            ratingScale: 5,
-            reviewDesign: 'classic',
-            isLoading: false,
-            isSynced: false,
-          });
-          console.error('Failed to reset settings on server:', error);
+        } else {
+          set({ isLoading: false, lastFetched: Date.now() });
         }
-      },
-    }),
-    {
-      name: 'review-system-settings',
-      partialize: (state) => ({
-        ratingScale: state.ratingScale,
-        reviewDesign: state.reviewDesign,
-        theme: state.theme,
-        lastFetched: state.lastFetched,
-      }),
-    }
-  )
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Failed to fetch settings';
+        set({ error: message, isLoading: false });
+        console.error('Failed to fetch settings:', error);
+      }
+    },
+
+    /**
+     * Save current settings to backend
+     */
+    saveSettings: async () => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const { ratingScale, reviewDesign, theme } = get();
+
+        await apiClient.put('/settings', { ratingScale, reviewDesign, theme });
+
+        set({ isLoading: false, isSynced: true, lastFetched: Date.now() });
+        return true;
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Failed to save settings';
+        set({ error: message, isLoading: false });
+        return false;
+      }
+    },
+
+    setRatingScale: (scale) => {
+      set({ ratingScale: scale, isSynced: false });
+    },
+
+    setReviewDesign: (design) => {
+      set({ reviewDesign: design, isSynced: false });
+    },
+
+    setTheme: (themeUpdates) => {
+      set((state) => ({
+        theme: { ...state.theme, ...themeUpdates },
+        isSynced: false,
+      }));
+    },
+
+    resetTheme: async () => {
+      set({ isLoading: true });
+
+      try {
+        await apiClient.post('/settings/reset');
+
+        set({
+          theme: { ...defaultTheme },
+          ratingScale: 5,
+          reviewDesign: 'classic',
+          isLoading: false,
+          isSynced: true,
+          lastFetched: Date.now(),
+        });
+      } catch (error) {
+        // Fallback to local reset
+        set({
+          theme: { ...defaultTheme },
+          ratingScale: 5,
+          reviewDesign: 'classic',
+          isLoading: false,
+          isSynced: false,
+        });
+        console.error('Failed to reset settings on server:', error);
+      }
+    },
+  })
 );
 
 /**

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import QRCode from 'qrcode';
 import { Download, Printer, QrCode, ExternalLink, Copy, Check } from 'lucide-react';
 import { useCategoryStore } from '../../stores/categoryStore';
+import { useAuthStore } from '../../stores/authStore';
 
 interface QRCodeData {
     categoryId: string;
@@ -13,6 +14,8 @@ interface QRCodeData {
 
 const QRCodesPage: React.FC = () => {
     const { categories, fetchCategories, isLoading } = useCategoryStore();
+    const { user } = useAuthStore();
+    const hotelCode = user?.hotelId?.code || '';
     const [qrCodes, setQrCodes] = useState<QRCodeData[]>([]);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
@@ -30,7 +33,7 @@ const QRCodesPage: React.FC = () => {
 
             const codes: QRCodeData[] = await Promise.all(
                 categories.map(async (cat) => {
-                    const url = `${baseUrl}/${cat.slug}`;
+                    const url = `${baseUrl}/${hotelCode}/${cat.slug}`;
                     const qrDataUrl = await QRCode.toDataURL(url, {
                         width: 256,
                         margin: 2,

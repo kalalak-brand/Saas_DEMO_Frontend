@@ -161,8 +161,8 @@ function App() {
               </Route>
             </Route>
 
-            {/* Public Review Routes - No Auth Required */}
-            <Route path="/:category" element={<ReviewRouter />} />
+            {/* Public Review Routes - No Auth Required, hotel-scoped */}
+            <Route path="/:hotelCode/:category" element={<ReviewRouter />} />
 
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>

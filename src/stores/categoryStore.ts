@@ -1,6 +1,5 @@
 // src/stores/categoryStore.ts
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { useMemo } from 'react';
 import apiClient from '../utils/apiClient';
 
@@ -79,220 +78,211 @@ const CACHE_DURATION = 5 * 60 * 1000;
  * Category Store with API integration and caching
  */
 export const useCategoryStore = create<CategoryState>()(
-    persist(
-        (set, get) => ({
-            categories: [],
-            isLoading: false,
-            error: null,
-            lastFetched: null,
-            selectedHotelId: null,
+    (set, get) => ({
+        categories: [],
+        isLoading: false,
+        error: null,
+        lastFetched: null,
+        selectedHotelId: null,
 
-            /**
-             * Set selected hotel ID for super_admin
-             */
-            setSelectedHotelId: (hotelId: string | null) => {
-                set({ selectedHotelId: hotelId, categories: [], lastFetched: null });
-            },
+        /**
+         * Set selected hotel ID for super_admin
+         */
+        setSelectedHotelId: (hotelId: string | null) => {
+            set({ selectedHotelId: hotelId, categories: [], lastFetched: null });
+        },
 
-            /**
-             * Fetch categories from backend with caching
-             */
-            fetchCategories: async (force = false, hotelId?: string) => {
-                const { lastFetched, isLoading, selectedHotelId } = get();
+        /**
+         * Fetch categories from backend with caching
+         */
+        fetchCategories: async (force = false, hotelId?: string) => {
+            const { lastFetched, isLoading, selectedHotelId } = get();
 
-                // Skip if already loading
-                if (isLoading) return;
+            // Skip if already loading
+            if (isLoading) return;
 
-                // Use cache if not forcing and cache is fresh
-                if (!force && lastFetched && Date.now() - lastFetched < CACHE_DURATION) {
-                    return;
-                }
+            // Use cache if not forcing and cache is fresh
+            if (!force && lastFetched && Date.now() - lastFetched < CACHE_DURATION) {
+                return;
+            }
 
-                set({ isLoading: true, error: null });
+            set({ isLoading: true, error: null });
 
-                try {
-                    // Use provided hotelId or selectedHotelId for super_admin
-                    const queryHotelId = hotelId || selectedHotelId;
-                    const params = queryHotelId ? { hotelId: queryHotelId } : {};
+            try {
+                // Use provided hotelId or selectedHotelId for super_admin
+                const queryHotelId = hotelId || selectedHotelId;
+                const params = queryHotelId ? { hotelId: queryHotelId } : {};
 
-                    const response = await apiClient.get('/categories', { params });
-                    const categories = response.data.data?.categories || response.data.data || [];
-                    set({ categories, isLoading: false, lastFetched: Date.now() });
-                } catch (error: unknown) {
-                    const message = error instanceof Error ? error.message : 'Failed to fetch categories';
-                    set({ error: message, isLoading: false });
-                    console.error('Failed to fetch categories:', error);
-                }
-            },
+                const response = await apiClient.get('/categories', { params });
+                const categories = response.data.data?.categories || response.data.data || [];
+                set({ categories, isLoading: false, lastFetched: Date.now() });
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : 'Failed to fetch categories';
+                set({ error: message, isLoading: false });
+                console.error('Failed to fetch categories:', error);
+            }
+        },
 
-            /**
-             * Create a new category
-             */
-            createCategory: async (data: CategoryPayload) => {
-                set({ isLoading: true, error: null });
-                const { selectedHotelId } = get();
+        /**
+         * Create a new category
+         */
+        createCategory: async (data: CategoryPayload) => {
+            set({ isLoading: true, error: null });
+            const { selectedHotelId } = get();
 
-                try {
-                    // Include hotelId from data or selectedHotelId for super_admin
-                    const payload = {
-                        ...data,
-                        hotelId: data.hotelId || selectedHotelId,
-                    };
-                    const response = await apiClient.post('/categories', payload);
-                    const newCategory = response.data.data?.category || response.data.data;
-                    set((state) => ({
-                        categories: [...state.categories, newCategory],
-                        isLoading: false,
-                        lastFetched: Date.now(),
-                    }));
-                    return true;
-                } catch (error: unknown) {
-                    const message = error instanceof Error ? error.message : 'Failed to create category';
-                    set({ error: message, isLoading: false });
-                    return false;
-                }
-            },
+            try {
+                // Include hotelId from data or selectedHotelId for super_admin
+                const payload = {
+                    ...data,
+                    hotelId: data.hotelId || selectedHotelId,
+                };
+                const response = await apiClient.post('/categories', payload);
+                const newCategory = response.data.data?.category || response.data.data;
+                set((state) => ({
+                    categories: [...state.categories, newCategory],
+                    isLoading: false,
+                    lastFetched: Date.now(),
+                }));
+                return true;
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : 'Failed to create category';
+                set({ error: message, isLoading: false });
+                return false;
+            }
+        },
 
-            /**
-             * Update an existing category
-             */
-            updateCategory: async (id: string, data: Partial<CategoryPayload>) => {
-                set({ isLoading: true, error: null });
-                const { selectedHotelId } = get();
+        /**
+         * Update an existing category
+         */
+        updateCategory: async (id: string, data: Partial<CategoryPayload>) => {
+            set({ isLoading: true, error: null });
+            const { selectedHotelId } = get();
 
-                try {
-                    // Include hotelId from data or selectedHotelId for super_admin
-                    const payload = {
-                        ...data,
-                        hotelId: data.hotelId || selectedHotelId,
-                    };
-                    const response = await apiClient.put(`/categories/${id}`, payload);
-                    const updatedCategory = response.data.data?.category || response.data.data;
-                    set((state) => ({
-                        categories: state.categories.map((c) =>
-                            c._id === id ? updatedCategory : c
-                        ),
-                        isLoading: false,
-                        lastFetched: Date.now(),
-                    }));
-                    return true;
-                } catch (error: unknown) {
-                    const message = error instanceof Error ? error.message : 'Failed to update category';
-                    set({ error: message, isLoading: false });
-                    return false;
-                }
-            },
+            try {
+                // Include hotelId from data or selectedHotelId for super_admin
+                const payload = {
+                    ...data,
+                    hotelId: data.hotelId || selectedHotelId,
+                };
+                const response = await apiClient.put(`/categories/${id}`, payload);
+                const updatedCategory = response.data.data?.category || response.data.data;
+                set((state) => ({
+                    categories: state.categories.map((c) =>
+                        c._id === id ? updatedCategory : c
+                    ),
+                    isLoading: false,
+                    lastFetched: Date.now(),
+                }));
+                return true;
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : 'Failed to update category';
+                set({ error: message, isLoading: false });
+                return false;
+            }
+        },
 
-            /**
-             * Delete a category
-             */
-            deleteCategory: async (id: string, hotelId?: string) => {
-                set({ isLoading: true, error: null });
-                const { selectedHotelId } = get();
+        /**
+         * Delete a category
+         */
+        deleteCategory: async (id: string, hotelId?: string) => {
+            set({ isLoading: true, error: null });
+            const { selectedHotelId } = get();
 
-                try {
-                    const queryHotelId = hotelId || selectedHotelId;
-                    const params = queryHotelId ? { hotelId: queryHotelId } : {};
-                    await apiClient.delete(`/categories/${id}`, { params });
-                    set((state) => ({
-                        categories: state.categories.filter((c) => c._id !== id),
-                        isLoading: false,
-                        lastFetched: Date.now(),
-                    }));
-                    return true;
-                } catch (error: unknown) {
-                    const message = error instanceof Error ? error.message : 'Failed to delete category';
-                    set({ error: message, isLoading: false });
-                    return false;
-                }
-            },
+            try {
+                const queryHotelId = hotelId || selectedHotelId;
+                const params = queryHotelId ? { hotelId: queryHotelId } : {};
+                await apiClient.delete(`/categories/${id}`, { params });
+                set((state) => ({
+                    categories: state.categories.filter((c) => c._id !== id),
+                    isLoading: false,
+                    lastFetched: Date.now(),
+                }));
+                return true;
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : 'Failed to delete category';
+                set({ error: message, isLoading: false });
+                return false;
+            }
+        },
 
-            /**
-             * Toggle category active status with optimistic update
-             */
-            toggleCategoryActive: async (id: string, hotelId?: string) => {
-                const { categories, selectedHotelId } = get();
-                const category = categories.find((c) => c._id === id);
-                if (!category) return;
+        /**
+         * Toggle category active status with optimistic update
+         */
+        toggleCategoryActive: async (id: string, hotelId?: string) => {
+            const { categories, selectedHotelId } = get();
+            const category = categories.find((c) => c._id === id);
+            if (!category) return;
 
-                // Optimistic update
+            // Optimistic update
+            set({
+                categories: categories.map((c) =>
+                    c._id === id ? { ...c, isActive: !c.isActive } : c
+                ),
+            });
+
+            try {
+                const bodyHotelId = hotelId || selectedHotelId;
+                await apiClient.patch(`/categories/${id}/toggle`, { hotelId: bodyHotelId });
+            } catch (error) {
+                // Revert on failure
                 set({
                     categories: categories.map((c) =>
-                        c._id === id ? { ...c, isActive: !c.isActive } : c
+                        c._id === id ? { ...c, isActive: category.isActive } : c
                     ),
                 });
+                console.error('Failed to toggle category:', error);
+            }
+        },
 
-                try {
-                    const bodyHotelId = hotelId || selectedHotelId;
-                    await apiClient.patch(`/categories/${id}/toggle`, { hotelId: bodyHotelId });
-                } catch (error) {
-                    // Revert on failure
-                    set({
-                        categories: categories.map((c) =>
-                            c._id === id ? { ...c, isActive: category.isActive } : c
-                        ),
-                    });
-                    console.error('Failed to toggle category:', error);
-                }
-            },
+        /**
+         * Reorder categories with optimistic update
+         */
+        reorderCategories: async (orderedIds: string[], hotelId?: string) => {
+            const { categories, selectedHotelId } = get();
 
-            /**
-             * Reorder categories with optimistic update
-             */
-            reorderCategories: async (orderedIds: string[], hotelId?: string) => {
-                const { categories, selectedHotelId } = get();
+            // Optimistic update
+            const reordered = orderedIds
+                .map((id, index) => {
+                    const cat = categories.find((c) => c._id === id);
+                    return cat ? { ...cat, order: index + 1 } : null;
+                })
+                .filter(Boolean) as Category[];
 
-                // Optimistic update
-                const reordered = orderedIds
-                    .map((id, index) => {
-                        const cat = categories.find((c) => c._id === id);
-                        return cat ? { ...cat, order: index + 1 } : null;
-                    })
-                    .filter(Boolean) as Category[];
+            set({ categories: reordered });
 
-                set({ categories: reordered });
+            try {
+                const bodyHotelId = hotelId || selectedHotelId;
+                await apiClient.post('/categories/reorder', { orderedIds, hotelId: bodyHotelId });
+            } catch (error) {
+                // Revert on failure
+                set({ categories });
+                console.error('Failed to reorder categories:', error);
+            }
+        },
 
-                try {
-                    const bodyHotelId = hotelId || selectedHotelId;
-                    await apiClient.post('/categories/reorder', { orderedIds, hotelId: bodyHotelId });
-                } catch (error) {
-                    // Revert on failure
-                    set({ categories });
-                    console.error('Failed to reorder categories:', error);
-                }
-            },
+        /**
+         * Get only active categories
+         */
+        getActiveCategories: () => {
+            return get()
+                .categories.filter((c) => c.isActive)
+                .sort((a, b) => a.order - b.order);
+        },
 
-            /**
-             * Get only active categories
-             */
-            getActiveCategories: () => {
-                return get()
-                    .categories.filter((c) => c.isActive)
-                    .sort((a, b) => a.order - b.order);
-            },
+        /**
+         * Get category by slug
+         */
+        getCategoryBySlug: (slug: string) => {
+            return get().categories.find((c) => c.slug === slug);
+        },
 
-            /**
-             * Get category by slug
-             */
-            getCategoryBySlug: (slug: string) => {
-                return get().categories.find((c) => c.slug === slug);
-            },
-
-            /**
-             * Get category by ID
-             */
-            getCategoryById: (id: string) => {
-                return get().categories.find((c) => c._id === id);
-            },
-        }),
-        {
-            name: 'review-system-categories',
-            partialize: (state) => ({
-                categories: state.categories,
-                lastFetched: state.lastFetched,
-            }),
-        }
-    )
+        /**
+         * Get category by ID
+         */
+        getCategoryById: (id: string) => {
+            return get().categories.find((c) => c._id === id);
+        },
+    })
 );
 
 /**

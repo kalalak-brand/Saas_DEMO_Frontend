@@ -12,6 +12,7 @@ export interface IUser {
   hotelId?: {
     _id: string;
     name: string;
+    code: string;
   };
 }
 
@@ -46,6 +47,9 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         set({ token: null, user: null });
+        // Clear all hotel-scoped persisted stores to prevent stale data
+        localStorage.removeItem('review-system-categories');
+        localStorage.removeItem('review-system-settings');
       },
 
       login: async (username, password) => {

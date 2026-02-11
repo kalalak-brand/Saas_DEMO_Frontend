@@ -6,7 +6,6 @@ import { useReviewStore, ReviewPayload } from "../../stores/reviewStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { PlaceholderLogo } from "../../components/common/PlaceholderLogo";
-import { useAuthStore } from "../../stores/authStore";
 import toast from "react-hot-toast";
 import clsx from "clsx";
 
@@ -162,13 +161,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
  * Modern, mobile-first design with animated star ratings
  */
 const StarRatingReviewPage: React.FC = () => {
-    const { category } = useParams<{ category: string }>();
+    const { category, hotelCode } = useParams<{ category: string; hotelCode: string }>();
     const navigate = useNavigate();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
     const { theme, ratingScale } = useSettingsStore();
     const { getCategoryBySlug } = useCategoryStore();
-    const { user } = useAuthStore();
 
     const [guestName, setGuestName] = useState("");
     const [guestPhone, setGuestPhone] = useState("");
@@ -184,6 +182,7 @@ const StarRatingReviewPage: React.FC = () => {
         setAnswer,
         submitReview,
         resetReview,
+        hotelInfo,
     } = useReviewStore();
 
     const currentCategory = useMemo(() => {
@@ -192,10 +191,10 @@ const StarRatingReviewPage: React.FC = () => {
 
     useEffect(() => {
         resetReview();
-        if (category) {
-            fetchQuestions(category);
+        if (category && hotelCode) {
+            fetchQuestions(category, hotelCode);
         }
-    }, [category, fetchQuestions, resetReview]);
+    }, [category, hotelCode, fetchQuestions, resetReview]);
 
     const { ratingQuestions, yesNoQuestions } = useMemo(() => ({
         ratingQuestions: questions.filter(q => q.questionType === "rating"),
@@ -239,6 +238,7 @@ const StarRatingReviewPage: React.FC = () => {
                 phone: guestPhone.trim(),
                 roomNumber: guestRoom.trim() || "N/A",
             },
+            hotelCode: hotelCode,
         };
 
         const success = await submitReview(payload);
@@ -387,7 +387,7 @@ const StarRatingReviewPage: React.FC = () => {
                 <div className="max-w-lg mx-auto text-center">
                     <PlaceholderLogo size="md" showText={false} />
                     <h1 className="text-2xl font-semibold mt-4">
-                        {user?.hotelId?.name || "Guest Feedback"}
+                        {hotelInfo?.name || "Guest Feedback"}
                     </h1>
                     {currentCategory && (
                         <p className="text-white/70 mt-1">{currentCategory.name} Review</p>

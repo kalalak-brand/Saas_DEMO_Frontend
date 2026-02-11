@@ -11,7 +11,7 @@ import clsx from "clsx";
 
 // --- Main Review Page Component ---
 const ReviewPage: React.FC = () => {
-    const { category } = useParams<{ category: string }>();
+    const { category, hotelCode } = useParams<{ category: string; hotelCode: string }>();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
     const { theme, ratingScale } = useSettingsStore();
@@ -33,6 +33,7 @@ const ReviewPage: React.FC = () => {
         submitReview,
         resetReview,
         categoryInfo,
+        hotelInfo,
     } = useReviewStore();
 
     // Use category info from reviewStore (fetched from public API)
@@ -40,10 +41,10 @@ const ReviewPage: React.FC = () => {
 
     useEffect(() => {
         resetReview();
-        if (category) {
-            fetchQuestions(category);
+        if (category && hotelCode) {
+            fetchQuestions(category, hotelCode);
         }
-    }, [category, fetchQuestions, resetReview]);
+    }, [category, hotelCode, fetchQuestions, resetReview]);
 
     const { ratingQuestions, yesNoQuestions } = useMemo(() => ({
         ratingQuestions: questions.filter(q => q.questionType === "rating"),
@@ -94,6 +95,7 @@ const ReviewPage: React.FC = () => {
                 phone: guestPhone.trim(),
                 roomNumber: guestRoom.trim() || "N/A",
             },
+            hotelCode: hotelCode,
         };
 
         const success = await submitReview(payload);
@@ -262,7 +264,7 @@ const ReviewPage: React.FC = () => {
                         <PlaceholderLogo size="sm" showText={false} />
                         <div>
                             <h1 className="text-lg md:text-xl font-semibold">
-                                Guest Feedback
+                                {hotelInfo?.name || "Guest Feedback"}
                             </h1>
                             {currentCategory && (
                                 <p className="text-white/70 text-sm">{currentCategory.name}</p>
