@@ -12,8 +12,9 @@ const BRAND = {
   background: '#F0F4F8',
 };
 
-// All admin users go to the main dashboard
-const getRedirectPath = (): string => {
+// Redirect based on user role
+const getRedirectPath = (role?: string): string => {
+  if (role === 'super_admin') return '/super-admin';
   return '/';
 };
 
@@ -27,7 +28,7 @@ const LoginPage: React.FC = () => {
   // Redirect to dashboard on login
   useEffect(() => {
     if (user && !isLoading) {
-      const path = getRedirectPath();
+      const path = getRedirectPath(user.role);
       navigate(path, { replace: true });
     }
   }, [user, isLoading, navigate]);

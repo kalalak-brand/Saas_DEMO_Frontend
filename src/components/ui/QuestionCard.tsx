@@ -13,7 +13,7 @@ export interface QuestionCardProps {
     onRatingChange?: (value: number) => void;
     onBooleanChange?: (value: boolean) => void;
     onTextChange?: (value: string) => void;
-    ratingScale: 5 | 10;
+
     primaryColor: string;
     accentColor: string;
     disabled?: boolean;
@@ -26,7 +26,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     onRatingChange,
     onBooleanChange,
     onTextChange,
-    ratingScale,
+
     primaryColor,
     accentColor,
     disabled = false,
@@ -46,7 +46,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                 <AdaptiveRating
                     value={typeof answer === "number" ? answer : null}
                     onChange={onRatingChange ?? (() => { })}
-                    max={ratingScale}
+                    max={5}
                     accentColor={accentColor}
                     disabled={disabled}
                 />

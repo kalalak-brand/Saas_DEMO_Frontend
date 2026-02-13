@@ -11,7 +11,6 @@ import {
     X,
     ListChecks,
     BarChart2,
-    Building2,
     Settings,
     ChevronDown,
     FileText,
@@ -57,7 +56,6 @@ const formBuilderItems: NavItem[] = [
  * System Admin navigation items
  */
 const systemAdminItems: NavItem[] = [
-    { href: '/management/hotels', icon: Building2, label: 'Hotels' },
     { href: '/management/categories', icon: Layers, label: 'Categories' },
     { href: '/management/qr-codes', icon: QrCode, label: 'QR Codes' },
     { href: '/management/users', icon: Users, label: 'Users' },

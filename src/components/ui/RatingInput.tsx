@@ -1,7 +1,6 @@
 // src/components/ui/RatingInput.tsx
 import React, { useMemo, useCallback } from 'react';
 import clsx from 'clsx';
-import { useSettingsStore } from '../../stores/settingsStore';
 
 interface RatingInputProps {
     currentRating: number | null;
@@ -26,9 +25,8 @@ export const RatingInput: React.FC<RatingInputProps> = ({
     showNA = true,
     className,
 }) => {
-    // Use prop if provided, otherwise fall back to settings store
-    const settingsScale = useSettingsStore((state) => state.ratingScale);
-    const scale = scaleProp ?? settingsScale;
+    // Rating scale is always 5
+    const scale = scaleProp ?? 5;
 
     // Generate rating options based on scale
     const ratingOptions = useMemo(() => {

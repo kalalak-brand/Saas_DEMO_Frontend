@@ -1,7 +1,7 @@
 // src/pages/management/SettingsPage.tsx
 import React, { useState, useCallback } from 'react';
-import { Settings, Palette, Star, RotateCcw, Check, Layout, Table } from 'lucide-react';
-import { useSettingsStore, ThemeConfig, ReviewDesign } from '../../stores/settingsStore';
+import { Settings, Palette, RotateCcw, Check } from 'lucide-react';
+import { useSettingsStore, ThemeConfig } from '../../stores/settingsStore';
 import { Button, Card, Input } from '../../components/ui';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
@@ -20,15 +20,11 @@ const colorPresets = [
 
 /**
  * Settings Page Component
- * Allows admin to configure rating scale and theme
+ * Allows admin to configure theme
  */
 const SettingsPage: React.FC = () => {
     const {
-        ratingScale,
-        reviewDesign,
         theme,
-        setRatingScale,
-        setReviewDesign,
         setTheme,
         resetTheme,
     } = useSettingsStore();
@@ -36,25 +32,6 @@ const SettingsPage: React.FC = () => {
     // Local state for form
     const [localTheme, setLocalTheme] = useState<ThemeConfig>(theme);
     const [hasChanges, setHasChanges] = useState(false);
-
-    // Design options for review pages
-    const designOptions: { id: ReviewDesign; name: string; description: string; icon: React.ReactNode }[] = [
-        { id: 'classic', name: 'Classic Table', description: 'Traditional table layout with radio buttons', icon: <Table className="h-6 w-6" /> },
-        { id: 'star-rating', name: 'Star Rating', description: 'Modern cards with animated star ratings', icon: <Star className="h-6 w-6" /> },
-        { id: 'modern', name: 'Modern Minimal', description: 'Clean, minimal design with large buttons', icon: <Layout className="h-6 w-6" /> },
-    ];
-
-    // Handle rating scale change
-    const handleRatingScaleChange = useCallback((scale: 5 | 10) => {
-        setRatingScale(scale);
-        toast.success(`Rating scale updated to 1-${scale}`);
-    }, [setRatingScale]);
-
-    // Handle design change
-    const handleDesignChange = useCallback((design: ReviewDesign) => {
-        setReviewDesign(design);
-        toast.success(`Review design changed to ${design}`);
-    }, [setReviewDesign]);
 
     // Handle theme color change
     const handleColorChange = useCallback((key: 'primaryColor' | 'accentColor', value: string) => {
@@ -102,144 +79,11 @@ const SettingsPage: React.FC = () => {
                 </div>
                 <div>
                     <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
-                    <p className="text-text-secondary">Configure rating scale and theme appearance</p>
+                    <p className="text-text-secondary">Configure review design and theme appearance</p>
                 </div>
             </div>
 
-            {/* Rating Scale Section */}
-            <Card padding="lg">
-                <div className="flex items-start gap-4 mb-6">
-                    <div className="p-2.5 rounded-lg bg-accent-50">
-                        <Star className="h-5 w-5 text-accent-dark" />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-semibold text-text-primary">Rating Scale</h2>
-                        <p className="text-sm text-text-secondary mt-1">
-                            Choose the rating scale for guest feedback forms
-                        </p>
-                    </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
-                    {/* 1-5 Scale Option */}
-                    <button
-                        onClick={() => handleRatingScaleChange(5)}
-                        className={clsx(
-                            'p-4 rounded-xl border-2 transition-all duration-200 text-left',
-                            ratingScale === 5
-                                ? 'border-primary bg-primary-50 shadow-sm'
-                                : 'border-border hover:border-primary-200 hover:bg-surface-hover'
-                        )}
-                    >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-primary">1-5 Scale</span>
-                            {ratingScale === 5 && (
-                                <div className="p-1 rounded-full bg-primary">
-                                    <Check className="h-3 w-3 text-white" />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex gap-1.5 mb-2">
-                            {[1, 2, 3, 4, 5].map((n) => (
-                                <div
-                                    key={n}
-                                    className={clsx(
-                                        'w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium',
-                                        ratingScale === 5
-                                            ? 'bg-primary text-white'
-                                            : 'bg-surface-elevated text-text-secondary'
-                                    )}
-                                >
-                                    {n}
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-xs text-text-muted">Simpler, faster for guests</p>
-                    </button>
-
-                    {/* 1-10 Scale Option */}
-                    <button
-                        onClick={() => handleRatingScaleChange(10)}
-                        className={clsx(
-                            'p-4 rounded-xl border-2 transition-all duration-200 text-left',
-                            ratingScale === 10
-                                ? 'border-primary bg-primary-50 shadow-sm'
-                                : 'border-border hover:border-primary-200 hover:bg-surface-hover'
-                        )}
-                    >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-primary">1-10 Scale</span>
-                            {ratingScale === 10 && (
-                                <div className="p-1 rounded-full bg-primary">
-                                    <Check className="h-3 w-3 text-white" />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex gap-1 mb-2 flex-wrap">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                                <div
-                                    key={n}
-                                    className={clsx(
-                                        'w-6 h-6 rounded flex items-center justify-center text-xs font-medium',
-                                        ratingScale === 10
-                                            ? 'bg-primary text-white'
-                                            : 'bg-surface-elevated text-text-secondary'
-                                    )}
-                                >
-                                    {n}
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-xs text-text-muted">More granular feedback</p>
-                    </button>
-                </div>
-            </Card>
-
-            {/* Review Design Section */}
-            <Card padding="lg">
-                <div className="flex items-start gap-4 mb-6">
-                    <div className="p-2.5 rounded-lg bg-purple-100">
-                        <Layout className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-semibold text-text-primary">Review Page Design</h2>
-                        <p className="text-sm text-text-secondary mt-1">
-                            Select the design style for your guest feedback forms
-                        </p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {designOptions.map((option) => (
-                        <button
-                            key={option.id}
-                            onClick={() => handleDesignChange(option.id)}
-                            className={clsx(
-                                'p-5 rounded-xl border-2 transition-all duration-200 text-left',
-                                reviewDesign === option.id
-                                    ? 'border-primary bg-primary-50 shadow-sm'
-                                    : 'border-border hover:border-primary-200 hover:bg-surface-hover'
-                            )}
-                        >
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className={clsx(
-                                    'p-2 rounded-lg',
-                                    reviewDesign === option.id ? 'bg-primary text-white' : 'bg-surface-elevated text-text-secondary'
-                                )}>
-                                    {option.icon}
-                                </div>
-                                {reviewDesign === option.id && (
-                                    <div className="p-1 rounded-full bg-primary ml-auto">
-                                        <Check className="h-3 w-3 text-white" />
-                                    </div>
-                                )}
-                            </div>
-                            <h3 className="font-semibold text-text-primary mb-1">{option.name}</h3>
-                            <p className="text-xs text-text-muted">{option.description}</p>
-                        </button>
-                    ))}
-                </div>
-            </Card>
 
             {/* Theme Customization Section */}
             <Card padding="lg">

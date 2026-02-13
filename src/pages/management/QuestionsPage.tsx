@@ -355,7 +355,7 @@ const QuestionsPage: React.FC = () => {
                 defaultValue={editingQuestion?.questionType || "rating"}
                 className="form-select mt-1"
               >
-                <option value="rating">Rating (1-10)</option>
+                <option value="rating">Rating (0-5)</option>
                 <option value="yes_no">Yes / No</option>
               </select>
             </div>

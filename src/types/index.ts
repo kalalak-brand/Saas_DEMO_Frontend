@@ -156,7 +156,3 @@ export interface ThemeConfig {
  */
 export type ReviewDesign = 'classic' | 'star-rating' | 'modern';
 
-/**
- * Rating scale options
- */
-export type RatingScale = 5 | 10;

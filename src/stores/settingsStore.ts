@@ -21,11 +21,9 @@ export type ReviewDesign = 'classic' | 'star-rating' | 'modern';
 
 /**
  * Application settings state
+ * Rating scale is fixed at 5 (displayed as 0-10 on dashboard)
  */
 interface SettingsState {
-  // Rating scale: 5 or 10
-  ratingScale: 5 | 10;
-
   // Review page design
   reviewDesign: ReviewDesign;
 
@@ -41,7 +39,6 @@ interface SettingsState {
   // Actions
   fetchSettings: (force?: boolean) => Promise<void>;
   saveSettings: () => Promise<boolean>;
-  setRatingScale: (scale: 5 | 10) => void;
   setReviewDesign: (design: ReviewDesign) => void;
   setTheme: (theme: Partial<ThemeConfig>) => void;
   resetTheme: () => Promise<void>;
@@ -69,7 +66,6 @@ const CACHE_DURATION = 5 * 60 * 1000;
  */
 export const useSettingsStore = create<SettingsState>()(
   (set, get) => ({
-    ratingScale: 5,
     reviewDesign: 'classic' as ReviewDesign,
     theme: { ...defaultTheme },
     isLoading: false,
@@ -99,7 +95,6 @@ export const useSettingsStore = create<SettingsState>()(
 
         if (settings) {
           set({
-            ratingScale: settings.ratingScale || 5,
             reviewDesign: settings.reviewDesign || 'classic',
             theme: settings.theme ? { ...defaultTheme, ...settings.theme } : defaultTheme,
             isLoading: false,
@@ -123,9 +118,9 @@ export const useSettingsStore = create<SettingsState>()(
       set({ isLoading: true, error: null });
 
       try {
-        const { ratingScale, reviewDesign, theme } = get();
+        const { reviewDesign, theme } = get();
 
-        await apiClient.put('/settings', { ratingScale, reviewDesign, theme });
+        await apiClient.put('/settings', { reviewDesign, theme });
 
         set({ isLoading: false, isSynced: true, lastFetched: Date.now() });
         return true;
@@ -136,9 +131,7 @@ export const useSettingsStore = create<SettingsState>()(
       }
     },
 
-    setRatingScale: (scale) => {
-      set({ ratingScale: scale, isSynced: false });
-    },
+
 
     setReviewDesign: (design) => {
       set({ reviewDesign: design, isSynced: false });
@@ -159,7 +152,6 @@ export const useSettingsStore = create<SettingsState>()(
 
         set({
           theme: { ...defaultTheme },
-          ratingScale: 5,
           reviewDesign: 'classic',
           isLoading: false,
           isSynced: true,
@@ -169,7 +161,6 @@ export const useSettingsStore = create<SettingsState>()(
         // Fallback to local reset
         set({
           theme: { ...defaultTheme },
-          ratingScale: 5,
           reviewDesign: 'classic',
           isLoading: false,
           isSynced: false,
@@ -181,25 +172,14 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 /**
- * Helper hook to get rating scale labels
+ * Helper hook to get rating scale labels (fixed at 1-5)
  */
 export const useRatingLabels = () => {
-  const ratingScale = useSettingsStore((state) => state.ratingScale);
-
-  if (ratingScale === 5) {
-    return {
-      max: 5,
-      maxLabel: 'Excellent',
-      minLabel: 'Poor',
-      labels: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
-    };
-  }
-
   return {
-    max: 10,
-    maxLabel: 'Outstanding',
-    minLabel: 'Unacceptable',
-    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    max: 5,
+    maxLabel: 'Excellent',
+    minLabel: 'Poor',
+    labels: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
   };
 };
 
@@ -209,7 +189,6 @@ export const useRatingLabels = () => {
 export const fetchPublicSettings = async (
   hotelId: string
 ): Promise<{
-  ratingScale: 5 | 10;
   reviewDesign: ReviewDesign;
   theme: ThemeConfig;
 } | null> => {
@@ -219,7 +198,6 @@ export const fetchPublicSettings = async (
 
     if (settings) {
       return {
-        ratingScale: settings.ratingScale || 5,
         reviewDesign: settings.reviewDesign || 'classic',
         theme: settings.theme ? { ...defaultTheme, ...settings.theme } : defaultTheme,
       };

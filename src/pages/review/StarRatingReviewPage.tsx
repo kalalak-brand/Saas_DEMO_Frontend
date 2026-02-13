@@ -88,7 +88,7 @@ interface QuestionCardProps {
     value: number | boolean | null;
     onRatingChange?: (value: number) => void;
     onBooleanChange?: (value: boolean) => void;
-    ratingScale: number;
+
     accentColor?: string;
     primaryColor?: string;
 }
@@ -98,7 +98,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     value,
     onRatingChange,
     onBooleanChange,
-    ratingScale,
+
     accentColor = "#c9a962",
     primaryColor = "#1e3a5f",
 }) => {
@@ -116,12 +116,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     <StarRating
                         value={typeof value === "number" ? value : 0}
                         onChange={onRatingChange ?? (() => { })}
-                        max={ratingScale}
+                        max={5}
                         size="lg"
                         accentColor={accentColor}
                     />
                     <p className="text-sm text-gray-500">
-                        {value ? `${value} / ${ratingScale}` : "Tap a star to rate"}
+                        {value ? `${value} / 5` : "Tap a star to rate"}
                     </p>
                 </div>
             ) : (
@@ -165,7 +165,7 @@ const StarRatingReviewPage: React.FC = () => {
     const navigate = useNavigate();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
-    const { theme, ratingScale } = useSettingsStore();
+    const { theme } = useSettingsStore();
     const { getCategoryBySlug } = useCategoryStore();
 
     const [guestName, setGuestName] = useState("");
@@ -412,7 +412,7 @@ const StarRatingReviewPage: React.FC = () => {
                             question={q}
                             value={answers[q._id]}
                             onRatingChange={(val) => setAnswer(q._id, val)}
-                            ratingScale={ratingScale}
+
                             accentColor={theme.accentColor}
                             primaryColor={theme.primaryColor}
                         />
@@ -432,7 +432,7 @@ const StarRatingReviewPage: React.FC = () => {
                                 question={q}
                                 value={answers[q._id]}
                                 onBooleanChange={(val) => setAnswer(q._id, val)}
-                                ratingScale={ratingScale}
+
                                 accentColor={theme.accentColor}
                                 primaryColor={theme.primaryColor}
                             />

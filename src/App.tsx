@@ -47,6 +47,16 @@ const QRCodesPage = lazy(
   () => import("./pages/management/QRCodesPage")
 );
 
+// Super Admin pages
+const SuperAdminLayout = lazy(
+  () => import("./pages/superadmin/SuperAdminLayout")
+);
+const SAHotelsPage = lazy(
+  () => import("./pages/superadmin/SAHotelsPage")
+);
+const SAUsersPage = lazy(
+  () => import("./pages/superadmin/SAUsersPage")
+);
 
 
 
@@ -158,6 +168,17 @@ function App() {
                   <Route path="categories" element={<CategoriesPage />} />
                   <Route path="qr-codes" element={<QRCodesPage />} />
                 </Route>
+              </Route>
+            </Route>
+
+            {/* Super Admin Routes — separate UI */}
+            <Route
+              element={<ProtectedRoute allowedRoles={["super_admin"]} />}
+            >
+              <Route path="/super-admin" element={<SuperAdminLayout />}>
+                <Route index element={<Navigate to="hotels" replace />} />
+                <Route path="hotels" element={<SAHotelsPage />} />
+                <Route path="users" element={<SAUsersPage />} />
               </Route>
             </Route>
 

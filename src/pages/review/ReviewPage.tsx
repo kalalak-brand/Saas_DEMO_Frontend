@@ -14,7 +14,7 @@ const ReviewPage: React.FC = () => {
     const { category, hotelCode } = useParams<{ category: string; hotelCode: string }>();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
-    const { theme, ratingScale } = useSettingsStore();
+    const { theme } = useSettingsStore();
 
     const [guestName, setGuestName] = useState("");
     const [guestPhone, setGuestPhone] = useState("");
@@ -286,7 +286,7 @@ const ReviewPage: React.FC = () => {
                         className="inline-block px-3 py-1 rounded-full text-xs font-medium"
                         style={{ backgroundColor: `${theme.accentColor}20`, color: theme.primaryColor }}
                     >
-                        Rating Scale: 1-{ratingScale}
+                        Rating Scale: 1-5
                     </span>
                 </div>
 
@@ -303,7 +303,7 @@ const ReviewPage: React.FC = () => {
                                 question={q}
                                 answer={answers[q._id]}
                                 onRatingChange={(val) => setAnswer(q._id, val)}
-                                ratingScale={ratingScale}
+
                                 primaryColor={theme.primaryColor}
                                 accentColor={theme.accentColor}
                             />
@@ -325,7 +325,7 @@ const ReviewPage: React.FC = () => {
                                 yesNoText={yesNoAnswerText[q._id]}
                                 onBooleanChange={(val) => setAnswer(q._id, val)}
                                 onTextChange={(val) => setYesNoAnswerText(q._id, val)}
-                                ratingScale={ratingScale}
+
                                 primaryColor={theme.primaryColor}
                                 accentColor={theme.accentColor}
                             />

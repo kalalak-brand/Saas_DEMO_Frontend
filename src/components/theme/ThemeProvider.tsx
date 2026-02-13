@@ -8,9 +8,7 @@ import { useAuthStore } from '../../stores/authStore';
  */
 interface ThemeContextValue {
     theme: ThemeConfig;
-    ratingScale: 5 | 10;
     setTheme: (theme: Partial<ThemeConfig>) => void;
-    setRatingScale: (scale: 5 | 10) => void;
     resetTheme: () => void;
 }
 
@@ -104,7 +102,7 @@ const generateColorVariants = (baseColor: string) => {
  * Injects CSS variables for runtime theming based on settings store
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-    const { theme, ratingScale, setTheme, setRatingScale, resetTheme, fetchSettings } = useSettingsStore();
+    const { theme, setTheme, resetTheme, fetchSettings } = useSettingsStore();
     const token = useAuthStore((state) => state.token);
 
     // Only fetch settings when user is authenticated
@@ -160,12 +158,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const contextValue = useMemo(
         () => ({
             theme,
-            ratingScale,
             setTheme,
-            setRatingScale,
             resetTheme,
         }),
-        [theme, ratingScale, setTheme, setRatingScale, resetTheme]
+        [theme, setTheme, resetTheme]
     );
 
     return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
