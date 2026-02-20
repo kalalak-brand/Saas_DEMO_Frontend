@@ -182,7 +182,10 @@ function App() {
               </Route>
             </Route>
 
-            {/* Public Review Routes - No Auth Required, hotel-scoped */}
+            {/* Public Review Routes - No Auth Required */}
+            {/* Org-aware route (new QR codes) */}
+            <Route path="/:orgSlug/:hotelCode/:category" element={<ReviewRouter />} />
+            {/* Legacy route (backward compatible) */}
             <Route path="/:hotelCode/:category" element={<ReviewRouter />} />
 
             <Route path="*" element={<Navigate to="/login" replace />} />

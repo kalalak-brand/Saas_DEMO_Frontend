@@ -8,11 +8,17 @@ export interface IUser {
   _id: string;
   fullName: string;
   username: string;
-  role: 'super_admin' | 'admin' | 'viewer';
+  role: 'saas_admin' | 'org_admin' | 'super_admin' | 'admin' | 'viewer';
+  organizationId?: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
   hotelId?: {
     _id: string;
     name: string;
     code: string;
+    logo?: { url: string; publicId: string };
   };
 }
 
@@ -20,7 +26,7 @@ export interface IUser {
  * Helper to check if a role is an admin-type role
  */
 export const isAdminRole = (role: string): boolean => {
-  return ['super_admin', 'admin', 'viewer'].includes(role);
+  return ['saas_admin', 'org_admin', 'super_admin', 'admin', 'viewer'].includes(role);
 };
 
 interface AuthState {
@@ -31,11 +37,12 @@ interface AuthState {
   setAuth: (token: string, user: IUser) => void;
   logout: () => void;
   login: (username: string, password: string) => Promise<IUser | null>;
+  updateHotelLogo: (logo: { url: string; publicId: string } | undefined) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       user: null,
       isLoading: false,
@@ -50,6 +57,13 @@ export const useAuthStore = create<AuthState>()(
         // Clear all hotel-scoped persisted stores to prevent stale data
         localStorage.removeItem('review-system-categories');
         localStorage.removeItem('review-system-settings');
+      },
+
+      updateHotelLogo: (logo) => {
+        const user = get().user;
+        if (user?.hotelId) {
+          set({ user: { ...user, hotelId: { ...user.hotelId, logo } } });
+        }
       },
 
       login: async (username, password) => {

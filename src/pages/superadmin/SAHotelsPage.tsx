@@ -3,8 +3,9 @@
  * CRUD operations for hotels with a clean card layout
  * Time: O(n) for list rendering, Space: O(n) for hotel state
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useHotelStore, IHotel } from '../../stores/hotelStore';
+import { useAuthStore } from '../../stores/authStore';
 import {
     Building2,
     Plus,
@@ -17,6 +18,9 @@ import {
     Hash,
     Loader2,
     Search,
+    Upload,
+    Image as ImageIcon,
+    XCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -43,14 +47,24 @@ const EMPTY_FORM: HotelFormData = {
 
 /* ─── Component ─── */
 const SAHotelsPage: React.FC = () => {
-    const { hotels, isLoading, fetchHotels, createHotel, updateHotel, deleteHotel } =
+    const { hotels, isLoading, fetchHotels, createHotel, updateHotel, deleteHotel, uploadLogo, deleteLogo } =
         useHotelStore();
+    const { user } = useAuthStore();
 
     const [showModal, setShowModal] = useState(false);
     const [editingHotel, setEditingHotel] = useState<IHotel | null>(null);
     const [form, setForm] = useState<HotelFormData>(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
     const [search, setSearch] = useState('');
+    const [uploadingLogoId, setUploadingLogoId] = useState<string | null>(null);
+    const logoInputRef = useRef<HTMLInputElement>(null);
+    const [logoTargetHotelId, setLogoTargetHotelId] = useState<string | null>(null);
+
+    // Filter hotels: super_admin with hotelId sees only their hotel
+    const userHotelId = user?.hotelId?._id;
+    const visibleHotels = userHotelId
+        ? hotels.filter(h => h._id === userHotelId)
+        : hotels;
 
     useEffect(() => {
         fetchHotels(true);
@@ -137,12 +151,47 @@ const SAHotelsPage: React.FC = () => {
 
     // Time: O(n) filter
     const filtered = search
-        ? hotels.filter(
+        ? visibleHotels.filter(
             (h) =>
                 h.name.toLowerCase().includes(search.toLowerCase()) ||
                 (h.code && h.code.toLowerCase().includes(search.toLowerCase()))
         )
-        : hotels;
+        : visibleHotels;
+
+    /* ─── Logo handlers ─── */
+    const handleLogoUploadClick = (hotelId: string) => {
+        setLogoTargetHotelId(hotelId);
+        logoInputRef.current?.click();
+    };
+
+    const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !logoTargetHotelId) return;
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image file');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB');
+            return;
+        }
+        setUploadingLogoId(logoTargetHotelId);
+        const result = await uploadLogo(logoTargetHotelId, file);
+        if (result) toast.success('Logo uploaded!');
+        else toast.error('Failed to upload logo');
+        setUploadingLogoId(null);
+        setLogoTargetHotelId(null);
+        e.target.value = '';
+    };
+
+    const handleLogoDelete = async (hotelId: string) => {
+        if (!window.confirm('Remove the logo?')) return;
+        setUploadingLogoId(hotelId);
+        const result = await deleteLogo(hotelId);
+        if (result) toast.success('Logo removed');
+        else toast.error('Failed to remove logo');
+        setUploadingLogoId(null);
+    };
 
     /* ─── Render ─── */
     return (
@@ -150,19 +199,30 @@ const SAHotelsPage: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Hotels</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{userHotelId ? 'My Hotel' : 'Hotels'}</h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        Manage all hotels in the system
+                        {userHotelId ? 'Manage your allocated hotel' : 'Manage all hotels in the system'}
                     </p>
                 </div>
-                <button
-                    onClick={openCreateModal}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-sm"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add Hotel
-                </button>
+                {!userHotelId && (
+                    <button
+                        onClick={openCreateModal}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 active:bg-indigo-800 transition-colors shadow-sm"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Hotel
+                    </button>
+                )}
             </div>
+
+            {/* Hidden file input for logo upload */}
+            <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogoFileChange}
+            />
 
             {/* Search */}
             <div className="relative mb-6">
@@ -203,8 +263,27 @@ const SAHotelsPage: React.FC = () => {
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                        <Building2 className="w-5 h-5 text-indigo-600" />
+                                    {/* Hotel logo/icon — clickable for upload */}
+                                    <div
+                                        className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center cursor-pointer hover:bg-indigo-100 transition-colors overflow-hidden relative group/logo"
+                                        title={hotel.logo?.url ? 'Change logo' : 'Upload logo'}
+                                        onClick={() => handleLogoUploadClick(hotel._id)}
+                                    >
+                                        {uploadingLogoId === hotel._id ? (
+                                            <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                                        ) : hotel.logo?.url ? (
+                                            <>
+                                                <img src={hotel.logo.url} alt="Logo" className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/logo:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <Upload className="w-4 h-4 text-white" />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Building2 className="w-5 h-5 text-indigo-600 group-hover/logo:hidden" />
+                                                <Upload className="w-5 h-5 text-indigo-600 hidden group-hover/logo:block" />
+                                            </>
+                                        )}
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-900">{hotel.name}</h3>
@@ -260,8 +339,8 @@ const SAHotelsPage: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Status badge */}
-                            <div className="mt-3 pt-3 border-t border-gray-100">
+                            {/* Status badge + logo actions */}
+                            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
                                 <span
                                     className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${hotel.isActive !== false
                                         ? 'bg-green-50 text-green-700'
@@ -272,6 +351,27 @@ const SAHotelsPage: React.FC = () => {
                                         }`} />
                                     {hotel.isActive !== false ? 'Active' : 'Inactive'}
                                 </span>
+                                <div className="flex items-center gap-1">
+                                    {hotel.logo?.url ? (
+                                        <button
+                                            onClick={() => handleLogoDelete(hotel._id)}
+                                            className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors"
+                                            title="Remove logo"
+                                        >
+                                            <XCircle className="w-3.5 h-3.5" />
+                                            Remove Logo
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleLogoUploadClick(hotel._id)}
+                                            className="inline-flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-colors"
+                                            title="Upload logo"
+                                        >
+                                            <ImageIcon className="w-3.5 h-3.5" />
+                                            Add Logo
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

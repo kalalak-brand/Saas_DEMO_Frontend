@@ -16,6 +16,7 @@ const QRCodesPage: React.FC = () => {
     const { categories, fetchCategories, isLoading } = useCategoryStore();
     const { user } = useAuthStore();
     const hotelCode = user?.hotelId?.code || '';
+    const orgSlug = user?.organizationId?.slug || '';
     const [qrCodes, setQrCodes] = useState<QRCodeData[]>([]);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
@@ -33,7 +34,10 @@ const QRCodesPage: React.FC = () => {
 
             const codes: QRCodeData[] = await Promise.all(
                 categories.map(async (cat) => {
-                    const url = `${baseUrl}/${hotelCode}/${cat.slug}`;
+                    // Use org-scoped URL if org slug available, otherwise legacy
+                    const url = orgSlug
+                        ? `${baseUrl}/${orgSlug}/${hotelCode}/${cat.slug}`
+                        : `${baseUrl}/${hotelCode}/${cat.slug}`;
                     const qrDataUrl = await QRCode.toDataURL(url, {
                         width: 256,
                         margin: 2,

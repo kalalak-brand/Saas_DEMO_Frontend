@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useReportStore } from '../../stores/reportStore';
 import { useAuthStore } from '../../stores/authStore';
 import YearlyReportModal from '../common/YearlyReportModal';
+import LogoUpload from '../common/LogoUpload';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -19,8 +20,12 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Show management link for admin and super_admin roles
+  // Show management link for hotel-level admin roles (saas/org admins use separate dashboard)
   const canAccessManagement = user?.role === 'admin' || user?.role === 'super_admin';
+
+  // Hotel logo from auth store
+  const hotelLogoUrl = user?.hotelId?.logo?.url;
+  const hotelId = user?.hotelId?._id;
 
   // Close profile dropdown on outside click
   // Time: O(1), Space: O(1)
@@ -41,12 +46,22 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
     navigate('/login', { replace: true });
   };
 
-  const roleLabel = user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'admin' ? 'Admin' : 'Viewer';
-  const roleColor = user?.role === 'super_admin'
-    ? 'bg-purple-100 text-purple-700'
-    : user?.role === 'admin'
-      ? 'bg-blue-100 text-blue-700'
-      : 'bg-gray-100 text-gray-600';
+  const roleLabels: Record<string, string> = {
+    saas_admin: 'SaaS Admin',
+    org_admin: 'Org Admin',
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    viewer: 'Viewer',
+  };
+  const roleColors: Record<string, string> = {
+    saas_admin: 'bg-red-100 text-red-700',
+    org_admin: 'bg-orange-100 text-orange-700',
+    super_admin: 'bg-purple-100 text-purple-700',
+    admin: 'bg-blue-100 text-blue-700',
+    viewer: 'bg-gray-100 text-gray-600',
+  };
+  const roleLabel = roleLabels[user?.role || 'viewer'] || 'Viewer';
+  const roleColor = roleColors[user?.role || 'viewer'] || 'bg-gray-100 text-gray-600';
 
   return (
     <>
@@ -61,7 +76,12 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
                 <Menu className="h-6 w-6" />
               </button>
             )}
-            <span className="hidden md:inline text-xl text-gray-500 font-semibold">Dashboards <span className="mx-1 text-gray-400">/</span> Menu</span>
+            {/* Hotel Logo or "LOGO" fallback */}
+            {hotelId ? (
+              <LogoUpload hotelId={hotelId} logoUrl={hotelLogoUrl} size="sm" />
+            ) : (
+              <span className="hidden md:inline text-xl text-gray-500 font-semibold">Dashboard</span>
+            )}
           </div>
 
           <div className="flex-1 flex justify-center">

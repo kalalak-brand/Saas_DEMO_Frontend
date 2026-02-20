@@ -161,7 +161,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
  * Modern, mobile-first design with animated star ratings
  */
 const StarRatingReviewPage: React.FC = () => {
-    const { category, hotelCode } = useParams<{ category: string; hotelCode: string }>();
+    const { category, hotelCode, orgSlug } = useParams<{ category: string; hotelCode: string; orgSlug?: string }>();
     const navigate = useNavigate();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
@@ -192,9 +192,9 @@ const StarRatingReviewPage: React.FC = () => {
     useEffect(() => {
         resetReview();
         if (category && hotelCode) {
-            fetchQuestions(category, hotelCode);
+            fetchQuestions(category, hotelCode, orgSlug);
         }
-    }, [category, hotelCode, fetchQuestions, resetReview]);
+    }, [category, hotelCode, orgSlug, fetchQuestions, resetReview]);
 
     const { ratingQuestions, yesNoQuestions } = useMemo(() => ({
         ratingQuestions: questions.filter(q => q.questionType === "rating"),
@@ -208,14 +208,7 @@ const StarRatingReviewPage: React.FC = () => {
     const handleSubmit = async () => {
         if (!category) return;
 
-        if (!guestName.trim()) {
-            toast.error("Please enter your name");
-            return;
-        }
-        if (!guestPhone.trim()) {
-            toast.error("Please enter your phone number");
-            return;
-        }
+        // No mandatory guest info fields — all optional
 
         const answersPayload = Object.keys(answers)
             .filter(qId => answers[qId] !== null && answers[qId] !== undefined)
@@ -229,16 +222,19 @@ const StarRatingReviewPage: React.FC = () => {
                 return { question: qId, answerBoolean: answer as boolean };
             });
 
+        const hasGuestInfo = guestName.trim() || guestPhone.trim() || guestRoom.trim();
+
         const payload: ReviewPayload = {
             category,
             answers: answersPayload as ReviewPayload["answers"],
             description: description.trim(),
-            guestInfo: {
-                name: guestName.trim(),
-                phone: guestPhone.trim(),
-                roomNumber: guestRoom.trim() || "N/A",
-            },
+            guestInfo: hasGuestInfo ? {
+                name: guestName.trim() || undefined,
+                phone: guestPhone.trim() || undefined,
+                roomNumber: guestRoom.trim() || undefined,
+            } : undefined,
             hotelCode: hotelCode,
+            orgSlug: orgSlug,
         };
 
         const success = await submitReview(payload);
@@ -313,7 +309,7 @@ const StarRatingReviewPage: React.FC = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Phone *
+                                    Phone
                                 </label>
                                 <input
                                     type="tel"
@@ -324,18 +320,21 @@ const StarRatingReviewPage: React.FC = () => {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Room Number (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={guestRoom}
-                                    onChange={e => setGuestRoom(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="e.g., 101"
-                                />
-                            </div>
+                            {/* Room Number — only show for room category */}
+                            {category?.toLowerCase() === 'room' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Room Number
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={guestRoom}
+                                        onChange={e => setGuestRoom(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="e.g., 101"
+                                    />
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">

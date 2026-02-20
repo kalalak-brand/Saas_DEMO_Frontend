@@ -69,7 +69,7 @@ const LowRatedQuestionsPage: React.FC = () => {
       </div>
 
       <p className="text-lg text-gray-600 mb-6">
-        Select a question to see all guest reviews where the rating was 5 or below.
+        Select a question to see all guest reviews where the rating was 2 or below.
       </p>
 
       <div className="bg-white rounded-lg shadow-md">
@@ -83,8 +83,8 @@ const LowRatedQuestionsPage: React.FC = () => {
                 key={category.slug}
                 onClick={() => setActiveTab(category.slug)}
                 className={`py-2 px-6 text-base font-medium whitespace-nowrap ${activeTab === category.slug
-                    ? 'border-b-2 border-primary text-primary'
-                    : 'text-gray-500 hover:text-gray-700'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
                 {category.name}

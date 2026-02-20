@@ -11,7 +11,7 @@ import clsx from "clsx";
 
 // --- Main Review Page Component ---
 const ReviewPage: React.FC = () => {
-    const { category, hotelCode } = useParams<{ category: string; hotelCode: string }>();
+    const { category, hotelCode, orgSlug } = useParams<{ category: string; hotelCode: string; orgSlug?: string }>();
     const [page, setPage] = useState<"review" | "info" | "thankyou">("review");
 
     const { theme } = useSettingsStore();
@@ -42,9 +42,9 @@ const ReviewPage: React.FC = () => {
     useEffect(() => {
         resetReview();
         if (category && hotelCode) {
-            fetchQuestions(category, hotelCode);
+            fetchQuestions(category, hotelCode, orgSlug);
         }
-    }, [category, hotelCode, fetchQuestions, resetReview]);
+    }, [category, hotelCode, orgSlug, fetchQuestions, resetReview]);
 
     const { ratingQuestions, yesNoQuestions } = useMemo(() => ({
         ratingQuestions: questions.filter(q => q.questionType === "rating"),
@@ -62,14 +62,7 @@ const ReviewPage: React.FC = () => {
     const handleSubmit = async () => {
         if (!category) return;
 
-        if (!guestName.trim()) {
-            toast.error("Please enter your name");
-            return;
-        }
-        if (!guestPhone.trim() || guestPhone.length < 10) {
-            toast.error("Please enter a valid 10-digit phone number");
-            return;
-        }
+        // No mandatory guest info fields — all optional
 
         const answersPayload = Object.keys(answers)
             .filter(qId => answers[qId] !== null && answers[qId] !== undefined)
@@ -86,16 +79,19 @@ const ReviewPage: React.FC = () => {
                 };
             });
 
+        const hasGuestInfo = guestName.trim() || guestPhone.trim() || guestRoom.trim();
+
         const payload: ReviewPayload = {
             category,
             answers: answersPayload as ReviewPayload["answers"],
             description: description.trim(),
-            guestInfo: {
-                name: guestName.trim(),
-                phone: guestPhone.trim(),
-                roomNumber: guestRoom.trim() || "N/A",
-            },
+            guestInfo: hasGuestInfo ? {
+                name: guestName.trim() || undefined,
+                phone: guestPhone.trim() || undefined,
+                roomNumber: guestRoom.trim() || undefined,
+            } : undefined,
             hotelCode: hotelCode,
+            orgSlug: orgSlug,
         };
 
         const success = await submitReview(payload);
@@ -175,7 +171,7 @@ const ReviewPage: React.FC = () => {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                                 <input
                                     type="text"
                                     value={guestName}
@@ -186,7 +182,7 @@ const ReviewPage: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                                 <input
                                     type="tel"
                                     inputMode="numeric"
@@ -197,7 +193,7 @@ const ReviewPage: React.FC = () => {
                                     maxLength={10}
                                 />
                             </div>
-                            {currentCategory?.guestInfoFields?.roomNumber && (
+                            {category?.toLowerCase() === 'room' && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Room Number</label>
                                     <input
