@@ -21,8 +21,8 @@ const QRCodesPage: React.FC = () => {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
 
-    // Get base URL from environment or default
-    const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    // Base URL for QR codes — points to the live main app
+    const baseUrl = import.meta.env.VITE_APP_URL || 'https://saas-demo-frontend-sigma.vercel.app';
 
     useEffect(() => {
         fetchCategories();
