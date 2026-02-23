@@ -184,21 +184,6 @@ const ReviewPage: React.FC = () => {
                             </a>
                         </div>
                     )}
-
-                    <button
-                        onClick={() => { resetReview(); setPage("review"); }}
-                        className={clsx(
-                            "w-full py-3 rounded-xl font-semibold transition-all hover:opacity-90",
-                            showGoogleReview
-                                ? "border text-gray-600 hover:bg-gray-50"
-                                : "text-white"
-                        )}
-                        style={showGoogleReview
-                            ? { borderColor: theme.primaryColor, color: theme.primaryColor }
-                            : { backgroundColor: theme.primaryColor }}
-                    >
-                        Submit Another Review
-                    </button>
                 </div>
             </div>
         );
