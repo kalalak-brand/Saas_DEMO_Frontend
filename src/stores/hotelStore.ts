@@ -25,6 +25,8 @@ export interface IHotel {
   country?: string;
   contactEmail?: string;
   contactPhone?: string;
+  googleReviewLink?: string;
+  postReviewMessage?: string;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;

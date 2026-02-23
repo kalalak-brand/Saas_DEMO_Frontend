@@ -6,7 +6,7 @@ import { useSettingsStore } from "../../stores/settingsStore";
 import { PlaceholderLogo } from "../../components/common/PlaceholderLogo";
 import { QuestionCard } from "../../components/ui/QuestionCard";
 import toast from 'react-hot-toast';
-import { Send, Loader2, ChevronLeft, Star } from "lucide-react";
+import { Send, Loader2, ChevronLeft, Star, ExternalLink } from "lucide-react";
 import clsx from "clsx";
 
 // --- Main Review Page Component ---
@@ -103,6 +103,29 @@ const ReviewPage: React.FC = () => {
 
 
 
+    // Pre-build Map for O(1) question-type lookups instead of O(n) .find() per entry
+    // Time: O(n) build, Space: O(n) where n = number of questions
+    const questionTypeMap = useMemo(
+        () => new Map(questions.map(q => [q._id, q.questionType])),
+        [questions]
+    );
+
+    // Compute average rating from submitted answers
+    // Time: O(m) where m = number of answers, Space: O(1) — using pre-built Map for O(1) lookups
+    const averageRating = useMemo(() => {
+        let sum = 0;
+        let count = 0;
+        for (const [qId, val] of Object.entries(answers)) {
+            if (typeof val === 'number' && questionTypeMap.get(qId) === 'rating') {
+                sum += val;
+                count++;
+            }
+        }
+        return count === 0 ? 0 : sum / count;
+    }, [answers, questionTypeMap]);
+
+    const showGoogleReview = averageRating >= 4 && !!hotelInfo?.googleReviewLink;
+
     // Loading state
     if (isLoading) {
         return (
@@ -136,10 +159,43 @@ const ReviewPage: React.FC = () => {
                         Thank You!
                     </h1>
                     <p className="text-gray-600 mb-6">{theme.thankYouMessage}</p>
+
+                    {/* Google Review Prompt — shown for high ratings when link is configured */}
+                    {showGoogleReview && (
+                        <div
+                            className="mb-6 p-5 rounded-xl border"
+                            style={{
+                                borderColor: `${theme.accentColor}40`,
+                                background: `linear-gradient(135deg, ${theme.accentColor}08, ${theme.primaryColor}05)`,
+                            }}
+                        >
+                            <p className="text-gray-700 font-medium mb-4">
+                                {hotelInfo?.postReviewMessage || "Would you like to share your experience on Google?"}
+                            </p>
+                            <a
+                                href={hotelInfo!.googleReviewLink!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90 hover:shadow-lg"
+                                style={{ backgroundColor: theme.primaryColor }}
+                            >
+                                <ExternalLink size={18} />
+                                Leave a Google Review
+                            </a>
+                        </div>
+                    )}
+
                     <button
                         onClick={() => { resetReview(); setPage("review"); }}
-                        className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
-                        style={{ backgroundColor: theme.primaryColor }}
+                        className={clsx(
+                            "w-full py-3 rounded-xl font-semibold transition-all hover:opacity-90",
+                            showGoogleReview
+                                ? "border text-gray-600 hover:bg-gray-50"
+                                : "text-white"
+                        )}
+                        style={showGoogleReview
+                            ? { borderColor: theme.primaryColor, color: theme.primaryColor }
+                            : { backgroundColor: theme.primaryColor }}
                     >
                         Submit Another Review
                     </button>

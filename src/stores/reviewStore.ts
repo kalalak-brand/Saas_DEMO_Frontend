@@ -33,6 +33,18 @@ export interface ReviewPayload {
   orgSlug?: string;   // Organization slug for org-scoped submissions
 }
 
+/**
+ * Public-facing hotel info returned alongside questions.
+ * Matches backend's HotelPublicInfo DTO. Single source of truth on the frontend.
+ */
+export interface HotelPublicInfo {
+  _id: string;
+  name: string;
+  code: string;
+  googleReviewLink?: string;
+  postReviewMessage?: string;
+}
+
 interface ReviewState {
   questions: ApiQuestion[];
   answers: Record<string, number | boolean | null>;
@@ -41,7 +53,7 @@ interface ReviewState {
   isSubmitting: boolean;
   error: string | null;
   categoryInfo: { name: string; guestInfoFields?: { roomNumber?: boolean } } | null;
-  hotelInfo: { _id: string; name: string; code: string } | null;
+  hotelInfo: HotelPublicInfo | null;
 
   fetchQuestions: (category: string, hotelCode: string, orgSlug?: string) => Promise<void>;
   setAnswer: (questionId: string, answer: number | boolean) => void;

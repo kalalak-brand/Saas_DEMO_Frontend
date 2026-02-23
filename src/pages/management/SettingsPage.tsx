@@ -1,10 +1,12 @@
 // src/pages/management/SettingsPage.tsx
-import React, { useState, useCallback } from 'react';
-import { Settings, Palette, RotateCcw, Check } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Settings, Palette, RotateCcw, Check, ExternalLink, Loader2 } from 'lucide-react';
 import { useSettingsStore, ThemeConfig } from '../../stores/settingsStore';
+import { useAuthStore } from '../../stores/authStore';
 import { Button, Card, Input } from '../../components/ui';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
+import apiClient from '../../utils/apiClient';
 
 /**
  * Color preset options for theme
@@ -69,6 +71,48 @@ const SettingsPage: React.FC = () => {
         setHasChanges(false);
         toast.success('Theme reset to defaults');
     }, [resetTheme]);
+
+    // ── Google Review Integration ──
+    const user = useAuthStore((s) => s.user);
+    const [googleReviewLink, setGoogleReviewLink] = useState('');
+    const [postReviewMessage, setPostReviewMessage] = useState('');
+    const [googleSaving, setGoogleSaving] = useState(false);
+    const [googleLoaded, setGoogleLoaded] = useState(false);
+
+    // Fetch current hotel's Google Review settings (apiClient auto-injects auth)
+    // Time: O(1) API call, Space: O(1)
+    useEffect(() => {
+        if (!user?.hotelId?._id) return;
+        apiClient.get(`/admin/hotels/${user.hotelId._id}`)
+            .then(res => {
+                const h = res.data.data?.hotel || res.data.data;
+                setGoogleReviewLink(h?.googleReviewLink || '');
+                setPostReviewMessage(h?.postReviewMessage || '');
+                setGoogleLoaded(true);
+            })
+            .catch(() => {
+                // Silently fail — fields just remain empty
+                setGoogleLoaded(true);
+            });
+    }, [user?.hotelId?._id]);
+
+    // Save Google Review settings via apiClient (auto-injects auth token)
+    // Time: O(1) API call, Space: O(1)
+    const handleSaveGoogleReview = useCallback(async () => {
+        if (!user?.hotelId?._id) return;
+        setGoogleSaving(true);
+        try {
+            await apiClient.put(`/admin/hotels/${user.hotelId._id}`, {
+                googleReviewLink: googleReviewLink.trim() || null,
+                postReviewMessage: postReviewMessage.trim() || null,
+            });
+            toast.success('Google Review settings saved');
+        } catch {
+            toast.error('Failed to save Google Review settings');
+        } finally {
+            setGoogleSaving(false);
+        }
+    }, [user?.hotelId?._id, googleReviewLink, postReviewMessage]);
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -258,6 +302,69 @@ const SettingsPage: React.FC = () => {
                         <Button onClick={handleSaveTheme} leftIcon={<Check className="h-4 w-4" />}>
                             Save Changes
                         </Button>
+                    </div>
+                )}
+            </Card>
+
+            {/* Google Review Integration Section */}
+            <Card padding="lg">
+                <div className="flex items-start gap-4 mb-6">
+                    <div className="p-2.5 rounded-lg bg-primary-100">
+                        <ExternalLink className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-semibold text-text-primary">Google Review Integration</h2>
+                        <p className="text-sm text-text-secondary mt-1">
+                            When guests give a high rating (≥ 4 stars), they'll be prompted to leave a Google review
+                        </p>
+                    </div>
+                </div>
+
+                {!googleLoaded ? (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-text-secondary" />
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">
+                                Google Review Link
+                            </label>
+                            <Input
+                                value={googleReviewLink}
+                                onChange={(e) => setGoogleReviewLink(e.target.value)}
+                                placeholder="https://search.google.com/local/writereview?placeid=..."
+                                className="font-mono text-sm"
+                            />
+                            <p className="text-xs text-text-muted mt-1">
+                                Paste your Google Maps review link here. Guests who rate ≥ 4 stars will be prompted to leave a review.
+                            </p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">
+                                Custom Prompt Message
+                            </label>
+                            <textarea
+                                value={postReviewMessage}
+                                onChange={(e) => setPostReviewMessage(e.target.value)}
+                                rows={2}
+                                className="input resize-none"
+                                placeholder="Would you like to share your experience on Google?"
+                                maxLength={200}
+                            />
+                            <p className="text-xs text-text-muted mt-1">
+                                {postReviewMessage.length}/200 characters. Leave empty for default message.
+                            </p>
+                        </div>
+                        <div className="flex justify-end pt-4 border-t border-border">
+                            <Button
+                                onClick={handleSaveGoogleReview}
+                                disabled={googleSaving}
+                                leftIcon={googleSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                            >
+                                {googleSaving ? 'Saving...' : 'Save Google Review Settings'}
+                            </Button>
+                        </div>
                     </div>
                 )}
             </Card>
