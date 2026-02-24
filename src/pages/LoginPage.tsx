@@ -2,17 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
+import { useSettingsStore } from '../stores/settingsStore';
 import logo from '../assets/logo/Kalalak.png';
-import { Eye, EyeOff } from 'lucide-react';
-
-const BRAND = {
-  primary: '#1E3A5F',
-  primaryHover: '#2A4A73',
-  accent: '#3B82F6',
-  background: '#F0F4F8',
-};
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 // Redirect based on user role
+// Time: O(1), Space: O(1)
 const getRedirectPath = (role?: string): string => {
   if (role === 'super_admin') return '/super-admin';
   return '/';
@@ -23,6 +18,7 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error, user } = useAuthStore();
+  const { theme } = useSettingsStore();
   const navigate = useNavigate();
 
   // Redirect to dashboard on login
@@ -35,8 +31,6 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // We only call login here.
-    // If successful, the 'user' state updates, triggering the useEffect above.
     await login(username, password);
   };
 
@@ -44,28 +38,36 @@ const LoginPage: React.FC = () => {
     setShowPassword(prev => !prev);
   };
 
-  // ❌ REMOVED: The problematic 'if (user) return <Navigate ... />' block
-  // If the user exists, the useEffect above will handle the move.
-  // We can render the form (or a loader) briefly while that happens.
-
   return (
     <div
       className="flex justify-center items-center min-h-screen"
-      style={{ backgroundColor: BRAND.background }}
+      style={{
+        background: `linear-gradient(135deg, ${theme.primaryColor}12, ${theme.accentColor}12, ${theme.primaryColor}08)`,
+      }}
     >
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-4 w-80 bg-white p-8 rounded-xl shadow-xl border border-gray-100"
+        className="flex flex-col gap-5 w-[22rem] bg-white p-9 rounded-2xl shadow-xl border border-gray-100"
       >
-        <img src={logo} alt="Kalalak Logo" className="w-32 mx-auto mb-2" />
-        <h2
-          className="text-2xl font-bold text-center mb-2"
-          style={{ color: BRAND.primary }}
-        >
-          Review System
-        </h2>
+        {/* Logo */}
+        <img src={logo} alt="Kalalak Insight" className="w-28 mx-auto" />
 
-        {/* ... Rest of your inputs ... */}
+        {/* Brand Title */}
+        <div className="text-center mb-1">
+          <h1
+            className="text-2xl font-bold tracking-tight"
+            style={{ color: theme.primaryColor }}
+          >
+            Kalalak Insight
+          </h1>
+          <p className="text-[0.7rem] tracking-[0.15em] uppercase font-medium mt-1"
+            style={{ color: theme.accentColor }}
+          >
+            Hospitality Performance Intelligence Platform
+          </p>
+        </div>
+
+        {/* Username */}
         <input
           type="text"
           placeholder="Username"
@@ -73,10 +75,11 @@ const LoginPage: React.FC = () => {
           onChange={(e) => setUsername(e.target.value)}
           required
           autoComplete="username"
-          className="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all"
-          style={{ '--tw-ring-color': BRAND.accent } as React.CSSProperties}
+          className="px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+          style={{ '--tw-ring-color': theme.accentColor } as React.CSSProperties}
         />
 
+        {/* Password */}
         <div className="relative w-full">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -85,8 +88,8 @@ const LoginPage: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent pr-10 transition-all"
-            style={{ '--tw-ring-color': BRAND.accent } as React.CSSProperties}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent pr-10 transition-all"
+            style={{ '--tw-ring-color': theme.accentColor } as React.CSSProperties}
           />
           <button
             type="button"
@@ -98,19 +101,30 @@ const LoginPage: React.FC = () => {
           </button>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-3 text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md"
-          style={{ backgroundColor: BRAND.primary }}
+          className="px-4 py-3 text-white rounded-xl font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: isLoading ? undefined : theme.primaryColor,
+            ...(isLoading ? { backgroundColor: '#9ca3af' } : {}),
+          }}
         >
-          {isLoading ? 'Signing in...' : 'Sign In'}
+          {isLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            'Sign In'
+          )}
         </button>
 
         {error && <p className="text-red-600 text-sm text-center">{error}</p>}
 
-        <p className="text-center text-xs text-gray-400 mt-2">
-          Powered by Kalalak
+        <p className="text-center text-xs mt-1" style={{ color: `${theme.primaryColor}80` }}>
+          Powered by <span className="font-semibold" style={{ color: theme.primaryColor }}>Kalalak</span>
         </p>
       </form>
     </div>

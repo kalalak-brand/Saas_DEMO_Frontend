@@ -6,7 +6,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useReportStore } from '../../stores/reportStore';
 import { useAuthStore } from '../../stores/authStore';
 import YearlyReportModal from '../common/YearlyReportModal';
-import LogoUpload from '../common/LogoUpload';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -22,10 +21,6 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
 
   // Show management link for hotel-level admin roles (saas/org admins use separate dashboard)
   const canAccessManagement = user?.role === 'admin' || user?.role === 'super_admin';
-
-  // Hotel logo from auth store
-  const hotelLogoUrl = user?.hotelId?.logo?.url;
-  const hotelId = user?.hotelId?._id;
 
   // Close profile dropdown on outside click
   // Time: O(1), Space: O(1)
@@ -76,12 +71,10 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
                 <Menu className="h-6 w-6" />
               </button>
             )}
-            {/* Hotel Logo or "LOGO" fallback */}
-            {hotelId ? (
-              <LogoUpload hotelId={hotelId} logoUrl={hotelLogoUrl} size="sm" />
-            ) : (
-              <span className="hidden md:inline text-xl text-gray-500 font-semibold">Dashboard</span>
-            )}
+            {/* Hotel name or Dashboard label */}
+            <span className="hidden md:inline text-lg text-gray-700 font-semibold">
+              {user?.hotelId && typeof user.hotelId === 'object' ? user.hotelId.name : 'Dashboard'}
+            </span>
           </div>
 
           <div className="flex-1 flex justify-center">

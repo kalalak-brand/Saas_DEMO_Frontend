@@ -22,7 +22,7 @@ const QRCodesPage: React.FC = () => {
     const printRef = useRef<HTMLDivElement>(null);
 
     // Base URL for QR codes — points to the live main app
-    const baseUrl = import.meta.env.VITE_APP_URL || 'https://saas-demo-frontend-sigma.vercel.app';
+    const baseUrl = import.meta.env.VITE_APP_URL || 'https://insight.kalalak.com';
 
     useEffect(() => {
         fetchCategories();
