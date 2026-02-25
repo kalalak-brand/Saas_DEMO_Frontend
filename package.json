@@ -1,5 +1,6 @@
 {
-  "name": "review-management-frontend",
+  "name": "kalalak-insight-dashboard",
+  "description": "Kalalak Insight — Hotel Experience Intelligence Dashboard",
   "private": true,
   "version": "2.0.0",
   "type": "module",
