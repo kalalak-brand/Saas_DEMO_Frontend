@@ -1,11 +1,14 @@
-// Components/common/yearlyReportModal.tsx
+// Components/common/YearlyReportModal.tsx
 import React, { useState, useEffect } from 'react';
 import { useReportStore } from '../../stores/reportStore';
+import { useActiveCategories } from '../../stores/categoryStore';
 import { Loader2, AlertCircle } from 'lucide-react';
 
-// This is a basic modal structure. You can replace it with your
-// existing modal/dialog component (e.g., from Shadcn/ui, Material-UI).
-const Modal = ({ children, onClose }: { children: React.ReactNode, onClose: () => void }) => (
+/**
+ * Simple modal wrapper — fullscreen overlay with centered card.
+ * Time: O(1), Space: O(1)
+ */
+const Modal = ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
       <button
@@ -19,6 +22,11 @@ const Modal = ({ children, onClose }: { children: React.ReactNode, onClose: () =
   </div>
 );
 
+/**
+ * YearlyReportModal — category+year selector to download PDF report.
+ * Categories are fetched dynamically from the category store.
+ * Time: O(c) where c = categories, Space: O(y) where y = available years
+ */
 const YearlyReportModal = () => {
   const {
     isModalOpen,
@@ -32,61 +40,60 @@ const YearlyReportModal = () => {
     clearYears,
   } = useReportStore();
 
-  // ✅ UPDATED: Added 'cfc' to the category state type
-  const [category, setCategory] = useState<'room' | 'f&b' | 'cfc' | ''>('');
+  const activeCategories = useActiveCategories();
+
+  const [categorySlug, setCategorySlug] = useState<string>('');
   const [year, setYear] = useState<number | ''>('');
 
-  // When the category changes, fetch new years
+  // When category changes, fetch available years for that category
   useEffect(() => {
-    if (category) {
-      setYear(''); // Reset year selection
-      fetchAvailableYears(category);
+    if (categorySlug) {
+      setYear('');
+      fetchAvailableYears(categorySlug);
     } else {
-      clearYears(); // Clear years if no category
+      clearYears();
     }
-  }, [category, fetchAvailableYears, clearYears]);
+  }, [categorySlug, fetchAvailableYears, clearYears]);
 
-  // Reset local state when modal is closed
+  // Reset local state when modal closes
   useEffect(() => {
     if (!isModalOpen) {
-      setCategory('');
+      setCategorySlug('');
       setYear('');
     }
   }, [isModalOpen]);
 
   const handleDownload = () => {
-    if (year && category) {
-      downloadReport(year, category);
+    if (year && categorySlug) {
+      downloadReport(year, categorySlug);
     }
   };
 
-  if (!isModalOpen) {
-    return null;
-  }
+  if (!isModalOpen) return null;
 
   return (
     <Modal onClose={() => !isLoadingReport && closeModal()}>
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Download Yearly Report</h2>
-      
+
       <div className="space-y-4">
-        {/* Step 1: Category Selection */}
+        {/* Step 1: Dynamic Category Selection */}
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
             Category
           </label>
           <select
             id="category"
-            value={category}
-            // ✅ UPDATED: Included 'cfc' in the onChange type assertion
-            onChange={(e) => setCategory(e.target.value as 'room' | 'f&b' | 'cfc' | '')}
+            value={categorySlug}
+            onChange={(e) => setCategorySlug(e.target.value)}
             disabled={isLoadingReport}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
           >
             <option value="">-- Select a category --</option>
-            <option value="room">Room</option>
-            <option value="f&b">Food & Beverage (F&B)</option>
-            {/* ✅ ADDED: New option for CFC */}
-            <option value="cfc">Coffee Klatch (CK)</option>
+            {activeCategories.map((cat) => (
+              <option key={cat._id} value={cat.slug}>
+                {cat.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -100,7 +107,7 @@ const YearlyReportModal = () => {
               id="year"
               value={year}
               onChange={(e) => setYear(e.target.value ? parseInt(e.target.value) : '')}
-              disabled={!category || isLoadingYears || isLoadingReport || availableYears.length === 0}
+              disabled={!categorySlug || isLoadingYears || isLoadingReport || availableYears.length === 0}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
             >
               <option value="">-- Select a year --</option>
@@ -112,8 +119,8 @@ const YearlyReportModal = () => {
               <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-gray-400" />
             )}
           </div>
-          {availableYears.length === 0 && category && !isLoadingYears && (
-             <p className="text-xs text-gray-500 mt-1">No data available for this category.</p>
+          {availableYears.length === 0 && categorySlug && !isLoadingYears && (
+            <p className="text-xs text-gray-500 mt-1">No data available for this category.</p>
           )}
         </div>
 
@@ -136,7 +143,7 @@ const YearlyReportModal = () => {
           </button>
           <button
             onClick={handleDownload}
-            disabled={!year || !category || isLoadingReport}
+            disabled={!year || !categorySlug || isLoadingReport}
             className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoadingReport ? (

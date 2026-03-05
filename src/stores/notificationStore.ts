@@ -2,7 +2,7 @@
  * Notification Store (Zustand)
  * Manages in-app notification state with polling for real-time updates.
  *
- * Polls /api/notifications/unread-count every 30 seconds.
+ * Polls /api/notifications/unread-count every 10 seconds for near-instant alerts.
  * Fetches full notification list on demand when dropdown opens.
  *
  * Time: O(1) state access, O(n) for notification list
@@ -14,9 +14,9 @@ import { showBrowserNotification } from '../utils/notificationPermission';
 import toast from 'react-hot-toast';
 
 /**
- * Play a two-tone notification chime using the Web Audio API.
+ * Play a loud triple-beep alarm using the Web Audio API.
  * No audio file needed — synthesized in real-time.
- * Tone: E5 (659Hz) → G5 (784Hz), 120ms each, soft volume.
+ * Pattern: 880Hz → 1047Hz → 880Hz, 150ms each, louder volume (0.35).
  * Time: O(1), Space: O(1)
  */
 const playAlertSound = () => {
@@ -24,30 +24,25 @@ const playAlertSound = () => {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const now = ctx.currentTime;
 
-        // First tone — E5
-        const osc1 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.value = 659.25; // E5
-        gain1.gain.setValueAtTime(0.15, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-        osc1.connect(gain1).connect(ctx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.15);
+        const beep = (freq: number, start: number, duration: number) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.35, now + start);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + start + duration);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + start);
+            osc.stop(now + start + duration);
+        };
 
-        // Second tone — G5 (starts after first)
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.value = 783.99; // G5
-        gain2.gain.setValueAtTime(0.15, now + 0.12);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-        osc2.connect(gain2).connect(ctx.destination);
-        osc2.start(now + 0.12);
-        osc2.stop(now + 0.35);
+        // Triple beep — urgent, attention-grabbing
+        beep(880, 0, 0.15);      // A5
+        beep(1046.5, 0.2, 0.15); // C6
+        beep(880, 0.4, 0.2);     // A5 (longer)
 
         // Cleanup AudioContext after sound finishes
-        setTimeout(() => ctx.close(), 500);
+        setTimeout(() => ctx.close(), 800);
     } catch {
         // Web Audio API not available — silently skip
     }
@@ -97,7 +92,7 @@ interface NotificationState {
     /** Mark all notifications as read */
     markAllAsRead: () => Promise<void>;
 
-    /** Start polling for unread count every 30s */
+    /** Start polling for unread count every 10s */
     startPolling: () => void;
 
     /** Stop polling */
@@ -119,14 +114,36 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
             // Play sound + show browser notification + toast when new alerts arrive
             if (count > prevCount && prevCount >= 0) {
                 const newAlerts = count - prevCount;
+
+                // Loud beep alarm
                 playAlertSound();
+
+                // Browser push notification
                 showBrowserNotification(
                     '⚠️ Low Rating Alert',
                     `${newAlerts} new low-rated review(s) received`
                 );
-                toast.error(
-                    `⚠️ ${newAlerts} new low-rated review${newAlerts > 1 ? 's' : ''} received!`,
-                    { duration: 5000, id: 'low-rating-alert' }
+
+                // Prominent in-app toast — top-right, long duration
+                toast(
+                    `🔔 ${newAlerts} new low-rated review${newAlerts > 1 ? 's' : ''} received! Click the bell to view.`,
+                    {
+                        duration: 8000,
+                        position: 'top-right',
+                        id: `low-rating-alert-${Date.now()}`,
+                        style: {
+                            background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                            color: '#fff',
+                            fontWeight: '600',
+                            fontSize: '15px',
+                            padding: '16px 20px',
+                            borderRadius: '12px',
+                            boxShadow: '0 8px 32px rgba(220, 38, 38, 0.4)',
+                            maxWidth: '420px',
+                            border: '2px solid rgba(255,255,255,0.2)',
+                        },
+                        icon: '⚠️',
+                    }
                 );
             }
 
@@ -185,10 +202,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         // Fetch immediately on start
         get().fetchUnreadCount();
 
-        // Poll every 30 seconds
+        // Poll every 10 seconds for near-instant updates
         const id = setInterval(() => {
             get().fetchUnreadCount();
-        }, 30_000);
+        }, 10_000);
 
         set({ _pollingId: id });
     },
@@ -201,3 +218,4 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         }
     },
 }));
+

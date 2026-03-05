@@ -133,7 +133,7 @@ function App() {
   return (
     <ThemeProvider>
       <ChartProvider>
-        <Toaster position="top-center" reverseOrder={false} />
+        <Toaster position="top-right" reverseOrder={false} containerStyle={{ zIndex: 99999 }} />
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />

@@ -63,7 +63,7 @@ declare module 'jspdf' {
 export const generateYearlyReportPDF = (
   reportData: FullReportData,
   year: number,
-  category: 'room' | 'f&b' | 'cfc'
+  category: string
 ) => {
   const doc = new jsPDF({ orientation: 'landscape' });
   let currentY = 15;

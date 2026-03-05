@@ -55,8 +55,8 @@ interface ReportState {
   openModal: () => void;
   closeModal: () => void;
   // ✅ UPDATED: Added 'cfc' to the category type
-  fetchAvailableYears: (category: 'room' | 'f&b' | 'cfc') => Promise<void>;
-  downloadReport: (year: number, category: 'room' | 'f&b' | 'cfc') => Promise<void>;
+  fetchAvailableYears: (category: string) => Promise<void>;
+  downloadReport: (year: number, category: string) => Promise<void>;
   clearYears: () => void;
 }
 
@@ -85,7 +85,7 @@ export const useReportStore = create<ReportState>((set) => ({
         params: { category },
       };
       const response = await axios.get<number[]>(
-        `${BASE_URL}/analytics/years`,
+        `${BASE_URL}/analytics/available-years`,
         config
       );
       set({ availableYears: response.data || [], isLoadingYears: false });
@@ -115,7 +115,7 @@ export const useReportStore = create<ReportState>((set) => ({
       if (!apiData) {
         throw new Error('No data received from server.');
       }
-      
+
       // Data transformation logic remains the same
       const transformedData: FullReportData = {
         questionHeaders: apiData.yearlyQuestionAverages.map((q) => ({
@@ -123,7 +123,7 @@ export const useReportStore = create<ReportState>((set) => ({
           text: q.questionText,
         })),
         dailyBreakdown: apiData.dailyBreakdown,
-        dailyData: [], 
+        dailyData: [],
         monthlyData: {
           questions: apiData.monthlyQuestionAverages.map((q) => ({
             name: q.questionText,
