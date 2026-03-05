@@ -84,11 +84,12 @@ export const useReportStore = create<ReportState>((set) => ({
         headers: { Authorization: `Bearer ${token}` },
         params: { category },
       };
-      const response = await axios.get<number[]>(
+      const response = await axios.get(
         `${BASE_URL}/analytics/available-years`,
         config
       );
-      set({ availableYears: response.data || [], isLoadingYears: false });
+      const years = response.data?.data?.years ?? response.data?.years ?? [];
+      set({ availableYears: Array.isArray(years) ? years : [], isLoadingYears: false });
     } catch (err) {
       console.error('Failed to fetch available years:', err);
       set({ error: 'Could not load years.', isLoadingYears: false });
