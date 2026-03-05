@@ -14,7 +14,7 @@ const LowRatedQuestionsPage: React.FC = () => {
   // Set default tab when categories load
   useEffect(() => {
     if (activeCategories.length > 0 && !activeTab) {
-      setActiveTab(activeCategories[0].slug);
+      setActiveTab(activeCategories[0]._id);
     }
   }, [activeCategories, activeTab]);
 
@@ -23,8 +23,8 @@ const LowRatedQuestionsPage: React.FC = () => {
     fetchRatingQuestions();
   }, [fetchRatingQuestions]);
 
-  const getQuestionsByCategory = (categorySlug: string) => {
-    return questions.filter(q => q.category === categorySlug);
+  const getQuestionsByCategory = (categoryId: string) => {
+    return questions.filter(q => q.category === categoryId);
   };
 
   const renderTabContent = (categorySlug: string) => {
@@ -69,7 +69,7 @@ const LowRatedQuestionsPage: React.FC = () => {
       </div>
 
       <p className="text-lg text-gray-600 mb-6">
-        Select a question to see all guest reviews where the rating was 2 or below.
+        Select a question to see all guest reviews where the rating was 3 or below.
       </p>
 
       <div className="bg-white rounded-lg shadow-md">
@@ -80,9 +80,9 @@ const LowRatedQuestionsPage: React.FC = () => {
           ) : (
             activeCategories.map((category) => (
               <button
-                key={category.slug}
-                onClick={() => setActiveTab(category.slug)}
-                className={`py-2 px-6 text-base font-medium whitespace-nowrap ${activeTab === category.slug
+                key={category._id}
+                onClick={() => setActiveTab(category._id)}
+                className={`py-2 px-6 text-base font-medium whitespace-nowrap ${activeTab === category._id
                   ? 'border-b-2 border-primary text-primary'
                   : 'text-gray-500 hover:text-gray-700'
                   }`}

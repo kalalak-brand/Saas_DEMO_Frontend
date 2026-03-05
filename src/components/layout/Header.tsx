@@ -1,17 +1,139 @@
 //components/layout/header.tsx
 import { useState, useRef, useEffect } from "react";
-import { Menu, Settings, User, Building2, Shield, LogOut, ChevronDown, Bell, CheckCheck, AlertTriangle, Phone, DoorOpen, UserIcon } from "lucide-react";
+import { Menu, Settings, User, Building2, Shield, LogOut, ChevronDown, Bell, CheckCheck, AlertTriangle, Phone, DoorOpen, UserIcon, ChevronRight } from "lucide-react";
 import { FaDownload, FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useReportStore } from '../../stores/reportStore';
 import { useAuthStore } from '../../stores/authStore';
-import { useNotificationStore } from '../../stores/notificationStore';
+import { useNotificationStore, NotificationItem, LowRatedQuestionItem } from '../../stores/notificationStore';
 import YearlyReportModal from '../common/YearlyReportModal';
 
 interface HeaderProps {
   toggleSidebar: () => void;
   isMobile: boolean;
 }
+
+/**
+ * Get color class for rating badge based on score.
+ * Time: O(1), Space: O(1)
+ */
+const getRatingColor = (rating: number): string => {
+  if (rating <= 1) return 'bg-red-500 text-white';
+  if (rating <= 2) return 'bg-orange-500 text-white';
+  return 'bg-amber-400 text-gray-800';
+};
+
+/**
+ * Expandable notification card with per-question bundled view.
+ * Shows category, timestamp, guest info at glance. Expands to show
+ * individual low-rated questions with color-coded rating badges.
+ *
+ * Time: O(m) where m = lowRatedQuestions count, Space: O(1)
+ */
+const NotificationCard = ({ notification: n, onMarkRead, timeAgo }: {
+  notification: NotificationItem;
+  onMarkRead: () => void;
+  timeAgo: (d: string) => string;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const lowRated = n.metadata.lowRatedQuestions ?? [];
+
+  const handleClick = () => {
+    onMarkRead();
+    setExpanded(!expanded);
+  };
+
+  // Format full timestamp for expanded view
+  const fullTimestamp = new Date(n.createdAt).toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+
+  return (
+    <div
+      className={`border-b border-gray-50 transition-colors ${!n.isRead ? 'bg-red-50/50' : ''}`}
+    >
+      {/* Main row — always visible */}
+      <div
+        onClick={handleClick}
+        className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-start gap-3">
+          {/* Rating circle */}
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white ${(n.metadata.avgRating ?? 0) <= 1 ? 'bg-red-500' : (n.metadata.avgRating ?? 0) <= 2 ? 'bg-orange-500' : 'bg-amber-500'
+            }`}>
+            {n.metadata.avgRating?.toFixed(1) ?? '—'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-800 truncate">
+                {n.metadata.categoryName || 'Low Rating'}
+                {lowRated.length > 0 && (
+                  <span className="ml-1.5 text-[10px] font-medium bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
+                    {lowRated.length} question{lowRated.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </p>
+              <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
+                {timeAgo(n.createdAt)}
+              </span>
+            </div>
+            {/* Guest info chips */}
+            {(n.metadata.guestName || n.metadata.guestPhone || n.metadata.guestRoomNumber) && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {n.metadata.guestName && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                    <UserIcon className="w-2.5 h-2.5" />{n.metadata.guestName}
+                  </span>
+                )}
+                {n.metadata.guestRoomNumber && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+                    <DoorOpen className="w-2.5 h-2.5" />Room {n.metadata.guestRoomNumber}
+                  </span>
+                )}
+                {n.metadata.guestPhone && (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">
+                    <Phone className="w-2.5 h-2.5" />{n.metadata.guestPhone}
+                  </span>
+                )}
+              </div>
+            )}
+            <div className="flex items-center gap-2 mt-1">
+              {!n.isRead && (
+                <span className="inline-block w-2 h-2 bg-red-500 rounded-full" />
+              )}
+              {lowRated.length > 0 && (
+                <span className="text-[10px] text-indigo-500 flex items-center gap-0.5">
+                  <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`} />
+                  {expanded ? 'Hide' : 'Show'} questions
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded: per-question breakdown */}
+      {expanded && lowRated.length > 0 && (
+        <div className="px-4 pb-3 pt-0">
+          <div className="ml-12 space-y-1.5 border-l-2 border-red-200 pl-3">
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">
+              Low-Rated Questions • {fullTimestamp}
+            </p>
+            {lowRated.map((q: LowRatedQuestionItem, idx: number) => (
+              <div key={idx} className="flex items-center gap-2 py-1">
+                <span className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold ${getRatingColor(q.rating)}`}>
+                  {q.rating}
+                </span>
+                <span className="text-xs text-gray-700 leading-tight">{q.questionText}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const openModal = useReportStore((state) => state.openModal);
@@ -164,7 +286,7 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
                 )}
               </button>
 
-              {/* Notification Dropdown */}
+              {/* Notification Dropdown — Bundled View */}
               {notifOpen && (
                 <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
                   {/* Header */}
@@ -184,8 +306,8 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
                     )}
                   </div>
 
-                  {/* Notification List */}
-                  <div className="max-h-80 overflow-y-auto">
+                  {/* Notification List with bundled per-question view */}
+                  <div className="max-h-96 overflow-y-auto">
                     {loading ? (
                       <div className="flex justify-center py-8">
                         <div className="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
@@ -194,61 +316,31 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
                       <div className="text-center py-8 px-4">
                         <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                         <p className="text-sm text-gray-400">No alerts yet</p>
-                        <p className="text-xs text-gray-300 mt-1">Low-rating alerts will appear here</p>
+                        <p className="text-xs text-gray-300 mt-1">Low-rating alerts (≤ 3) will appear here</p>
                       </div>
                     ) : (
                       notifications.map((n) => (
-                        <div
+                        <NotificationCard
                           key={n._id}
-                          onClick={() => { if (!n.isRead) markAsRead(n._id); }}
-                          className={`px-4 py-3 border-b border-gray-50 cursor-pointer transition-colors hover:bg-gray-50 ${!n.isRead ? 'bg-red-50/50' : ''
-                            }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            {/* Rating circle */}
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white ${(n.metadata.avgRating ?? 0) <= 1 ? 'bg-red-500' : 'bg-orange-500'
-                              }`}>
-                              {n.metadata.avgRating?.toFixed(1)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold text-gray-800 truncate">
-                                  {n.metadata.categoryName || 'Low Rating'}
-                                </p>
-                                <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
-                                  {timeAgo(n.createdAt)}
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-500 mt-0.5">{n.message}</p>
-                              {/* Guest info chips */}
-                              {(n.metadata.guestName || n.metadata.guestPhone || n.metadata.guestRoomNumber) && (
-                                <div className="flex flex-wrap gap-1.5 mt-1.5">
-                                  {n.metadata.guestName && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                                      <UserIcon className="w-2.5 h-2.5" />{n.metadata.guestName}
-                                    </span>
-                                  )}
-                                  {n.metadata.guestRoomNumber && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
-                                      <DoorOpen className="w-2.5 h-2.5" />Room {n.metadata.guestRoomNumber}
-                                    </span>
-                                  )}
-                                  {n.metadata.guestPhone && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">
-                                      <Phone className="w-2.5 h-2.5" />{n.metadata.guestPhone}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                              {!n.isRead && (
-                                <span className="inline-block w-2 h-2 bg-red-500 rounded-full mt-1.5" />
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                          notification={n}
+                          onMarkRead={() => { if (!n.isRead) markAsRead(n._id); }}
+                          timeAgo={timeAgo}
+                        />
                       ))
                     )}
                   </div>
+
+                  {/* Footer — View All link */}
+                  {notifications.length > 0 && canAccessManagement && (
+                    <div className="border-t border-gray-100 px-4 py-2">
+                      <button
+                        onClick={() => { setNotifOpen(false); navigate('/management/report/low-rated-questions'); }}
+                        className="w-full text-center text-xs text-indigo-600 hover:text-indigo-800 font-medium py-1"
+                      >
+                        View All Low-Rated Reports →
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

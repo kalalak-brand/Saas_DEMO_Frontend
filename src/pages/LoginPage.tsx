@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '../stores/settingsStore';
+import { requestNotificationPermission } from '../utils/notificationPermission';
 import logo from '../assets/logo/Kalalak.png';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -21,9 +22,11 @@ const LoginPage: React.FC = () => {
   const { theme } = useSettingsStore();
   const navigate = useNavigate();
 
-  // Redirect to dashboard on login
+  // Redirect to dashboard on login and request notification permission
   useEffect(() => {
     if (user && !isLoading) {
+      // Request browser notification + sound permission (fire-and-forget)
+      requestNotificationPermission().catch(() => { });
       const path = getRedirectPath(user.role);
       navigate(path, { replace: true });
     }
