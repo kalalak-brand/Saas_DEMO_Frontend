@@ -71,6 +71,20 @@ const LoadingFallback: React.FC = () => (
   </div>
 );
 
+/**
+ * Smart redirect for /management index
+ * Viewers → /management/responses (Yes/No page, the only thing they can see)
+ * Admins  → /management/questions (first admin page)
+ * Time: O(1), Space: O(1)
+ */
+const ManagementIndexRedirect: React.FC = () => {
+  const { user } = useAuthStore();
+  const isViewerOnly = user?.role === 'viewer' || user?.role === 'department_viewer';
+  return <Navigate to={isViewerOnly ? '/management/responses' : '/management/questions'} replace />;
+};
+
+
+
 // Index Redirect Logic
 const IndexRedirect: React.FC = () => {
   const navigate = useNavigate();
@@ -139,7 +153,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             {/* Admin & Viewer Routes */}
             <Route
-              element={<ProtectedRoute allowedRoles={["super_admin", "admin", "viewer"]} />}
+              element={<ProtectedRoute allowedRoles={["super_admin", "admin", "viewer", "department_viewer"]} />}
             >
               <Route path="/" element={<Layout />}>
                 <Route index element={<IndexRedirect />} />
@@ -148,14 +162,12 @@ function App() {
               </Route>
               <Route path="/compare/:category" element={<ComparePage />} />
               {/* Management Routes */}
-              <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin"]} />}>
+              <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin", "viewer", "department_viewer"]} />}>
                 <Route path="/management" element={<ManagementLayout />}>
-                  <Route path="composites" element={<CompositesPageMngt />} />
-                  <Route path="questions" element={<QuestionsPage />} />
-                  <Route path="users" element={<UsersPage />} />
-                  <Route path="responses" element={<GuestIssuesPage />} />{" "}
-                  <Route path="hotels" element={<HotelsManagementPage />} />{" "}
-                  {/* Renamed route */}
+                  {/* Smart index redirect based on role */}
+                  <Route index element={<ManagementIndexRedirect />} />
+                  {/* Shared report routes — accessible by all roles including viewers */}
+                  <Route path="responses" element={<GuestIssuesPage />} />
                   <Route
                     path="report/low-rated-questions"
                     element={<LowRatedQuestionsPage />}
@@ -164,10 +176,19 @@ function App() {
                     path="report/question-detail/:questionId"
                     element={<QuestionDetailReportPage />}
                   />
-                  <Route path="settings" element={<SettingsPage />} />
-                  <Route path="categories" element={<CategoriesPage />} />
-                  <Route path="qr-codes" element={<QRCodesPage />} />
+
+                  {/* Admin-only sections */}
+                  <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin"]} />}>
+                    <Route path="composites" element={<CompositesPageMngt />} />
+                    <Route path="questions" element={<QuestionsPage />} />
+                    <Route path="users" element={<UsersPage />} />
+                    <Route path="hotels" element={<HotelsManagementPage />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="categories" element={<CategoriesPage />} />
+                    <Route path="qr-codes" element={<QRCodesPage />} />
+                  </Route>
                 </Route>
+
               </Route>
             </Route>
 

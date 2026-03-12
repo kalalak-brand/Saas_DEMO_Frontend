@@ -145,8 +145,8 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Show management link for hotel-level admin roles (saas/org admins use separate dashboard)
-  const canAccessManagement = user?.role === 'admin' || user?.role === 'super_admin';
+  // Show management link for hotel-level roles so they can access reports
+  const canAccessManagement = ['admin', 'super_admin', 'viewer', 'department_viewer'].includes(user?.role || '');
 
   // Close profile dropdown on outside click
   // Time: O(1), Space: O(1)
@@ -213,6 +213,7 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
     super_admin: 'Super Admin',
     admin: 'Admin',
     viewer: 'Viewer',
+    department_viewer: 'Dept. Viewer',
   };
   const roleColors: Record<string, string> = {
     saas_admin: 'bg-red-100 text-red-700',
@@ -220,6 +221,7 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
     super_admin: 'bg-purple-100 text-purple-700',
     admin: 'bg-blue-100 text-blue-700',
     viewer: 'bg-gray-100 text-gray-600',
+    department_viewer: 'bg-teal-100 text-teal-700',
   };
   const roleLabel = roleLabels[user?.role || 'viewer'] || 'Viewer';
   const roleColor = roleColors[user?.role || 'viewer'] || 'bg-gray-100 text-gray-600';

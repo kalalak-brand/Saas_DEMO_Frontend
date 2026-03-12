@@ -68,18 +68,18 @@ const triggerAlertEffects = (newAlerts: number) => {
     toast(
         `🔔 ${newAlerts} new low-rated review${newAlerts > 1 ? 's' : ''} received! Click the bell to view.`,
         {
-            duration: 8000,
-            position: 'top-right',
+            duration: 3000,
+            position: 'bottom-right',
             id: `low-rating-alert-${Date.now()}`,
             style: {
                 background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
                 color: '#fff',
                 fontWeight: '600',
-                fontSize: '15px',
-                padding: '16px 20px',
+                fontSize: '14px',
+                padding: '12px 16px',
                 borderRadius: '12px',
                 boxShadow: '0 8px 32px rgba(220, 38, 38, 0.4)',
-                maxWidth: '420px',
+                maxWidth: '360px',
                 border: '2px solid rgba(255,255,255,0.2)',
             },
             icon: '⚠️',

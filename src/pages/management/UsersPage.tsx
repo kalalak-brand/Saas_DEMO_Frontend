@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useManagementStore, ManagementUser } from '../../stores/managementStore';
-import { Edit, Trash2, PlusCircle, Home } from 'lucide-react';
+import { Edit, Trash2, PlusCircle, Home, Tag } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 import { useAuthStore, IUser } from '../../stores/authStore';
 import { useHotelStore } from '../../stores/hotelStore';
+import { useActiveCategories } from '../../stores/categoryStore';
 
 type UserRole = IUser['role'];
 
@@ -27,6 +28,10 @@ const UsersPage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagementUser | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>('viewer');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const activeCategories = useActiveCategories();
 
   useEffect(() => {
     fetchUsers();
@@ -38,11 +43,19 @@ const UsersPage: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingUser(null);
+    setSelectedRole('viewer');
+    setSelectedCategories([]);
     setIsModalOpen(true);
   };
 
   const openEditModal = (user: ManagementUser) => {
     setEditingUser(user);
+    setSelectedRole(user.role);
+    // Extract category IDs from populated objects or plain strings
+    const catIds = (user.allowedCategories || []).map((c: any) =>
+      typeof c === 'string' ? c : c._id
+    );
+    setSelectedCategories(catIds);
     setIsModalOpen(true);
   };
 
@@ -60,6 +73,8 @@ const UsersPage: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
+    setSelectedRole('viewer');
+    setSelectedCategories([]);
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -83,15 +98,21 @@ const UsersPage: React.FC = () => {
         alert("You cannot remove your own admin role.");
         return;
       }
-      // <-- MODIFIED: Pass hotelId
-      updateUser(editingUser._id, { fullName, username, role, hotelId: hotelId || undefined });
+      updateUser(editingUser._id, {
+        fullName, username, role,
+        hotelId: hotelId || undefined,
+        allowedCategories: role === 'department_viewer' ? selectedCategories : undefined,
+      });
     } else {
       if (!password) {
         alert('Password is required for new users.');
         return;
       }
-      // <-- MODIFIED: Pass hotelId
-      createUser({ fullName, username, password, role, hotelId: hotelId || undefined });
+      createUser({
+        fullName, username, password, role,
+        hotelId: hotelId || undefined,
+        allowedCategories: role === 'department_viewer' ? selectedCategories : undefined,
+      });
     }
     closeModal();
   };
@@ -128,6 +149,13 @@ const UsersPage: React.FC = () => {
                   <span className="ml-2 text-xs font-semibold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
                     <Home size={12} />
                     {getHotelNameById(user.hotelId)}
+                  </span>
+                )}
+                {/* Show assigned categories for department_viewer */}
+                {user.role === 'department_viewer' && user.allowedCategories && (user.allowedCategories as any[]).length > 0 && (
+                  <span className="ml-2 text-xs text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                    <Tag size={12} />
+                    {(user.allowedCategories as any[]).map((c: any) => typeof c === 'string' ? c : c.name).join(', ')}
                   </span>
                 )}
               </div>
@@ -182,10 +210,12 @@ const UsersPage: React.FC = () => {
             <select
               name="role" id="role"
               defaultValue={editingUser?.role || 'viewer'}
+              onChange={(e) => setSelectedRole(e.target.value)}
               className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               disabled={editingUser?._id === currentAdminId && editingUser?.role === 'admin'}
             >
               <option value="viewer">Manager (Viewer)</option>
+              <option value="department_viewer">Department Head (Dept. Viewer)</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -217,6 +247,42 @@ const UsersPage: React.FC = () => {
             </div>
           )}
           {/* <-- END: Hotel selection dropdown --> */}
+
+          {/* Category multi-select for department_viewer */}
+          {selectedRole === 'department_viewer' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Assign Categories <span className="text-red-500">*</span>
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Select the departments this viewer can access.
+              </p>
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-md">
+                {activeCategories.map(cat => (
+                  <label key={cat._id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat._id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedCategories(prev => [...prev, cat._id]);
+                        } else {
+                          setSelectedCategories(prev => prev.filter(id => id !== cat._id));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    {cat.name}
+                  </label>
+                ))}
+              </div>
+              {selectedCategories.length === 0 && (
+                <p className="mt-1 text-xs text-red-500">
+                  Please select at least one category.
+                </p>
+              )}
+            </div>
+          )}
 
 
           {!editingUser && (

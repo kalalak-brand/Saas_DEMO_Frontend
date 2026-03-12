@@ -72,6 +72,14 @@ export const Layout = () => {
     return cat?._id;
   }, [activeCategories, category]);
 
+  // Auto-correct category if the current one is not in activeCategories (e.g., for department_viewer)
+  useEffect(() => {
+    if (activeCategories.length > 0 && categoryId === undefined) {
+      console.log(`Current category '${category}' not in active categories. Switching to '${activeCategories[0].slug}'.`);
+      setCategory(activeCategories[0].slug);
+    }
+  }, [activeCategories, categoryId, category, setCategory]);
+
   const handleLogout = () => {
     logout();
     navigate("/login"); // Redirect to login after logout

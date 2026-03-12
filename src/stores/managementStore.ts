@@ -28,9 +28,10 @@ export interface ManagementUser {
   fullName: string;
   username: string;
   isActive: boolean;
-  // Dynamic role - can be 'admin' | 'viewer' | 'staff' | 'staff_[category-slug]'
+  // Dynamic role - can be 'admin' | 'viewer' | 'department_viewer' | 'staff' | 'staff_[category-slug]'
   role: string;
   hotelId?: string;
+  allowedCategories?: Array<{ _id: string; name: string; slug: string }> | string[];
 }
 
 // Dynamic role type - supports all staff_[category] variants
@@ -41,14 +42,16 @@ type CreateUserPayload = {
   username: string;
   password?: string;
   role: UserRole;
-  hotelId?: string; // <-- ADD THIS
+  hotelId?: string;
+  allowedCategories?: string[];
 };
 
 type UpdateUserPayload = {
   fullName: string;
   username: string;
   role: UserRole;
-  hotelId?: string; // <-- ADD THIS
+  hotelId?: string;
+  allowedCategories?: string[];
 };
 
 // Category is now a dynamic string type

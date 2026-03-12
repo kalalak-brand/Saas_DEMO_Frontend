@@ -8,7 +8,7 @@ export interface IUser {
   _id: string;
   fullName: string;
   username: string;
-  role: 'saas_admin' | 'org_admin' | 'super_admin' | 'admin' | 'viewer';
+  role: 'saas_admin' | 'org_admin' | 'super_admin' | 'admin' | 'viewer' | 'department_viewer';
   organizationId?: {
     _id: string;
     name: string;
@@ -20,6 +20,7 @@ export interface IUser {
     code: string;
     logo?: { url: string; publicId: string };
   };
+  allowedCategories?: Array<{ _id: string; name: string; slug: string }> | string[];
 }
 
 /**

@@ -1,6 +1,8 @@
-//components/layout/Nav.tsx
+// components/layout/Nav.tsx
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
+import { ClipboardList, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { useActiveCategories } from "../../stores/categoryStore";
 import apiClient from "../../utils/apiClient";
@@ -57,7 +59,6 @@ function Nav({ category, setCategory }: NavProps) {
         const freshLogo = res.data?.data?.hotel?.logo;
         if (freshLogo?.url) {
           setLogoUrl(freshLogo.url);
-          // Keep auth store in sync so other components also see the latest logo
           updateHotelLogo(freshLogo);
         }
       })
@@ -71,16 +72,14 @@ function Nav({ category, setCategory }: NavProps) {
     return () => { cancelled = true; };
   }, [hotelId, authLogoUrl, updateHotelLogo]);
 
-  // Render logo area
-  const renderLogo = () => {
-    // Loading skeleton
-    if (isLoadingLogo) {
-      return (
-        <div className="w-[50px] h-[50px] rounded-xl bg-gray-200 animate-pulse" />
-      );
-    }
+  // Viewer-only flag — controls report shortcut buttons
+  const isViewerOnly = user?.role === 'viewer' || user?.role === 'department_viewer';
 
-    // Logo image available
+  // Render logo area — Time: O(1), Space: O(1)
+  const renderLogo = () => {
+    if (isLoadingLogo) {
+      return <div className="w-[50px] h-[50px] rounded-xl bg-gray-200 animate-pulse" />;
+    }
     if (logoUrl && !imgError) {
       return (
         <img
@@ -92,8 +91,6 @@ function Nav({ category, setCategory }: NavProps) {
         />
       );
     }
-
-    // Initials fallback
     return (
       <div className="w-[50px] h-[50px] rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
         {hotelInitials || 'H'}
@@ -104,21 +101,23 @@ function Nav({ category, setCategory }: NavProps) {
   return (
     <div className="flex justify-between items-center px-4 md:px-8 py-2 border-b border-gray-200 bg-background">
 
+      {/* Left: Hotel Logo */}
       <div className="flex items-center gap-4">
         {renderLogo()}
       </div>
 
-      {/* Dynamic category filter buttons */}
-      {(user?.role === 'admin' || user?.role === 'viewer') && activeCategories.length > 0 && (
+      {/* Center: Category filter tabs */}
+      {(user?.role === 'admin' || user?.role === 'viewer' || user?.role === 'department_viewer') && activeCategories.length > 0 && (
         <div className="flex items-center gap-2 bg-gray-200 p-1 rounded-lg overflow-x-auto">
           {activeCategories.map(cat => (
             <button
               key={cat.slug}
               onClick={() => setCategory(cat.slug)}
-              className={`px-4 py-1 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${category === cat.slug
-                ? 'bg-primary text-white shadow'
-                : 'text-gray-700 hover:bg-gray-300'
-                }`}
+              className={`px-4 py-1 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                category === cat.slug
+                  ? 'bg-primary text-white shadow'
+                  : 'text-gray-700 hover:bg-gray-300'
+              }`}
             >
               {cat.name}
             </button>
@@ -126,14 +125,43 @@ function Nav({ category, setCategory }: NavProps) {
         </div>
       )}
 
-      {/* User Info */}
-      <div className="flex items-center gap-4">
-        <FaUserCircle className="text-3xl text-pink-700" />
-        <p className="text-[#949CA1] capitalize">{user?.fullName || 'User'}</p>
+      {/* Right: Quick report links (viewer only) + User info */}
+      <div className="flex items-center gap-3">
+
+        {/* Report shortcut buttons — only shown to viewer / department_viewer roles */}
+        {isViewerOnly && (
+          <>
+            {/* Yes/No Responses */}
+            <Link
+              to="/management/responses"
+              title="Yes/No Question Responses"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
+            >
+              <ClipboardList size={17} />
+              <span className="hidden sm:inline">Responses</span>
+            </Link>
+
+            {/* Low Rating Reports */}
+            <Link
+              to="/management/report/low-rated-questions"
+              title="Low Rating Reports"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-sm font-medium"
+            >
+              <AlertTriangle size={17} />
+              <span className="hidden sm:inline">Low Ratings</span>
+            </Link>
+          </>
+        )}
+
+        {/* User Info */}
+        <div className="flex items-center gap-2">
+          <FaUserCircle className="text-3xl text-pink-700" />
+          <p className="text-[#949CA1] capitalize hidden sm:block">{user?.fullName || 'User'}</p>
+        </div>
       </div>
+
     </div>
   );
 }
 
 export default Nav;
-

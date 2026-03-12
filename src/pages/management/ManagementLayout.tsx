@@ -1,5 +1,5 @@
 // src/pages/management/ManagementLayout.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
     Layers,
@@ -62,23 +62,7 @@ const systemAdminItems: NavItem[] = [
     { href: '/management/settings', icon: Settings, label: 'Settings' },
 ];
 
-/**
- * Navigation groups configuration
- */
-const navGroups: NavGroup[] = [
-    {
-        title: 'Form Builder',
-        icon: FileText,
-        items: formBuilderItems,
-        defaultOpen: true,
-    },
-    {
-        title: 'System Admin',
-        icon: Shield,
-        items: systemAdminItems,
-        defaultOpen: true,
-    },
-];
+// Removed static navGroups array to make it dynamic based on user role inside the component
 
 /**
  * Collapsible navigation group component
@@ -164,10 +148,44 @@ const ManagementLayout: React.FC = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    const user = useAuthStore((state) => state.user);
+    const isViewerOnly = user?.role === 'viewer' || user?.role === 'department_viewer';
+
+    // Generate nav groups dynamically based on role
+    const activeNavGroups = useMemo(() => {
+        if (isViewerOnly) {
+            return [
+                {
+                    title: 'Reports',
+                    icon: BarChart2,
+                    items: [
+                        { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
+                        { href: '/management/report/low-rated-questions', icon: BarChart2, label: 'Low Rating Reports' },
+                    ],
+                    defaultOpen: true,
+                }
+            ];
+        }
+        return [
+            {
+                title: 'Form Builder',
+                icon: FileText,
+                items: formBuilderItems,
+                defaultOpen: true,
+            },
+            {
+                title: 'System Admin',
+                icon: Shield,
+                items: systemAdminItems,
+                defaultOpen: true,
+            },
+        ];
+    }, [isViewerOnly]);
+
     // Track which groups are expanded
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
-        navGroups.forEach((group) => {
+        activeNavGroups.forEach((group: NavGroup) => {
             initial[group.title] = group.defaultOpen ?? true;
         });
         return initial;
@@ -268,7 +286,7 @@ const ManagementLayout: React.FC = () => {
 
                     {/* Navigation Groups */}
                     <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin">
-                        {navGroups.map((group) => (
+                        {activeNavGroups.map((group: NavGroup) => (
                             <NavGroupSection
                                 key={group.title}
                                 group={group}

@@ -364,7 +364,7 @@ const CompositesPageMngt: React.FC = () => {
                 className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white disabled:bg-gray-100"
               >
                 {activeCategories.map((category) => (
-                  <option key={category.slug} value={category.slug}>
+                  <option key={category._id} value={category._id}>
                     {category.name}
                   </option>
                 ))}
@@ -390,7 +390,8 @@ const CompositesPageMngt: React.FC = () => {
 
           {/* Question Selector */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Questions (from {modalCategory.toUpperCase()} category)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Questions (from {activeCategories.find(c => c._id === modalCategory)?.name?.toUpperCase() || modalCategory} category)</label>
+
             <QuestionSelector
               key={`${editingComposite ? editingComposite._id : 'new'}-${modalCategory}`}
               allQuestions={questions}

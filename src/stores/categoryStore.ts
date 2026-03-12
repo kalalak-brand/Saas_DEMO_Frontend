@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { useMemo } from 'react';
 import apiClient from '../utils/apiClient';
+import { useAuthStore } from './authStore';
 
 /**
  * Guest info fields configuration for a category
@@ -295,18 +296,30 @@ export const useSortedCategories = () => {
 };
 
 /**
- * Hook to get active categories only
+ * Hook to get active categories only, filtered by allowedCategories for department_viewer.
+ * Time: O(n), Space: O(n)
  */
 export const useActiveCategories = () => {
     const categories = useCategoryStore((state) => state.categories);
+    const user = useAuthStore((state) => state.user);
 
-    return useMemo(
-        () =>
-            categories
-                .filter((c) => c.isActive)
-                .sort((a, b) => a.order - b.order),
-        [categories]
-    );
+    return useMemo(() => {
+        const active = categories
+            .filter((c) => c.isActive)
+            .sort((a, b) => a.order - b.order);
+
+        // Filter by allowedCategories for department_viewer
+        if (user?.role === 'department_viewer' && user.allowedCategories && user.allowedCategories.length > 0) {
+            const allowed = new Set(
+                user.allowedCategories.map((ac) =>
+                    typeof ac === 'string' ? ac : (ac as { _id: string })._id
+                )
+            );
+            return active.filter((c) => allowed.has(c._id));
+        }
+
+        return active;
+    }, [categories, user]);
 };
 
 /**
