@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalalak Insight — Hospitality Performance Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary: #1B4D3E; --primary-light: #2D6A55; --accent: #E4B580; --accent-dark: #c9a06a;
+      --text: #1a1a2e; --muted: #64748b; --border: #e2e8f0; --bg: #f8fafc; --card: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, var(--primary) 55%, var(--primary-light) 100%);
+      padding: 80px 40px 64px; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(228,181,128,.1) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(45,106,85,.3) 0%, transparent 50%);
+    }
+    .hero-inner { position:relative; z-index:1; max-width:700px; margin:0 auto; }
+    .badge {
+      display:inline-block; background:rgba(228,181,128,.15); border:1px solid rgba(228,181,128,.4);
+      color:var(--accent); font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+      padding:7px 20px; border-radius:30px; margin-bottom:28px;
+    }
+    .hero h1 { font-size:clamp(32px,6vw,60px); font-weight:900; color:white; line-height:1.08; margin-bottom:18px; }
+    .hero h1 span { color:var(--accent); }
+    .hero p { font-size:17px; color:rgba(255,255,255,.72); line-height:1.7; max-width:540px; margin:0 auto 40px; }
+    .wa-btn {
+      display:inline-flex; align-items:center; gap:10px;
+      background:#25D366; color:white; font-weight:700; font-size:15px;
+      padding:13px 28px; border-radius:12px; text-decoration:none;
+      box-shadow:0 8px 24px rgba(37,211,102,.35); transition:background .2s;
+    }
+    .wa-btn:hover { background:#1ebe5d; }
+
+    /* DOCS GRID */
+    .docs { padding:72px 40px; max-width:980px; margin:0 auto; }
+    .docs h2 { font-size:clamp(22px,3.5vw,34px); font-weight:800; text-align:center; margin-bottom:10px; }
+    .docs .sub { text-align:center; color:var(--muted); font-size:15px; margin-bottom:48px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+
+    .doc-card {
+      background:var(--card); border-radius:18px; border:1.5px solid var(--border);
+      padding:32px 24px; text-decoration:none; color:inherit;
+      box-shadow:0 4px 20px rgba(0,0,0,.06); transition:transform .2s,box-shadow .2s;
+      display:flex; flex-direction:column; gap:14px;
+    }
+    .doc-card:hover { transform:translateY(-5px); box-shadow:0 14px 40px rgba(0,0,0,.12); }
+    .doc-card .emoji { font-size:36px; }
+    .doc-card .label {
+      font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+      color:var(--accent-dark); margin-bottom:2px;
+    }
+    .doc-card h3 { font-size:17px; font-weight:800; color:var(--primary); }
+    .doc-card p { font-size:13px; color:var(--muted); line-height:1.65; }
+    .doc-card .arrow {
+      margin-top:auto; font-size:13px; font-weight:700; color:var(--primary-light);
+      display:flex; align-items:center; gap:5px;
+    }
+
+    /* Highlight card */
+    .doc-card.featured {
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      border-color:transparent; color:white;
+    }
+    .doc-card.featured h3 { color:var(--accent); }
+    .doc-card.featured p { color:rgba(255,255,255,.75); }
+    .doc-card.featured .label { color:rgba(228,181,128,.8); }
+    .doc-card.featured .arrow { color:var(--accent); }
+
+    /* QUICK ACTIONS */
+    .actions { background:white; border-top:1px solid var(--border); padding:48px 40px; text-align:center; }
+    .actions h2 { font-size:20px; font-weight:800; margin-bottom:6px; }
+    .actions p { color:var(--muted); font-size:14px; margin-bottom:24px; }
+    .action-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .btn-primary {
+      background:var(--primary); color:white; font-weight:700; font-size:14px;
+      padding:12px 26px; border-radius:10px; text-decoration:none;
+      box-shadow:0 6px 18px rgba(27,77,62,.3); transition:opacity .2s;
+    }
+    .btn-primary:hover { opacity:.88; }
+    .btn-outline {
+      background:transparent; color:var(--primary); font-weight:700; font-size:14px;
+      padding:12px 26px; border-radius:10px; text-decoration:none;
+      border:2px solid var(--primary); transition:background .2s,color .2s;
+    }
+    .btn-outline:hover { background:var(--primary); color:white; }
+
+    footer {
+      background:#0f1923; color:rgba(255,255,255,.45); padding:32px 40px;
+      text-align:center; font-size:12px;
+    }
+    footer .brand { font-size:17px; font-weight:800; color:white; margin-bottom:6px; }
+
+    @media(max-width:640px) {
+      .hero { padding:56px 24px 48px; }
+      .docs { padding:56px 24px; }
+      .actions { padding:40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Kalalak Insight · 2025–2026</div>
+    <h1>Hotel Department<br/><span>Efficiency Analyzer</span></h1>
+    <p>The all-in-one guest analytics platform built exclusively for hotels. Real-time feedback, instant alerts, and beautiful reports — all in one place.</p>
+    <a href="https://wa.me/918089632186?text=Hi%2C%20I%27d%20like%20to%20request%20a%20demo%20of%20Kalalak%20Insight." class="wa-btn" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.121 1.529 5.847L0 24l6.335-1.507A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.787 9.787 0 01-5.028-1.384l-.36-.214-3.762.895.952-3.677-.235-.376A9.787 9.787 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+      Chat on WhatsApp
+    </a>
+  </div>
+</section>
+
+<!-- DOCUMENTS GRID -->
+<section class="docs">
+  <h2>Product Documents</h2>
+  <p class="sub">Everything you need to evaluate, present, or onboard with Kalalak Insight.</p>
+  <div class="grid">
+
+    <a href="Product_Brochure.html" class="doc-card featured">
+      <div class="emoji">📘</div>
+      <div>
+        <div class="label">Marketing</div>
+        <h3>Product Brochure</h3>
+      </div>
+      <p>Full product overview — features, benefits, use cases, and the "Request a Demo" form that sends directly to WhatsApp.</p>
+      <div class="arrow">View Brochure →</div>
+    </a>
+
+    <a href="Demo_Credentials.html" class="doc-card">
+      <div class="emoji">🔑</div>
+      <div>
+        <div class="label">Access</div>
+        <h3>Demo Credentials</h3>
+      </div>
+      <p>Login details for all demo accounts across both hotels. Share with clients before a live demo session.</p>
+      <div class="arrow">View Credentials →</div>
+    </a>
+
+    <a href="User_Guide.html#intro" class="doc-card">
+      <div class="emoji">📖</div>
+      <div>
+        <div class="label">Onboarding</div>
+        <h3>User Guide</h3>
+      </div>
+      <p>Step-by-step guide for new users — login, dashboard navigation, reports, and role-specific features.</p>
+      <div class="arrow">Open Guide →</div>
+    </a>
+
+    <a href="Problem_Solution.html" class="doc-card">
+      <div class="emoji">💡</div>
+      <div>
+        <div class="label">Sales</div>
+        <h3>Problem–Solution</h3>
+      </div>
+      <p>Maps each pain point hotels face today to the exact feature that solves it. Ideal for client presentations.</p>
+      <div class="arrow">View Document →</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- QUICK ACTIONS -->
+<section class="actions">
+  <h2>Ready to See It Live?</h2>
+  <p>Schedule a demo or reach out on WhatsApp — we'll set everything up for you.</p>
+  <div class="action-btns">
+    <a href="Product_Brochure.html" class="btn-primary">🚀 Request a Demo</a>
+    <a href="https://wa.me/918089632186" target="_blank" class="btn-outline" style="color:#25D366;border-color:#25D366;">
+      💬 WhatsApp Us
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="brand">Kalalak Insight</div>
+  <p>Hotel Department Efficiency Analyzer &copy; 2025–2026 &middot; Powered by Kalalak</p>
+</footer>
+
+</body>
+</html>

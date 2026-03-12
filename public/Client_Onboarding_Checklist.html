@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Onboarding Checklist — Hotel Department Efficiency Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --surface: #111827;
+            --surface-2: #1a2236;
+            --surface-3: #242e45;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --green: #22c55e;
+            --orange: #f59e0b;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --red: #ef4444;
+            --purple: #a855f7;
+            --gold: #eab308;
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-light);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f1f5f9, #818cf8, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- Phase card --- */
+        .phase {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--surface-2);
+        }
+
+        .phase-num {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .phase-info {
+            flex: 1;
+        }
+
+        .phase-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .phase-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .phase-body {
+            padding: 28px;
+        }
+
+        /* --- Checklist item --- */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist>li {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .checklist>li:last-child {
+            border-bottom: none;
+        }
+
+        .check-box {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: transparent;
+        }
+
+        .check-content {
+            flex: 1;
+        }
+
+        .check-label {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-desc {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-required {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+        }
+
+        .tag-optional {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+        }
+
+        .tag-recommended {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--orange);
+        }
+
+        /* Example boxes */
+        .example {
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .example strong {
+            color: var(--accent-light);
+        }
+
+        .example-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        /* Sub list */
+        .sub-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 8px;
+        }
+
+        .sub-list li {
+            font-size: 0.84rem;
+            color: var(--muted);
+            padding: 3px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .sub-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-light);
+            font-weight: 700;
+        }
+
+        /* Table inside */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.82rem;
+        }
+
+        .info-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .info-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+        }
+
+        /* Divider */
+        .divider {
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent), var(--purple));
+            border-radius: 100px;
+            margin: 40px auto;
+        }
+
+        /* Summary box */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .summary-box h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .summary-item .num {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--accent-light);
+        }
+
+        .summary-item .lbl {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Print */
+        @media print {
+            body {
+                background: #fff;
+                color: #111;
+                padding: 20px;
+            }
+
+            .phase {
+                border: 1px solid #ccc;
+            }
+
+            .phase-header {
+                background: #f5f5f5;
+            }
+
+            .check-box {
+                border-color: #aaa;
+            }
+
+            .example {
+                background: #f9f9f9;
+                border-color: #ddd;
+                color: #333;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .phase-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <div class="header-badge">📋 Client Onboarding Document</div>
+            <h1>Client Setup Checklist &<br>Information Requirements</h1>
+            <p>Everything you need to collect from the hotel client before deploying the Department Efficiency Analyzer.
+            </p>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 1: HOTEL IDENTITY -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--accent), var(--purple));">01
+                </div>
+                <div class="phase-info">
+                    <div class="phase-title">🏨 Hotel Identity & Details</div>
+                    <div class="phase-sub">Basic information to register the hotel in the system</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Hotel Name <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Full official name of the hotel as it should appear in the system
+                                and on guest feedback forms.</div>
+                            <div class="example">
+                                <div class="example-title">Example</div><strong>TAJ HOTEL Mumbai</strong> •
+                                <strong>Grand Hyatt New Delhi</strong> • <strong>Lemon Tree Premier, Goa</strong>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Hotel Code <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">A short unique identifier code (3-10 characters). Used in URLs, QR
+                                codes, and internal references.</div>
+                            <div class="example">
+                                <div class="example-title">Example</div><strong>TAJH81</strong> •
+                                <strong>GHND01</strong> • <strong>LTPGOA</strong>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Address <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Full street address of the property.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">City & Country <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">City and country for location grouping and reporting.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Contact Email <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Primary contact email for the hotel management. Used for system
+                                notifications.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Contact Phone <span class="tag tag-optional">OPTIONAL</span></div>
+                            <div class="check-desc">Hotel management phone number.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Hotel Logo <span class="tag tag-recommended">RECOMMENDED</span>
+                            </div>
+                            <div class="check-desc">High-resolution logo file (PNG/SVG, transparent background, min
+                                200×200px). Displayed on the guest feedback form and dashboard.</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 2: DEPARTMENTS -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--green), var(--cyan));">02</div>
+                <div class="phase-info">
+                    <div class="phase-title">🏗️ Departments (Categories) to Track</div>
+                    <div class="phase-sub">Which departments will have separate feedback forms and analytics?</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">List of Departments <span class="tag tag-required">REQUIRED</span>
+                            </div>
+                            <div class="check-desc">Ask the client: <em>"Which departments in your hotel do you want to
+                                    separately measure guest satisfaction for?"</em> Each department gets its own QR
+                                code, feedback form, and analytics section.</div>
+                            <div class="example">
+                                <div class="example-title">Common hotel departments</div>
+                                <table class="info-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Department</th>
+                                            <th>Covers</th>
+                                            <th>QR Placement</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>🛏️ Room / Housekeeping</td>
+                                            <td>Room cleanliness, amenities, maintenance</td>
+                                            <td>Bedside table, room door</td>
+                                        </tr>
+                                        <tr>
+                                            <td>🛎️ Front Office / Reception</td>
+                                            <td>Check-in/out, concierge, billing</td>
+                                            <td>Reception desk, lobby</td>
+                                        </tr>
+                                        <tr>
+                                            <td>🍽️ Food & Beverage</td>
+                                            <td>Restaurant food quality, service, hygiene</td>
+                                            <td>Restaurant table tent</td>
+                                        </tr>
+                                        <tr>
+                                            <td>🏊 Pool & Recreation</td>
+                                            <td>Pool cleanliness, facilities, safety</td>
+                                            <td>Pool entrance area</td>
+                                        </tr>
+                                        <tr>
+                                            <td>💆 Spa & Wellness</td>
+                                            <td>Spa service quality, ambiance</td>
+                                            <td>Spa reception</td>
+                                        </tr>
+                                        <tr>
+                                            <td>🅿️ Valet & Parking</td>
+                                            <td>Parking service, valet speed</td>
+                                            <td>Parking area</td>
+                                        </tr>
+                                        <tr>
+                                            <td>🎪 Events & Banquets</td>
+                                            <td>Event management, setup quality</td>
+                                            <td>Banquet hall entrance</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Department Display Order <span
+                                    class="tag tag-optional">OPTIONAL</span></div>
+                            <div class="check-desc">In what order should departments appear in the sidebar/navigation?
+                                Default: alphabetical.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Guest Info Fields per Department <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">For each department, which guest details should the form ask for?
+                                Check which apply:</div>
+                            <div class="example">
+                                <table class="info-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Description</th>
+                                            <th>Common For</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>👤 Guest Name</td>
+                                            <td>Name of the person submitting feedback</td>
+                                            <td>All departments</td>
+                                        </tr>
+                                        <tr>
+                                            <td>📱 Phone Number</td>
+                                            <td>Contact number for follow-up</td>
+                                            <td>All departments</td>
+                                        </tr>
+                                        <tr>
+                                            <td>🔢 Room Number</td>
+                                            <td>Which room the guest is staying in</td>
+                                            <td>Room, Front Office</td>
+                                        </tr>
+                                        <tr>
+                                            <td>✉️ Email</td>
+                                            <td>Guest email for follow-up</td>
+                                            <td>Front Office, Events</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 3: QUESTIONS -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--orange), var(--gold));">03</div>
+                <div class="phase-info">
+                    <div class="phase-title">❓ Feedback Questions per Department</div>
+                    <div class="phase-sub">The most critical part — these determine what you'll measure</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Questions List per Department <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Ask the client: <em>"For each department, what specific questions do
+                                    you want to ask your guests?"</em> Ideally 5-10 questions per department. Each
+                                question has a type:</div>
+                            <ul class="sub-list">
+                                <li><strong>Rating Question</strong> — Guest rates on 1-5 stars (e.g., "Was the room
+                                    clean on arrival?")</li>
+                                <li><strong>Yes/No Question</strong> — Guest answers yes or no (e.g., "Did you face any
+                                    issues during your stay?")</li>
+                            </ul>
+                            <div class="example">
+                                <div class="example-title">Example — Room Department Questions</div>
+                                1. Was the room clean on arrival? <strong>(Rating ⭐)</strong><br>
+                                2. Was daily housekeeping timely? <strong>(Rating ⭐)</strong><br>
+                                3. Did all room facilities work properly? <strong>(Rating ⭐)</strong><br>
+                                4. Was the staff courteous? <strong>(Rating ⭐)</strong><br>
+                                5. Was noise or disturbance minimal? <strong>(Rating ⭐)</strong><br>
+                                6. Did you face any issues during your stay? <strong>(Yes/No)</strong>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Composite Scores (KPIs) <span
+                                    class="tag tag-recommended">RECOMMENDED</span></div>
+                            <div class="check-desc">Ask: <em>"Do you want to group certain questions into a combined
+                                    score (KPI)?"</em> For example, grouping "room cleanliness" + "bathroom cleanliness"
+                                + "housekeeping timeliness" into a single <strong>"Housekeeping Quality Score"</strong>.
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Example composites</div>
+                                <strong>Room Cleanliness Score</strong> = Q1 + Q2 + Q5<br>
+                                <strong>Staff Service Index</strong> = Q4 + Q6<br>
+                                <strong>Overall Room Quality</strong> = All rating questions averaged
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 4: USER ACCOUNTS -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--pink), var(--red));">04</div>
+                <div class="phase-info">
+                    <div class="phase-title">👥 User Accounts</div>
+                    <div class="phase-sub">Who needs access to the dashboard?</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Admin User <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">At least one admin account is needed. This person will manage
+                                questions, view analytics, generate QR codes, and configure settings.</div>
+                            <div class="example">
+                                <div class="example-title">Collect from client</div>
+                                <table class="info-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Full Name</td>
+                                            <td>Rajesh Kumar</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Username</td>
+                                            <td>admin@hotelmumbai</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Password</td>
+                                            <td>(client's choice or auto-generated)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Viewer / Manager Accounts <span
+                                    class="tag tag-optional">OPTIONAL</span></div>
+                            <div class="check-desc">Ask: <em>"Are there department heads or managers who should have
+                                    read-only dashboard access?"</em> These users can view analytics but can't modify
+                                questions or settings.</div>
+                            <div class="example">
+                                <div class="example-title">Example viewer accounts</div>
+                                • <strong>F&B Manager</strong> — fb_manager / password<br>
+                                • <strong>Front Office Manager</strong> — fo_manager / password<br>
+                                • <strong>General Manager</strong> — gm_viewer / password
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">How Many Total Users? <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Confirm total number of user accounts needed. Typically: 1 Admin +
+                                2-5 Viewers = 3-6 accounts per hotel.</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 5: BRANDING -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--cyan), var(--accent));">05</div>
+                <div class="phase-info">
+                    <div class="phase-title">🎨 Branding & Theme</div>
+                    <div class="phase-sub">Customize the look and feel for the client's brand</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Brand Color <span class="tag tag-recommended">RECOMMENDED</span>
+                            </div>
+                            <div class="check-desc">Primary brand color for the dashboard and feedback forms. Provide a
+                                hex code or let us match from their logo.</div>
+                            <div class="example">
+                                <div class="example-title">Example</div><strong>#1a1a2e</strong> (Dark Navy) •
+                                <strong>#d4a574</strong> (Gold) • <strong>#2d5016</strong> (Forest Green)
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Welcome Message <span class="tag tag-optional">OPTIONAL</span>
+                            </div>
+                            <div class="check-desc">Custom greeting message that appears on the guest feedback form.
+                            </div>
+                            <div class="example">
+                                <div class="example-title">Example</div>"Welcome to TAJ Mumbai! We value your feedback.
+                                Please take a moment to rate your experience."
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Thank You Message <span class="tag tag-optional">OPTIONAL</span>
+                            </div>
+                            <div class="check-desc">Message shown after guest submits feedback.</div>
+                            <div class="example">
+                                <div class="example-title">Example</div>"Thank you for your valuable feedback! We're
+                                committed to making your stay exceptional."
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 6: QR CODE SETUP -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--gold), var(--orange));">06</div>
+                <div class="phase-info">
+                    <div class="phase-title">📱 QR Code Placement Plan</div>
+                    <div class="phase-sub">Where will QR codes be placed in the hotel?</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">QR Locations per Department <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">For each department, where will the QR code be physically placed?
+                                This determines how many QR printouts are needed.</div>
+                            <div class="example">
+                                <div class="example-title">Typical QR placements</div>
+                                <table class="info-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Department</th>
+                                            <th>Placement</th>
+                                            <th>Qty Needed</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Room</td>
+                                            <td>Bedside table card / bathroom mirror sticker</td>
+                                            <td>1 per room (e.g., 200)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Front Office</td>
+                                            <td>Reception desk standee</td>
+                                            <td>2-3 at lobby</td>
+                                        </tr>
+                                        <tr>
+                                            <td>F&B</td>
+                                            <td>Table tent / menu card footer</td>
+                                            <td>1 per table (e.g., 50)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Spa</td>
+                                            <td>Treatment room card</td>
+                                            <td>1 per room</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">QR Design Preferences <span
+                                    class="tag tag-optional">OPTIONAL</span></div>
+                            <div class="check-desc">Does the client want branded QR codes (logo embedded) or plain? Do
+                                they need a specific card/standee size?</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 7: DEPLOYMENT -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--red), var(--pink));">07</div>
+                <div class="phase-info">
+                    <div class="phase-title">🚀 Deployment & Infrastructure</div>
+                    <div class="phase-sub">Technical requirements — handle internally, but confirm with client</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Domain / URL <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Will the app be hosted on a custom domain? Or a subdomain under your
+                                platform?</div>
+                            <div class="example">
+                                <div class="example-title">Options</div>
+                                <strong>Option A (Subdomain):</strong> tajmumbai.acculead.com<br>
+                                <strong>Option B (Custom):</strong> feedback.tajhotels.com (client provides DNS
+                                access)<br>
+                                <strong>Option C (Shared):</strong> app.acculead.com (multi-tenant, hotel selected at
+                                login)
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Hosting Region <span class="tag tag-recommended">RECOMMENDED</span>
+                            </div>
+                            <div class="check-desc">Where are most guests/staff accessing from? Determines server region
+                                for best performance (e.g., Mumbai, Singapore, US East).</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">SSL Certificate <span class="tag tag-required">REQUIRED</span>
+                            </div>
+                            <div class="check-desc">HTTPS is mandatory. If custom domain → need SSL setup. If subdomain
+                                → handled by you.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Database (MongoDB) <span class="tag tag-required">REQUIRED</span>
+                            </div>
+                            <div class="check-desc">Setup decision: shared MongoDB Atlas cluster (multi-tenant) or
+                                dedicated cluster per client.</div>
+                            <div class="example">
+                                <div class="example-title">Recommendation</div>Use <strong>MongoDB Atlas M10+</strong>
+                                on the nearest region. Each hotel's data is isolated by <code>hotelId</code> field.
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Environment Variables <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Configure these before deployment:</div>
+                            <div class="example">
+                                <div class="example-title">Required .env variables</div>
+                                <code>dataBaserURL</code> — MongoDB connection string<br>
+                                <code>JWT_SECRET</code> — Random secret key for auth tokens<br>
+                                <code>JWT_EXPIRES_IN</code> — Token expiry (e.g., "90d")<br>
+                                <code>PORT</code> — Server port (default: 5000)<br>
+                                <code>NODE_ENV</code> — "production"
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- PHASE 8: HANDOVER -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, var(--green), var(--accent));">08
+                </div>
+                <div class="phase-info">
+                    <div class="phase-title">📦 Handover Deliverables</div>
+                    <div class="phase-sub">What you give to the client after setup</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ul class="checklist">
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Admin Login Credentials <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Provide the admin and viewer usernames/passwords securely. Recommend
+                                the client change passwords on first login.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Dashboard URL <span class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">The URL where admins log in and view analytics.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">QR Code Files (Print-Ready) <span
+                                    class="tag tag-required">REQUIRED</span></div>
+                            <div class="check-desc">Generated QR codes for each department in high-resolution PNG/SVG.
+                                Include the public review URL for each department.</div>
+                            <div class="example">
+                                <div class="example-title">Example URLs</div>
+                                <code>https://app.acculead.com/review/room</code><br>
+                                <code>https://app.acculead.com/review/front-office</code><br>
+                                <code>https://app.acculead.com/review/food-and-beverage</code>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Quick Start Guide <span
+                                    class="tag tag-recommended">RECOMMENDED</span></div>
+                            <div class="check-desc">A simple 1-page PDF or HTML doc explaining: how to log in, where to
+                                view scores, how to add/edit questions, and how to read the dashboard charts.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Training Session <span
+                                    class="tag tag-recommended">RECOMMENDED</span></div>
+                            <div class="check-desc">Schedule a 30-minute video call with the hotel admin to walk through
+                                the dashboard, question management, and QR code placement.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="check-box">☐</div>
+                        <div class="check-content">
+                            <div class="check-label">Support Contact <span class="tag tag-required">REQUIRED</span>
+                            </div>
+                            <div class="check-desc">Provide the client with a support email/phone for post-deployment
+                                issues.</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ====================================================== -->
+        <!-- SETUP WORKFLOW SUMMARY -->
+        <!-- ====================================================== -->
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-num" style="background: linear-gradient(135deg, #6366f1, #ec4899);">⚡</div>
+                <div class="phase-info">
+                    <div class="phase-title">Your Internal Setup Steps (After Collecting Info)</div>
+                    <div class="phase-sub">The developer workflow to configure and deploy for a new client</div>
+                </div>
+            </div>
+            <div class="phase-body">
+                <ol style="list-style: none; padding: 0; counter-reset: step;">
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            1</div>
+                        <div><strong>Create the Hotel</strong> — Super Admin dashboard → Hotels → Add Hotel (name, code,
+                            address, contact)</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            2</div>
+                        <div><strong>Create User Accounts</strong> — Super Admin → Users → Create admin + viewer
+                            accounts, assign to the hotel</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            3</div>
+                        <div><strong>Create Departments (Categories)</strong> — Log in as hotel admin → Management →
+                            create each department with name, slug, icon, guest info fields</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            4</div>
+                        <div><strong>Add Questions</strong> — For each department, add the client's questions (rating or
+                            yes/no type)</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            5</div>
+                        <div><strong>Create Composites</strong> — Group questions into composite scores (KPIs) for the
+                            dashboard</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            6</div>
+                        <div><strong>Configure Theme</strong> — Settings → set brand color, welcome/thank you messages
+                        </div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            7</div>
+                        <div><strong>Generate & Print QR Codes</strong> — Generate QR codes for each department → export
+                            as print-ready files</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            8</div>
+                        <div><strong>Test Everything</strong> — Submit test reviews via each QR → verify they appear on
+                            the dashboard → check scores</div>
+                    </li>
+                    <li
+                        style="padding: 12px 0; display: flex; gap: 14px; align-items: flex-start; counter-increment: step;">
+                        <div
+                            style="width: 28px; height: 28px; border-radius: 50%; background: var(--green); display:flex; align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex-shrink:0; margin-top:2px;">
+                            9</div>
+                        <div><strong>Handover</strong> — Share credentials, QR files, quick start guide → schedule
+                            training call → go live! 🎉</div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-box">
+            <h2>📊 Quick Summary — What to Collect</h2>
+            <p style="color: var(--muted); font-size: 0.9rem;">Minimum items needed to set up a new hotel client:</p>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="num">7</div>
+                    <div class="lbl">Hotel Details</div>
+                </div>
+                <div class="summary-item">
+                    <div class="num">3-7</div>
+                    <div class="lbl">Departments</div>
+                </div>
+                <div class="summary-item">
+                    <div class="num">5-10</div>
+                    <div class="lbl">Questions / Dept</div>
+                </div>
+                <div class="summary-item">
+                    <div class="num">1-6</div>
+                    <div class="lbl">User Accounts</div>
+                </div>
+                <div class="summary-item">
+                    <div class="num">1</div>
+                    <div class="lbl">Brand Color</div>
+                </div>
+                <div class="summary-item">
+                    <div class="num">1</div>
+                    <div class="lbl">Domain / URL</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 48px 0 24px; color: var(--muted); font-size: 0.8rem;">
+            © 2025–2026 Acculead. Client Onboarding Checklist — Hotel Department Efficiency Analyzer.
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalalak Insight — Dashboard User Guide</title>
+    <meta name="description" content="Learn how to use the Kalalak Insight hotel experience intelligence dashboard.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --bg: #070b14;
+            --card: #0f1629;
+            --card2: #151d33;
+            --border: #1e2a45;
+            --border2: #2a3a5c;
+            --text: #c8d6e5;
+            --muted: #7a8ba8;
+            --bright: #e8f0fe;
+            --acc: #6366f1;
+            --acc-s: rgba(99, 102, 241, .15);
+            --acc-g: rgba(99, 102, 241, .3);
+            --teal: #2dd4bf;
+            --teal-s: rgba(45, 212, 191, .12);
+            --amber: #fbbf24;
+            --amber-s: rgba(251, 191, 36, .12);
+            --green: #22c55e;
+            --green-s: rgba(34, 197, 94, .12);
+            --r: 16px;
+            --rs: 10px
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.7
+        }
+
+        .wrap {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 40px 20px 80px
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 70px 30px 60px;
+            background: linear-gradient(160deg, #1a1145 0%, #0f1629 40%, #0d1a2e 100%);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 48px
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--acc-g) 0%, transparent 70%);
+            pointer-events: none
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--acc-s);
+            border: 1px solid rgba(99, 102, 241, .25);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--acc);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, #fff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .hero p {
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 560px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1
+        }
+
+        /* Section */
+        .sec {
+            margin-bottom: 40px
+        }
+
+        .sec-h {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sec-n {
+            width: 36px;
+            height: 36px;
+            background: var(--acc-s);
+            border: 1px solid rgba(99, 102, 241, .3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--acc);
+            flex-shrink: 0
+        }
+
+        .sec-h h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--bright)
+        }
+
+        /* Card */
+        .cd {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 28px;
+            margin-bottom: 16px;
+            transition: border-color .2s
+        }
+
+        .cd:hover {
+            border-color: var(--border2)
+        }
+
+        .cd h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--bright);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .cd p,
+        .cd li {
+            color: var(--text);
+            font-size: .92rem;
+            line-height: 1.75
+        }
+
+        .cd ul,
+        .cd ol {
+            padding-left: 20px;
+            margin-top: 8px
+        }
+
+        .cd li {
+            margin-bottom: 6px
+        }
+
+        .cd li::marker {
+            color: var(--acc)
+        }
+
+        /* Credentials */
+        .cg {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-top: 16px
+        }
+
+        .cc {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 20px;
+            text-align: center
+        }
+
+        .rb {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px
+        }
+
+        .cc.s .rb {
+            background: var(--acc-s);
+            color: var(--acc);
+            border: 1px solid rgba(99, 102, 241, .3)
+        }
+
+        .cc.a .rb {
+            background: var(--teal-s);
+            color: var(--teal);
+            border: 1px solid rgba(45, 212, 191, .3)
+        }
+
+        .cc.v .rb {
+            background: var(--amber-s);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, .3)
+        }
+
+        .cf {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: .85rem
+        }
+
+        .cf:last-child {
+            border-bottom: none
+        }
+
+        .cl {
+            color: var(--muted);
+            font-weight: 500
+        }
+
+        .cv {
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            color: var(--bright);
+            font-weight: 600;
+            background: rgba(255, 255, 255, .04);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        /* Flow */
+        .flow {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center
+        }
+
+        .fs {
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+            text-align: center;
+            padding: 20px 14px;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--rs)
+        }
+
+        .fs .fi {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: block
+        }
+
+        .fs .ft {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--bright);
+            margin-bottom: 4px
+        }
+
+        .fs .fd {
+            font-size: .75rem;
+            color: var(--muted);
+            line-height: 1.4
+        }
+
+        .fa {
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            color: var(--acc);
+            font-size: 20px;
+            font-weight: 700
+        }
+
+        /* QR */
+        .qr-box {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-top: 24px;
+            flex-wrap: wrap
+        }
+
+        .qr-img {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            border-radius: var(--rs);
+            padding: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(99, 102, 241, .15)
+        }
+
+        .qr-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain
+        }
+
+        .qr-nfo {
+            flex: 1;
+            min-width: 220px
+        }
+
+        .qr-nfo h4 {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--bright);
+            margin-bottom: 8px
+        }
+
+        .qr-nfo p {
+            font-size: .88rem;
+            color: var(--text);
+            margin-bottom: 8px
+        }
+
+        .qr-url {
+            display: inline-block;
+            margin: 6px 0 12px;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            background: rgba(255, 255, 255, .06);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: .82rem;
+            color: var(--teal);
+            border: 1px solid var(--border)
+        }
+
+        /* Feature grid */
+        .fg {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-top: 16px
+        }
+
+        .fi-c {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 20px
+        }
+
+        .fi-c .ic {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block
+        }
+
+        .fi-c h4 {
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--bright);
+            margin-bottom: 6px
+        }
+
+        .fi-c p {
+            font-size: .8rem;
+            color: var(--muted);
+            line-height: 1.5
+        }
+
+        /* Steps */
+        .sl {
+            counter-reset: step;
+            list-style: none;
+            padding-left: 0
+        }
+
+        .sl li {
+            counter-increment: step;
+            position: relative;
+            padding-left: 44px;
+            margin-bottom: 18px
+        }
+
+        .sl li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 28px;
+            height: 28px;
+            background: var(--acc-s);
+            border: 1px solid rgba(99, 102, 241, .3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--acc)
+        }
+
+        .sl li strong {
+            color: var(--bright)
+        }
+
+        /* Highlight */
+        .hl {
+            background: var(--acc-s);
+            border: 1px solid rgba(99, 102, 241, .25);
+            border-radius: var(--rs);
+            padding: 18px 22px;
+            margin-top: 16px;
+            font-size: .88rem
+        }
+
+        .hl.tl {
+            background: var(--teal-s);
+            border-color: rgba(45, 212, 191, .25)
+        }
+
+        .hl.am {
+            background: var(--amber-s);
+            border-color: rgba(251, 191, 36, .25)
+        }
+
+        .hl.gn {
+            background: var(--green-s);
+            border-color: rgba(34, 197, 94, .25)
+        }
+
+        .hl strong {
+            color: var(--bright)
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            background: rgba(255, 255, 255, .06);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: .82rem;
+            color: var(--teal)
+        }
+
+        /* Table */
+        .tb {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: .88rem
+        }
+
+        .tb th,
+        .tb td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .tb th {
+            color: var(--muted);
+            font-weight: 600;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .tb td {
+            color: var(--text)
+        }
+
+        .tb tr:last-child td {
+            border-bottom: none
+        }
+
+        /* TOC */
+        .toc {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 24px 28px;
+            margin-bottom: 40px
+        }
+
+        .toc h3 {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px
+        }
+
+        .toc ol {
+            padding-left: 20px
+        }
+
+        .toc li {
+            margin-bottom: 6px;
+            font-size: .88rem
+        }
+
+        .toc a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color .15s
+        }
+
+        .toc a:hover {
+            color: var(--acc)
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            font-size: .82rem;
+            border-top: 1px solid var(--border);
+            margin-top: 48px
+        }
+
+        .footer a {
+            color: var(--acc);
+            text-decoration: none
+        }
+
+        @media(max-width:640px) {
+            .wrap {
+                padding: 20px 12px 60px
+            }
+
+            .hero {
+                padding: 50px 20px 40px;
+                border-radius: 20px
+            }
+
+            .cd {
+                padding: 20px
+            }
+
+            .cg {
+                grid-template-columns: 1fr
+            }
+
+            .qr-box {
+                flex-direction: column;
+                align-items: flex-start
+            }
+
+            .flow {
+                flex-direction: column;
+                align-items: center
+            }
+
+            .fa {
+                transform: rotate(90deg);
+                padding: 4px 0
+            }
+
+            .fs {
+                max-width: 100%
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="wrap">
+
+        <!-- Hero -->
+        <div class="hero">
+            <span class="hero-badge">📖 User Guide</span>
+            <h1>Kalalak Insight</h1>
+            <p>Hospitality Performance Intelligence Platform designed to provide real-time visibility into
+                guest experience, protect hotel reputation, and transform structured guest feedback into
+                actionable operational intelligence.</p>
+        </div>
+        <div class="sec" id="service-recovery">
+            <div class="sec-h">
+                <span class="sec-n">5</span>
+                <h2>Instant Service Recovery Alerts</h2>
+            </div>
+            <div class="cd">
+                <p>In a luxury hospitality environment, resolving guest issues before they check out is critical.
+                    Kalalak Insight includes an automated <strong>Service Recovery Alert</strong> system that notifies
+                    your team the moment a sub-optimal rating is submitted.</p>
+
+                <div class="hl am">
+                    <strong>🚨 Immediate Action Triggered:</strong>
+                    <p style="margin-top: 8px;">If a guest submits an overall rating of <strong>3 stars or
+                            below</strong>, the system bypasses the Google Review prompt and instantly triggers an alert
+                        to the designated Department Head or Duty Manager. This allows your team to proactively reach
+                        out, apologize, and correct the issue while the guest is still on the property.</p>
+                </div>
+
+                <h3 style="margin-top: 20px;">How Alerts are Delivered</h3>
+                <p>To ensure no feedback slips through the cracks, alerts can be routed through multiple channels:</p>
+                <ul>
+                    <li><strong>Dashboard Notifications:</strong> Real-time visual alerts appear on the main dashboard
+                        for staff actively monitoring the system.</li>
+                    <li><strong>Email Routing:</strong> Instant emails sent directly to the relevant department leaders
+                        containing the score, specific composite breakdowns, and any guest comments.</li>
+                    <li><strong>Escalation Logs:</strong> Tracked within the system so the General Manager can verify
+                        that the Duty Manager successfully closed the loop on the guest's complaint.</li>
+                </ul>
+                <div class="hl tl" style="margin-top: 16px;">
+                    <strong>💡 Pro Tip:</strong> Ensure your notification routing is set up in the
+                    <strong>Settings</strong> tab so that Room Service complaints go directly to the F&B Manager, while
+                    cleanliness issues route instantly to Executive Housekeeping.
+                </div>
+            </div>
+        </div>
+        <!-- TOC -->
+        <div class="toc">
+            <h3>Quick Navigation</h3>
+            <ol>
+                <li><a href="#overview">What is Kalalak Insight?</a></li>
+
+                <li><a href="#qr-flow">How Guest Feedback Collection Works</a></li>
+                <li><a href="#login">Logging In</a></li>
+                <li><a href="#dashboard-tour">Dashboard Tour</a></li>
+                <li><a href="#analytics">Understanding Analytics</a></li>
+                <li><a href="#managing">Managing Questions &amp; Composites</a></li>
+                <li><a href="#reports">Generating Reports</a></li>
+                <li><a href="#roles">User Roles Explained</a></li>
+            </ol>
+        </div>
+
+        <!-- 1. Overview -->
+        <div class="sec" id="overview">
+            <div class="sec-h">
+                <span class="sec-n">1</span>
+                <h2>What is Kalalak Insight?</h2>
+            </div>
+            <div class="cd">
+                <p>Kalalak Insight is a <strong>hotel experience intelligence platform</strong> that helps hotels
+                    understand guest satisfaction at the department level. Instead of relying on generic online reviews,
+                    Kalalak Insight collects <strong>structured, real-time feedback</strong> from guests — right when
+                    they interact with each department.</p>
+                <div class="fg">
+                    <div class="fi-c"><span class="ic">📱</span>
+                        <h4>QR-Based Collection</h4>
+                        <p>Guests scan a QR code placed in their room or common area to submit feedback instantly — no
+                            app download needed.</p>
+                    </div>
+                    <div class="fi-c"><span class="ic">📊</span>
+                        <h4>Real-Time Analytics</h4>
+                        <p>Ratings and trends appear on the dashboard immediately. Track performance by day, week,
+                            month, or year.</p>
+                    </div>
+                    <div class="fi-c"><span class="ic">🏨</span>
+                        <h4>Department-Level Insight</h4>
+                        <p>Each department (Room, F&amp;B, Spa, etc.) has its own set of questions and composites for
+                            focused analysis.</p>
+                    </div>
+                    <div class="fi-c"><span class="ic">📄</span>
+                        <h4>PDF Reports</h4>
+                        <p>Export detailed analytics to PDF with a single click. Share with stakeholders in a
+                            professional format.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 3. QR Flow -->
+        <div class="sec" id="qr-flow">
+            <div class="sec-h">
+                <span class="sec-n">3</span>
+                <h2>How Guest Feedback Collection Works</h2>
+            </div>
+            <div class="cd">
+                <p>The entire feedback loop runs through <strong>QR codes</strong>. Here's how it works from start to
+                    finish:</p>
+
+                <div class="flow">
+                    <div class="fs"><span class="fi">🖨️</span>
+                        <div class="ft">Print QR Code</div>
+                        <div class="fd">Download QR from Settings or SaaS Admin and place in rooms</div>
+                    </div>
+                    <span class="fa">→</span>
+                    <div class="fs"><span class="fi">📱</span>
+                        <div class="ft">Guest Scans</div>
+                        <div class="fd">Guest opens camera, scans QR — opens feedback form instantly</div>
+                    </div>
+                    <span class="fa">→</span>
+                    <div class="fs"><span class="fi">⭐</span>
+                        <div class="ft">Rates &amp; Submits</div>
+                        <div class="fd">Guest answers rating &amp; yes/no questions, adds optional comments</div>
+                    </div>
+                    <span class="fa">→</span>
+                    <div class="fs"><span class="fi">📊</span>
+                        <div class="ft">Analytics Update</div>
+                        <div class="fd">Dashboard updates in real-time with new scores and trends</div>
+                    </div>
+                </div>
+
+                <!-- ACTUAL QR CODE -->
+                <div class="qr-box">
+                    <div class="qr-img">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Finsight.kalalak.com%2FGRAND%2Froom&color=1e293b&bgcolor=ffffff"
+                            alt="QR Code — Room Service Feedback">
+                    </div>
+                    <div class="qr-nfo">
+                        <h4>🔗 Demo QR Code — Room Service</h4>
+                        <p>Scan this QR code to open the guest feedback form for the Room Service department at Grand
+                            Resort &amp; Spa Calicut:</p>
+                        <span class="qr-url">https://insight.kalalak.com/GRAND/room</span>
+                        <p><strong>How to get QR codes for your hotel:</strong></p>
+                        <ol>
+                            <li><strong>Dashboard Settings → QR Codes</strong> — Download individual QR codes per
+                                department</li>
+                            <li><strong>SaaS Admin Dashboard</strong> — Platform admins can download all QR codes for a
+                                hotel at once</li>
+                        </ol>
+                        <p style="margin-top:8px;color:var(--muted);font-size:.82rem">Print QR codes on tent cards,
+                            table stands, or wall frames. Place them where guests naturally interact with each
+                            department.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Login -->
+        <div class="sec" id="login">
+            <div class="sec-h">
+                <span class="sec-n">4</span>
+                <h2>Logging In</h2>
+            </div>
+            <div class="cd">
+                <ol class="sl">
+                    <li><strong>Open the Dashboard</strong> — Navigate to your hotel's Kalalak Insight dashboard URL
+                        (e.g., <code>https://your-hotel.kalalak.com</code> or <code>http://localhost:5173</code> for
+                        demo)</li>
+                    <li><strong>Enter Credentials</strong> — Type your username and password on the login page</li>
+                    <li><strong>Click "Sign In"</strong> — You'll be redirected to the main dashboard showing today's
+                        overview</li>
+                </ol>
+                <div class="hl tl">
+                    <strong>🔒 Note:</strong> Sessions expire automatically for security. If you're logged out, simply
+                    sign in again. Your data is always safe and persisted.
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Dashboard Tour -->
+        <div class="sec" id="dashboard-tour">
+            <div class="sec-h">
+                <span class="sec-n">5</span>
+                <h2>Dashboard Tour</h2>
+            </div>
+            <div class="cd">
+                <h3>📍 Navigation Sidebar</h3>
+                <p>The left sidebar contains all major sections:</p>
+                <table class="tb">
+                    <thead>
+                        <tr>
+                            <th>Menu Item</th>
+                            <th>What It Does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Dashboard</strong></td>
+                            <td>Overview with daily stats, total feedback count, average scores, and quick department
+                                breakdown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics</strong></td>
+                            <td>Deep-dive analytics with charts, trends, date range filtering, and composite score
+                                breakdown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Compare</strong></td>
+                            <td>Side-by-side comparison of departments or time periods</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Questions</strong></td>
+                            <td>Manage rating and yes/no questions for each department (Super Admin only)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Composites</strong></td>
+                            <td>Group questions into composite scores — e.g., "Cleanliness Score" combining 2 related
+                                questions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Users</strong></td>
+                            <td>Manage dashboard users — add admins, viewers, or managers (Super Admin only)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Settings</strong></td>
+                            <td>Hotel profile, logo upload, QR code download, and guest feedback settings</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="cd">
+                <h3>📈 Main Dashboard Page</h3>
+                <p>When you first log in, you'll see:</p>
+                <ul>
+                    <li><strong>Stat Cards</strong> — Total feedback today, average rating, response trend</li>
+                    <li><strong>Rating Distribution</strong> — How many 1-star, 2-star, ..., 5-star ratings you received
+                    </li>
+                    <li><strong>Recent Feedback</strong> — Latest guest submissions with their scores and comments</li>
+                    <li><strong>Department Selector</strong> — Click on a department tab to filter the view to that
+                        specific area</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 6. Analytics -->
+        <div class="sec" id="analytics">
+            <div class="sec-h">
+                <span class="sec-n">6</span>
+                <h2>Understanding Analytics</h2>
+            </div>
+            <div class="cd">
+                <h3>📊 Analytics Page</h3>
+                <p>The analytics page is the core of Kalalak Insight. Here's what each section shows:</p>
+                <ul>
+                    <li><strong>Date Range Filter</strong> — Select any time period: today, this week, this month, or a
+                        custom range</li>
+                    <li><strong>Question Averages</strong> — See the average rating for each question over the selected
+                        period</li>
+                    <li><strong>Composite Scores</strong> — Composite scores combine multiple related questions into a
+                        single metric (e.g., "Cleanliness Score" averages room cleanliness + bed/linen quality)</li>
+                    <li><strong>Trend Charts</strong> — Line charts showing how scores change over time</li>
+                    <li><strong>Yes/No Breakdown</strong> — For yes/no questions, see the percentage of "Yes" vs "No"
+                        answers</li>
+                    <li><strong>Staff Performance</strong> — Track which staff members contribute to positive/negative
+                        feedback</li>
+                </ul>
+                <div class="hl gn">
+                    <strong>📌 Demo Data:</strong> The demo hotel includes <strong>12 months of realistic data</strong>
+                    (Jan 2025 – Jan 2026) for the Room Service department. Explore the analytics to see seasonal
+                    patterns — notice how scores dip during monsoon months (Jun-Jul) and peak during the holiday season
+                    (Nov-Dec).
+                </div>
+            </div>
+            <div class="cd">
+                <h3>🔍 What are Composites?</h3>
+                <p>Composites group related questions into meaningful scores. The demo has 3 composites:</p>
+                <table class="tb">
+                    <thead>
+                        <tr>
+                            <th>Composite</th>
+                            <th>Questions Combined</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Cleanliness Score</strong></td>
+                            <td>Room cleanliness + Bed/linen quality (2 Qs)</td>
+                            <td>Overall cleanliness perception</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Comfort &amp; Amenities</strong></td>
+                            <td>Bathroom + AC + In-room amenities (3 Qs)</td>
+                            <td>Physical comfort level</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Overall Room Experience</strong></td>
+                            <td>Cleanliness + Bed + Bathroom + AC (4 Qs)</td>
+                            <td>Holistic room quality metric</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 7. Managing -->
+        <div class="sec" id="managing">
+            <div class="sec-h">
+                <span class="sec-n">7</span>
+                <h2>Managing Questions &amp; Composites</h2>
+            </div>
+            <div class="cd">
+                <h3>❓ Questions (Super Admin Only)</h3>
+                <p>Navigate to <strong>Questions</strong> in the sidebar to manage the survey questions guests see:</p>
+                <ul>
+                    <li><strong>Add new questions</strong> — Choose between <em>Rating</em> (1–5 stars) or
+                        <em>Yes/No</em> type
+                    </li>
+                    <li><strong>Reorder questions</strong> — Drag to change the order they appear in the guest form</li>
+                    <li><strong>Edit text</strong> — Update question wording at any time</li>
+                    <li><strong>Activate/Deactivate</strong> — Hide a question without deleting it (preserves historical
+                        data)</li>
+                </ul>
+            </div>
+            <div class="cd">
+                <h3>📊 Composites (Super Admin Only)</h3>
+                <p>Navigate to <strong>Composites</strong> to create grouped scores:</p>
+                <ol class="sl">
+                    <li><strong>Click "Add Composite"</strong> — Give it a descriptive name (e.g., "Guest Comfort
+                        Index")</li>
+                    <li><strong>Select questions</strong> — Pick 2 or more rating questions to group together</li>
+                    <li><strong>Save</strong> — The composite score will now appear in analytics as an average of the
+                        selected questions</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 8. Reports -->
+        <div class="sec" id="reports">
+            <div class="sec-h">
+                <span class="sec-n">8</span>
+                <h2>Generating Reports</h2>
+            </div>
+            <div class="cd">
+                <p>Kalalak Insight lets you export analytics as a <strong>professional PDF report</strong>.</p>
+                <ol class="sl">
+                    <li><strong>Go to Analytics</strong> — Select the department and date range you want to report on
+                    </li>
+                    <li><strong>Click "Export PDF"</strong> — Found in the top-right corner of the analytics page</li>
+                    <li><strong>Download</strong> — A formatted PDF with charts, averages, and trends will download
+                        automatically</li>
+                </ol>
+                <div class="hl am">
+                    <strong>📄 Report Includes:</strong> Question-level averages, composite scores, trend charts, rating
+                    distribution, yes/no breakdown, and guest comment highlights — all for the selected date range.
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Roles -->
+        <div class="sec" id="roles">
+            <div class="sec-h">
+                <span class="sec-n">9</span>
+                <h2>User Roles Explained</h2>
+            </div>
+            <div class="cd">
+                <table class="tb">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Access Level</th>
+                            <th>Can Do</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Super Admin</strong></td>
+                            <td>Full access</td>
+                            <td>Everything — manage questions, composites, users, settings, view analytics, export
+                                reports</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Admin</strong></td>
+                            <td>Management access</td>
+                            <td>View analytics, export reports, manage some settings. Cannot add/remove users or
+                                questions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Viewer</strong></td>
+                            <td>Read-only</td>
+                            <td>View dashboard and analytics only. Ideal for department heads and managers who need to
+                                monitor performance</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="hl">
+                    <strong>🏢 Organization Structure:</strong> Your hotel belongs to an organization (e.g., "Kalalak
+                    Hotels"). The SaaS Admin (platform level) manages organizations and hotels. Within each hotel, the
+                    Super Admin manages the day-to-day dashboard.
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Kalalak Insight</strong> — Hotel Experience Intelligence Platform</p>
+            <p style="margin-top:6px">Built by <a href="#">Acculead</a> · Version 2.0 · © 2025</p>
+        </div>
+
+    </div>
+</body>
+
+</html>

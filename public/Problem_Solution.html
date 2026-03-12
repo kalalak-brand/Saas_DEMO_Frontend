@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Problem & Solution — Kalalak Insight</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary: #1B4D3E; --accent: #E4B580; --text: #1a1a2e; --muted: #64748b;
+      --border: #e2e8f0; --bg: #f8fafc; --card: #ffffff;
+      --red: #dc2626; --red-bg: #fef2f2; --red-border: #fecaca;
+      --green: #059669; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+      --amber: #d97706; --amber-bg: #fffbeb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #1B4D3E 100%);
+      color: white; padding: 64px 40px 54px; text-align: center;
+    }
+    .hero .badge {
+      display: inline-block; background: rgba(228,181,128,0.2); border: 1px solid rgba(228,181,128,0.5);
+      color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      padding: 6px 18px; border-radius: 20px; margin-bottom: 22px;
+    }
+    .hero h1 { font-size: clamp(26px, 4.5vw, 46px); font-weight: 800; margin-bottom: 16px; }
+    .hero p { font-size: 17px; color: rgba(255,255,255,0.75); max-width: 640px; margin: 0 auto; }
+
+    .container { max-width: 1050px; margin: 0 auto; padding: 56px 24px; }
+
+    .section-label {
+      font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .section-label.red { color: var(--red); }
+    .section-label.green { color: var(--green); }
+    .section-label.amber { color: var(--amber); }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-heading { font-size: clamp(20px, 3vw, 28px); font-weight: 800; margin-bottom: 10px; }
+    .section-sub { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+
+    /* PROBLEM CARDS */
+    .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-bottom: 48px; }
+    .problem-card {
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      border-radius: 14px; padding: 24px; position: relative; overflow: hidden;
+    }
+    .problem-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--red);
+    }
+    .problem-card .prob-icon { font-size: 26px; margin-bottom: 12px; }
+    .problem-card h3 { font-size: 16px; font-weight: 700; color: var(--red); margin-bottom: 8px; }
+    .problem-card p { font-size: 14px; color: #7f1d1d; line-height: 1.6; }
+
+    /* IMPACT */
+    .impact-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 48px;
+    }
+    .impact-item {
+      background: var(--amber-bg); border: 1px solid #fde68a;
+      border-radius: 12px; padding: 20px; text-align: center;
+    }
+    .impact-item .num { font-size: 34px; font-weight: 800; color: var(--amber); }
+    .impact-item p { font-size: 13px; color: #78350f; margin-top: 4px; font-weight: 500; }
+
+    /* SOLUTION MAP */
+    .solution-map { display: flex; flex-direction: column; gap: 20px; margin-bottom: 48px; }
+    .solution-row {
+      display: grid; grid-template-columns: 1fr 50px 1fr;
+      align-items: center; gap: 16px;
+    }
+    .prob-box {
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .prob-box .label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
+    .prob-box p { font-size: 14px; color: #7f1d1d; line-height: 1.5; }
+    .arrow-box { text-align: center; font-size: 26px; color: var(--primary); }
+    .sol-box {
+      background: var(--green-bg); border: 1px solid var(--green-border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .sol-box .label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green); margin-bottom: 4px; }
+    .sol-box h4 { font-size: 15px; font-weight: 700; color: #064e3b; margin-bottom: 4px; }
+    .sol-box p { font-size: 13px; color: #065f46; line-height: 1.5; }
+    .sol-box .feature-tag {
+      display: inline-block; margin-top: 8px;
+      background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ADVANTAGES */
+    .adv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 48px; }
+    .adv-card {
+      background: var(--card); border-radius: 14px; padding: 24px;
+      border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      border-top: 3px solid var(--primary);
+    }
+    .adv-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .adv-card h3 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    .adv-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* CLOSING BANNER */
+    .closing {
+      background: linear-gradient(135deg, var(--primary), #2D6A55);
+      color: white; border-radius: 18px; padding: 40px;
+      text-align: center; margin-bottom: 40px;
+    }
+    .closing h2 { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+    .closing p { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto; }
+
+    footer { text-align: center; padding: 28px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+    footer strong { color: var(--primary); }
+
+    @media (max-width: 640px) {
+      .solution-row { grid-template-columns: 1fr; }
+      .arrow-box { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">White Paper</div>
+  <h1>The Problem & The Solution</h1>
+  <p>How Kalalak Insight transforms hotel guest feedback from a manual burden into real-time competitive intelligence.</p>
+</div>
+
+<div class="container">
+
+  <!-- SECTION 1: PROBLEMS -->
+  <div class="section-label red">⚠️ Section 1 — Current Problems</div>
+  <h2 class="section-heading">What Hotels Struggle With Today</h2>
+  <p class="section-sub">Without a dedicated analytics platform, hotel operations teams face these persistent challenges every day.</p>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="prob-icon">📋</div>
+      <h3>Paper-Based Feedback Collection</h3>
+      <p>Feedback forms are filled on paper, collected manually, and often never analyzed. Insights are lost before anyone even reads them.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon">🔍</div>
+      <h3>No Real-Time Visibility</h3>
+      <p>Hotels have no way to know a department is underperforming until weeks later — by which time the guest has already complained publicly.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon">📊</div>
+      <h3>Scattered & Siloed Data</h3>
+      <p>Feedback for Room, F&amp;B, Spa, and Pool are tracked in different spreadsheets by different teams, making comparison impossible.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon">⏱️</div>
+      <h3>Time-Consuming Manual Reporting</h3>
+      <p>Department heads spend hours each week collating feedback into PowerPoint slides for management meetings — time better spent on service improvement.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon">🔔</div>
+      <h3>No Alert System for Low Ratings</h3>
+      <p>When a guest gives a 1-star rating, no one is notified in real time. The issue festers. The guest leaves without resolution.</p>
+    </div>
+    <div class="problem-card">
+      <div class="prob-icon">🔐</div>
+      <h3>Data Accessibility Issues</h3>
+      <p>Department heads either see too much or too little. There is no controlled, role-based access to relevant data for each team.</p>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="section-label amber">📉 Section 2 — Business Impact</div>
+  <h2 class="section-heading">The Cost of Doing Nothing</h2>
+  <p class="section-sub">These problems don't just create inconvenience — they directly damage guest satisfaction and revenue.</p>
+  <div class="impact-row">
+    <div class="impact-item"><div class="num">67%</div><p>of guests never complain directly — they just leave a bad review online</p></div>
+    <div class="impact-item"><div class="num">5×</div><p>more expensive to acquire a new guest than to retain an existing one</p></div>
+    <div class="impact-item"><div class="num">48 hrs</div><p>average delay before management knows about a recurring service issue</p></div>
+    <div class="impact-item"><div class="num">0</div><p>data-driven decisions made with paper forms and spreadsheets</p></div>
+  </div>
+
+  <!-- SOLUTION MAP -->
+  <div class="section-label green">✅ Section 3 — How We Solve It</div>
+  <h2 class="section-heading">Kalalak Insight: Problem to Solution</h2>
+  <p class="section-sub">Every problem has a direct feature that eliminates it.</p>
+
+  <div class="solution-map">
+    <div class="solution-row">
+      <div class="prob-box">
+        <div class="label">Problem</div>
+        <p>Paper-based forms are lost, unread, and never analyzed</p>
+      </div>
+      <div class="arrow-box">→</div>
+      <div class="sol-box">
+        <div class="label">Solution</div>
+        <h4>QR Code Guest Surveys</h4>
+        <p>Guests scan a QR code and submit feedback from their phone — instantly captured and stored in real time.</p>
+        <span class="feature-tag">📱 Digital Feedback Collection</span>
+      </div>
+    </div>
+    <div class="solution-row">
+      <div class="prob-box">
+        <div class="label">Problem</div>
+        <p>No real-time visibility into which department is failing right now</p>
+      </div>
+      <div class="arrow-box">→</div>
+      <div class="sol-box">
+        <div class="label">Solution</div>
+        <h4>Live Analytics Dashboard</h4>
+        <p>The dashboard refreshes automatically. Managers see current scores across all departments at a glance.</p>
+        <span class="feature-tag">📊 Real-Time Dashboard</span>
+      </div>
+    </div>
+    <div class="solution-row">
+      <div class="prob-box">
+        <div class="label">Problem</div>
+        <p>Data is siloed across different Excel sheets with no way to compare</p>
+      </div>
+      <div class="arrow-box">→</div>
+      <div class="sol-box">
+        <div class="label">Solution</div>
+        <h4>Unified Multi-Category Analytics</h4>
+        <p>Room, F&amp;B, Pool, Spa — all categories in one platform. The Compare Analytics tool lets you benchmark them side by side.</p>
+        <span class="feature-tag">🔀 Compare Analytics</span>
+      </div>
+    </div>
+    <div class="solution-row">
+      <div class="prob-box">
+        <div class="label">Problem</div>
+        <p>Hours wasted building weekly management reports manually</p>
+      </div>
+      <div class="arrow-box">→</div>
+      <div class="sol-box">
+        <div class="label">Solution</div>
+        <h4>One-Click PDF Report Download</h4>
+        <p>Generate and download a formatted PDF report of any composite or question trend in seconds — no Excel, no slides.</p>
+        <span class="feature-tag">📥 Report Download</span>
+      </div>
+    </div>
+    <div class="solution-row">
+      <div class="prob-box">
+        <div class="label">Problem</div>
+        <p>Low ratings go unnoticed for days — service issues compound</p>
+      </div>
+      <div class="arrow-box">→</div>
+      <div class="sol-box">
+        <div class="label">Solution</div>
+        <h4>Low-Rating Alert & Notification System</h4>
+        <p>When any guest rates a question at 3 or below, the system flags it immediately in the notification center with guest info.</p>
+        <span class="feature-tag">🔔 Real-Time Alerts</span>
+      </div>
+    </div>
+    <div class="solution-row">
+      <div class="prob-box">
+        <div class="label">Problem</div>
+        <p>No controlled access — everyone sees everything or nothing</p>
+      </div>
+      <div class="arrow-box">→</div>
+      <div class="sol-box">
+        <div class="label">Solution</div>
+        <h4>Role-Based Access Control (RBAC)</h4>
+        <p>Assign each user exactly the role and categories they need. F&amp;B head sees only F&amp;B. General Manager sees all. Admins manage the system.</p>
+        <span class="feature-tag">🔐 RBAC Permissions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADVANTAGES -->
+  <div class="section-label green">🏆 Section 4 — Key Advantages</div>
+  <h2 class="section-heading">What You Gain After Adoption</h2>
+  <p class="section-sub">The measurable improvements hotels experience when switching to Kalalak Insight.</p>
+  <div class="adv-grid">
+    <div class="adv-card"><div class="icon">⚡</div><h3>Instant Awareness</h3><p>Problems surface in seconds, not days. Your team can act before the guest checks out.</p></div>
+    <div class="adv-card"><div class="icon">📈</div><h3>Proven Trend Tracking</h3><p>See if quality is improving or declining month over month with historical charts and benchmarks.</p></div>
+    <div class="adv-card"><div class="icon">⏳</div><h3>Hours Saved Weekly</h3><p>Eliminate manual reporting. PDF reports are generated on demand. Zero effort for management updates.</p></div>
+    <div class="adv-card"><div class="icon">🎯</div><h3>Targeted Accountability</h3><p>Pin low-rated questions to specific departments. Know exactly which team to coach.</p></div>
+    <div class="adv-card"><div class="icon">🌐</div><h3>Multi-Hotel Ready</h3><p>Manage multiple hotel properties from one organization. Each hotel has its own dataset and team.</p></div>
+    <div class="adv-card"><div class="icon">📱</div><h3>Zero Guest Friction</h3><p>Guests submit feedback via QR code on their phone in under 2 minutes. Response rates increase dramatically.</p></div>
+  </div>
+
+  <!-- CLOSING -->
+  <div class="closing">
+    <h2>The Verdict is Simple</h2>
+    <p>Hotels that rely on paper forms and gut feeling are flying blind. Kalalak Insight gives your leadership team the real-time intelligence to act fast, improve faster, and build the kind of reputation that fills rooms.</p>
+  </div>
+
+</div>
+
+<footer>
+  <strong>Kalalak Insight</strong> — Hotel Department Efficiency Analyzer &nbsp;|&nbsp; Problem & Solution Document
+</footer>
+</body>
+</html>

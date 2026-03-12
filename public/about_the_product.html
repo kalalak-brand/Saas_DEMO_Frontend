@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalalak Insight — Product Documentation</title>
+    <meta name="description" content="Kalalak Insight hospitality Experience Intelligence Platform Documentation" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #06080f;
+            --surface: #0d1117;
+            --surface-2: #151b28;
+            --surface-3: #1c2436;
+            --border: #1e2a45;
+            --border-light: #2a3a5a;
+            --text: #cdd6e4;
+            --text-muted: #7a8ba8;
+            --bright: #edf2f8;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --green: #22c55e;
+            --green-glow: rgba(34, 197, 94, 0.12);
+            --amber: #f59e0b;
+            --amber-glow: rgba(245, 158, 11, 0.12);
+            --red: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.12);
+            --cyan: #06b6d4;
+            --cyan-glow: rgba(6, 182, 212, 0.12);
+            --purple: #a855f7;
+            --purple-glow: rgba(168, 85, 247, 0.12);
+            --pink: #ec4899;
+            --pink-glow: rgba(236, 72, 153, 0.12);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ===== BG PATTERN ===== */
+        .bg-pattern {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                radial-gradient(ellipse 700px 500px at 15% 25%, rgba(99, 102, 241, 0.06), transparent),
+                radial-gradient(ellipse 500px 400px at 85% 60%, rgba(168, 85, 247, 0.04), transparent),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+            pointer-events: none;
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ===== SCROLL REVEAL ANIMATIONS ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 {
+            transition-delay: 0.1s;
+        }
+
+        .reveal-delay-2 {
+            transition-delay: 0.2s;
+        }
+
+        .reveal-delay-3 {
+            transition-delay: 0.3s;
+        }
+
+        .reveal-delay-4 {
+            transition-delay: 0.4s;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            padding: 90px 0 60px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            border-radius: 100px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-light);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 28px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #818cf8 55%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease-out 0.1s both;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: 0 auto;
+            animation: fadeInDown 0.8s ease-out 0.2s both;
+        }
+
+        /* ===== SECTION HEADER ===== */
+        section {
+            padding: 70px 0;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            margin-bottom: 12px;
+        }
+
+        .section-label .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            font-weight: 800;
+            color: var(--bright);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            font-size: 0.98rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 36px;
+        }
+
+        .divider {
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent), var(--purple));
+            border-radius: 100px;
+            margin: 0 auto;
+        }
+
+        /* ===== EXECUTIVE SUMMARY ===== */
+        .summary-card {
+            background: linear-gradient(135deg, var(--surface), var(--surface-2));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--purple), var(--cyan));
+        }
+
+        .summary-card p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        /* ===== CAPABILITIES GRID ===== */
+        .cap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .cap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: transform 0.25s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .cap-item:hover {
+            transform: translateY(-3px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.08);
+        }
+
+        .cap-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .cap-item h4 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 4px;
+        }
+
+        .cap-item p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* ===== PROBLEM CARDS ===== */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .problem-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            transition: transform 0.25s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .problem-card:hover::after {
+            opacity: 1;
+        }
+
+        .problem-card:nth-child(1)::after {
+            background: var(--red);
+        }
+
+        .problem-card:nth-child(2)::after {
+            background: var(--amber);
+        }
+
+        .problem-card:nth-child(3)::after {
+            background: var(--cyan);
+        }
+
+        .problem-card:nth-child(4)::after {
+            background: var(--pink);
+        }
+
+        .problem-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .problem-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 8px;
+        }
+
+        .problem-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ===== FLOW STEPS ===== */
+        .flow-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            counter-reset: flow;
+        }
+
+        .flow-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 18px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.25s, box-shadow 0.3s;
+        }
+
+        .flow-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+        }
+
+        .flow-num {
+            counter-increment: flow;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .flow-num::after {
+            content: counter(flow);
+        }
+
+        .flow-emoji {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .flow-item h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 6px;
+        }
+
+        .flow-item p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* Arrow connector (desktop only) */
+        .flow-item:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--accent-light);
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        /* ===== FEATURE CARDS ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            transition: transform 0.25s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bright);
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-card li {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.5;
+        }
+
+        .feature-card li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* ===== ALERT CARDS ===== */
+        .alert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 18px;
+        }
+
+        .alert-card {
+            padding: 28px;
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .alert-card.amber {
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .alert-card.green {
+            background: rgba(34, 197, 94, 0.06);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .alert-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .alert-card.amber h3 {
+            color: var(--amber);
+        }
+
+        .alert-card.green h3 {
+            color: var(--green);
+        }
+
+        .alert-card p {
+            font-size: 0.88rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* ===== ROLES ===== */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .role-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            transition: transform 0.25s, border-color 0.3s;
+        }
+
+        .role-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-light);
+        }
+
+        .role-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin: 0 auto 14px;
+        }
+
+        .role-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 6px;
+        }
+
+        .role-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* ===== TRANSFORM TABLE ===== */
+        .transform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .transform-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.25s;
+        }
+
+        .transform-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .transform-from {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .transform-from::before {
+            content: '✕';
+            font-size: 10px;
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .transform-arrow {
+            width: 20px;
+            height: 2px;
+            background: linear-gradient(to right, var(--accent), var(--green));
+            border-radius: 2px;
+            margin: 6px 0;
+        }
+
+        .transform-to {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--bright);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .transform-to::before {
+            content: '✓';
+            font-size: 11px;
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* ===== CLOSING ===== */
+        .closing-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.06));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius);
+            padding: 36px;
+            text-align: center;
+        }
+
+        .closing-card p {
+            font-size: 1rem;
+            color: var(--text);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .closing-card strong {
+            color: var(--accent-light);
+        }
+
+        /* ===== DEMO REQUEST FORM ===== */
+        .demo-section {
+            padding: 70px 0;
+        }
+
+        .demo-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .demo-info h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--bright);
+            margin-bottom: 16px;
+            line-height: 1.25;
+        }
+
+        .demo-info>p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.7;
+        }
+
+        .demo-perks {
+            list-style: none;
+            padding: 0;
+        }
+
+        .demo-perks li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .demo-perks .perk-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .demo-form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+        }
+
+        .demo-form-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .form-group label .required {
+            color: var(--red);
+            margin-left: 2px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+            color: var(--bright);
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237a8ba8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        .demo-submit {
+            grid-column: 1 / -1;
+            margin-top: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .demo-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .demo-submit:active {
+            transform: translateY(0);
+        }
+
+        .demo-submit .btn-icon {
+            font-size: 18px;
+        }
+
+        /* Success state */
+        .demo-success {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .demo-success.show {
+            display: block;
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .demo-success .success-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--green-glow);
+            color: var(--green);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .demo-success h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 8px;
+        }
+
+        .demo-success p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .demo-wrapper {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 50px 0 40px;
+            border-top: 1px solid var(--border);
+            margin-top: 20px;
+        }
+
+        footer .brand {
+            font-size: 1.1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        footer p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0 40px;
+            }
+
+            section {
+                padding: 50px 0;
+            }
+
+            .flow-item:not(:last-child)::after {
+                display: none;
+            }
+
+            .alert-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .flow-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-pattern"></div>
+
+    <div class="wrap">
+
+        <!-- ===== HERO ===== -->
+        <div class="hero">
+            <div class="hero-badge">Product Documentation</div>
+            <h1>Kalalak Insight</h1>
+            <p>hospitality Experience Intelligence Platform engineered to collect structured guest feedback, protect
+                brand
+                reputation, and enable real-time operational performance improvement.</p>
+        </div>
+
+        <!-- ===== EXECUTIVE SUMMARY ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">📋</span> Executive Summary
+                </div>
+                <div class="summary-card">
+                    <p>Kalalak Insight is a comprehensive guest feedback intelligence platform built specifically for
+                        hotels and hospitality businesses. It transforms how hotels collect, analyze, and act on guest
+                        feedback — enabling continuous service improvement while proactively protecting and
+                        strengthening
+                        brand reputation through structured service recovery and controlled review amplification logic.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== WHAT IS THIS PRODUCT ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">💡</span> What Is This Product?
+                </div>
+                <h2 class="section-title">Five Core Capabilities</h2>
+                <p class="section-desc">A unified platform that turns fragmented guest feedback into actionable
+                    department-level intelligence.</p>
+            </div>
+            <div class="cap-grid">
+                <div class="cap-item reveal reveal-delay-1">
+                    <div class="cap-icon" style="background: var(--accent-glow); color: var(--accent-light);">📱</div>
+                    <div>
+                        <h4>Digital Feedback Collection</h4>
+                        <p>Collect guest feedback via mobile-friendly digital forms — no app download required</p>
+                    </div>
+                </div>
+                <div class="cap-item reveal reveal-delay-2">
+                    <div class="cap-icon" style="background: var(--cyan-glow); color: var(--cyan);">📊</div>
+                    <div>
+                        <h4>Department-Level Analysis</h4>
+                        <p>Analyze ratings and performance trends at the department level, not just overall</p>
+                    </div>
+                </div>
+                <div class="cap-item reveal reveal-delay-3">
+                    <div class="cap-icon" style="background: var(--purple-glow); color: var(--purple);">📈</div>
+                    <div>
+                        <h4>Real-Time Dashboards</h4>
+                        <p>Visualize operational insights through interactive, real-time analytics dashboards</p>
+                    </div>
+                </div>
+                <div class="cap-item reveal reveal-delay-1">
+                    <div class="cap-icon" style="background: var(--green-glow); color: var(--green);">🎯</div>
+                    <div>
+                        <h4>Data-Driven Decisions</h4>
+                        <p>Improve service quality using structured, data-driven performance intelligence</p>
+                    </div>
+                </div>
+                <div class="cap-item reveal reveal-delay-2">
+                    <div class="cap-icon" style="background: var(--amber-glow); color: var(--amber);">⭐</div>
+                    <div>
+                        <h4>Reputation Protection</h4>
+                        <p>Protect and strengthen online reputation through service recovery and review amplification
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== THE PROBLEM ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">⚠️</span> The Problem We Solve
+                </div>
+                <h2 class="section-title">Why Hotels Struggle Without This</h2>
+                <p class="section-desc">Four critical blind spots that silently damage your hotel's reputation and
+                    revenue.</p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card reveal reveal-delay-1">
+                    <div class="problem-icon" style="background: var(--red-glow); color: var(--red);">📄</div>
+                    <h3>Fragmented Feedback</h3>
+                    <p>Guest feedback scattered across paper forms and multiple platforms prevents a unified view of
+                        service performance.</p>
+                </div>
+                <div class="problem-card reveal reveal-delay-2">
+                    <div class="problem-icon" style="background: var(--amber-glow); color: var(--amber);">⏱️</div>
+                    <h3>Delayed Insights</h3>
+                    <p>Feedback is often reviewed too late to correct issues before checkout, resulting in avoidable
+                        public complaints.</p>
+                </div>
+                <div class="problem-card reveal reveal-delay-3">
+                    <div class="problem-icon" style="background: var(--cyan-glow); color: var(--cyan);">🔇</div>
+                    <h3>Department Blind Spots</h3>
+                    <p>General surveys fail to identify precise departmental performance gaps affecting guest
+                        experience.
+                    </p>
+                </div>
+                <div class="problem-card reveal reveal-delay-4">
+                    <div class="problem-icon" style="background: var(--pink-glow); color: var(--pink);">📉</div>
+                    <h3>Reputation Exposure</h3>
+                    <p>Negative experiences appear on public review platforms before management has the opportunity to
+                        intervene.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== HOW WE SOLVE IT ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">⚡</span> How We Solve It
+                </div>
+                <h2 class="section-title">From QR Scan to Actionable Intelligence</h2>
+                <p class="section-desc">A 5-step automated pipeline that turns guest feedback into operational action.
+                </p>
+            </div>
+            <div class="flow-container">
+                <div class="flow-item reveal reveal-delay-1">
+                    <div class="flow-num"></div>
+                    <div class="flow-emoji">📱</div>
+                    <h4>Deploy QR Codes</h4>
+                    <p>Department-specific QR codes at every guest touchpoint</p>
+                </div>
+                <div class="flow-item reveal reveal-delay-2">
+                    <div class="flow-num"></div>
+                    <div class="flow-emoji">⭐</div>
+                    <h4>Guest Submits</h4>
+                    <p>Quick, structured digital feedback in 30 seconds</p>
+                </div>
+                <div class="flow-item reveal reveal-delay-3">
+                    <div class="flow-num"></div>
+                    <div class="flow-emoji">📊</div>
+                    <h4>Instant Analytics</h4>
+                    <p>Data appears immediately in the live dashboard</p>
+                </div>
+                <div class="flow-item reveal reveal-delay-4">
+                    <div class="flow-num"></div>
+                    <div class="flow-emoji">🔔</div>
+                    <h4>Service Recovery</h4>
+                    <p>Alerts trigger automatically at ≤ 3 stars with guest details</p>
+                </div>
+                <div class="flow-item reveal reveal-delay-4">
+                    <div class="flow-num"></div>
+                    <div class="flow-emoji">🌟</div>
+                    <h4>Review Routing</h4>
+                    <p>Happy guests (4–5★) are invited to share on Google Reviews</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== KEY FEATURES ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">🚀</span> Key Features
+                </div>
+                <h2 class="section-title">What the Platform Delivers</h2>
+                <p class="section-desc">Every feature engineered for operational clarity and brand protection.</p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="feature-header">
+                        <div class="feature-icon" style="background: var(--accent-glow); color: var(--accent-light);">
+                            📋</div>
+                        <h3>Department-Based Feedback</h3>
+                    </div>
+                    <ul>
+                        <li>Custom departments (Room, F&B, Reception, Spa, etc.)</li>
+                        <li>1–5 star rating scales for measurable performance</li>
+                        <li>Yes/No questions for precise issue detection</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="feature-header">
+                        <div class="feature-icon" style="background: var(--purple-glow); color: var(--purple);">📊
+                        </div>
+                        <h3>Analytics Dashboard</h3>
+                    </div>
+                    <ul>
+                        <li>Department-level averages and comparisons</li>
+                        <li>Date range filtering and trends</li>
+                        <li>Composite performance metrics</li>
+                        <li>Operational visibility across touchpoints</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card reveal reveal-delay-3">
+                    <div class="feature-header">
+                        <div class="feature-icon" style="background: var(--cyan-glow); color: var(--cyan);">📄</div>
+                        <h3>Professional Reporting</h3>
+                    </div>
+                    <ul>
+                        <li>Export branded PDF reports</li>
+                        <li>Department-level performance summaries</li>
+                        <li>Executive-ready analytics documentation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Alert Feature Cards -->
+            <div class="alert-grid" style="margin-top: 18px;">
+                <div class="alert-card amber reveal">
+                    <div class="alert-header">
+                        <div class="alert-icon" style="background: var(--amber-glow); color: var(--amber);">🔔</div>
+                        <h3>Service Recovery Alerts</h3>
+                    </div>
+                    <p>Automatic alerts triggered at 3 stars or below. Enables immediate operational intervention before
+                        checkout, significantly reducing the risk of negative public reviews. Includes guest name, phone
+                        number, and room number for instant follow-up.</p>
+                </div>
+
+                <div class="alert-card green reveal">
+                    <div class="alert-header">
+                        <div class="alert-icon" style="background: var(--green-glow); color: var(--green);">⭐</div>
+                        <h3>Reputation Amplification</h3>
+                    </div>
+                    <p>Guests who submit 4★ or 5★ ratings are invited to leave a public Google review. This structured
+                        amplification converts satisfied guests into brand advocates and strengthens booking confidence.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== USER ROLES ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">👥</span> User Roles
+                </div>
+                <h2 class="section-title">Who Uses the Platform?</h2>
+                <p class="section-desc">Three distinct roles with tailored access levels and responsibilities.</p>
+            </div>
+            <div class="role-grid">
+                <div class="role-card reveal reveal-delay-1">
+                    <div class="role-avatar" style="background: var(--purple-glow); color: var(--purple);">👑</div>
+                    <h4>Hotel Administrator</h4>
+                    <p>Full configuration and analytics access. Manages departments, questions, branding, and all
+                        platform settings.</p>
+                </div>
+                <div class="role-card reveal reveal-delay-2">
+                    <div class="role-avatar" style="background: var(--accent-glow); color: var(--accent-light);">📊
+                    </div>
+                    <h4>Manager</h4>
+                    <p>View analytics dashboards and receive Service Recovery Alerts. Operational oversight without
+                        configuration access.</p>
+                </div>
+                <div class="role-card reveal reveal-delay-3">
+                    <div class="role-avatar" style="background: var(--green-glow); color: var(--green);">👁️</div>
+                    <h4>Viewer</h4>
+                    <p>Read-only dashboard access. Perfect for department heads, investors, or consulting teams.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== TRANSFORMATION SUMMARY ===== -->
+        <section>
+            <div class="reveal">
+                <div class="section-label">
+                    <span class="icon">🔄</span> The Transformation
+                </div>
+                <h2 class="section-title">Before & After Kalalak Insight</h2>
+            </div>
+            <div class="transform-grid">
+                <div class="transform-item reveal reveal-delay-1">
+                    <div class="transform-from">Paper-based feedback</div>
+                    <div class="transform-arrow"></div>
+                    <div class="transform-to">Digital structured intelligence</div>
+                </div>
+                <div class="transform-item reveal reveal-delay-2">
+                    <div class="transform-from">Delayed review analysis</div>
+                    <div class="transform-arrow"></div>
+                    <div class="transform-to">Real-time operational visibility</div>
+                </div>
+                <div class="transform-item reveal reveal-delay-3">
+                    <div class="transform-from">General satisfaction data</div>
+                    <div class="transform-arrow"></div>
+                    <div class="transform-to">Department-level insight</div>
+                </div>
+                <div class="transform-item reveal reveal-delay-4">
+                    <div class="transform-from">Reputation exposure</div>
+                    <div class="transform-arrow"></div>
+                    <div class="transform-to">Proactive recovery & amplification</div>
+                </div>
+            </div>
+
+            <div class="closing-card reveal" style="margin-top: 32px;">
+                <p>Kalalak Insight does not simply measure satisfaction — it enables <strong>structured operational
+                        correction</strong>, <strong>reputation protection</strong>, and <strong>systematic brand
+                        strengthening</strong>.</p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ===== REQUEST A DEMO ===== -->
+        <!-- <section class="demo-section" id="demo">
+            <div class="demo-wrapper">
+                <div class="demo-info reveal">
+                    <div class="section-label">
+                        <span class="icon">📩</span> Get Started
+                    </div>
+                    <h2>Request a Free Demo</h2>
+                    <p>See how Kalalak Insight can transform your hotel's guest feedback into actionable intelligence.
+                        We'll set up a personalized demo for your property.</p>
+                    <ul class="demo-perks">
+                        <li>
+                            <span class="perk-icon"
+                                style="background: var(--accent-glow); color: var(--accent-light);">⚡</span>
+                            15-minute setup — no technical skills needed
+                        </li>
+                        <li>
+                            <span class="perk-icon"
+                                style="background: var(--green-glow); color: var(--green);">🎯</span>
+                            Customized walkthrough for your hotel
+                        </li>
+                        <li>
+                            <span class="perk-icon"
+                                style="background: var(--amber-glow); color: var(--amber);">📊</span>
+                            Live dashboard demo with sample data
+                        </li>
+                        <li>
+                            <span class="perk-icon"
+                                style="background: var(--purple-glow); color: var(--purple);">💬</span>
+                            No obligations — just a conversation
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="demo-form-card reveal reveal-delay-2">
+                    <h3>Fill in your details</h3>
+
+                    <form id="demoForm" class="form-grid" onsubmit="return handleDemoSubmit(event)">
+                        <div class="form-group">
+                            <label>Hotel / Company Name <span class="required">*</span></label>
+                            <input type="text" id="companyName" placeholder="e.g. Grand Hyatt" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Person <span class="required">*</span></label>
+                            <input type="text" id="contactName" placeholder="Your full name" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address <span class="required">*</span></label>
+                            <input type="email" id="contactEmail" placeholder="you@hotel.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="contactPhone" placeholder="+91 98765 43210" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Properties</label>
+                            <select id="propertyCount">
+                                <option value="1">1 Hotel</option>
+                                <option value="2-5">2 — 5 Hotels</option>
+                                <option value="6-20">6 — 20 Hotels</option>
+                                <option value="20+">20+ Hotels</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>City / Location</label>
+                            <input type="text" id="location" placeholder="e.g. Mumbai, India" />
+                        </div>
+                        <div class="form-group full">
+                            <label>Message (Optional)</label>
+                            <textarea id="demoMessage"
+                                placeholder="Tell us about your hotel and what you'd like to achieve..."></textarea>
+                        </div>
+                        <button type="submit" class="demo-submit">
+                            <span class="btn-icon">🚀</span>
+                            Request Demo
+                        </button>
+                    </form>
+
+                    <div class="demo-success" id="demoSuccess">
+                        <div class="success-icon">✓</div>
+                        <h4>Your email client is opening!</h4>
+                        <p>Complete the email to send your demo request to
+                            <strong>insight@kalalak.com</strong>.<br>We'll get back to you within 24 hours.</p>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+
+        <!-- ===== FOOTER ===== -->
+        <footer>
+            <div class="brand">Kalalak Insight</div>
+            <p>hospitality Experience Intelligence Platform</p>
+
+        </footer>
+
+    </div>
+
+    <!-- ===== SCROLL REVEAL JS ===== -->
+    <script>
+
+        const date = new Date();
+        const year = date.getFullYear();
+        document.querySelector('footer p:last-child').textContent = `© ${year} Acculead. All rights reserved.`;
+
+        // Time: O(n) per check, Space: O(1) — uses IntersectionObserver for efficient scroll detection
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Demo form handler — composes mailto with form data
+        // Time: O(1), Space: O(1)
+        function handleDemoSubmit(e) {
+            e.preventDefault();
+
+            const company = document.getElementById('companyName').value.trim();
+            const contact = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const phone = document.getElementById('contactPhone').value.trim();
+            const properties = document.getElementById('propertyCount').value;
+            const location = document.getElementById('location').value.trim();
+            const message = document.getElementById('demoMessage').value.trim();
+
+            const subject = encodeURIComponent(`Demo Request — ${company}`);
+            const body = encodeURIComponent(
+                `New Demo Request from Kalalak Insight Product Page
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Hotel / Company:  ${company}
+Contact Person:   ${contact}
+Email:            ${email}
+Phone:            ${phone}
+Properties:       ${properties}
+Location:         ${location || 'Not specified'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Message:
+${message || 'No additional message.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sent from: Kalalak Insight Product Documentation Page`
+            );
+
+            window.location.href = `mailto:insight@kalalak.com?subject=${subject}&body=${body}`;
+
+            // Show success state
+            document.getElementById('demoForm').style.display = 'none';
+            const success = document.getElementById('demoSuccess');
+            success.classList.add('show');
+
+            return false;
+        }
+    </script>
+</body>
+
+</html>

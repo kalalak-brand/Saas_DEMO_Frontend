@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalalak Insight — Hotel Guest Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --primary-light: #16213e;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-soft: #eef2ff;
+            --green: #059669;
+            --green-bg: #ecfdf5;
+            --red: #dc2626;
+            --red-bg: #fef2f2;
+            --orange: #ea580c;
+            --orange-bg: #fff7ed;
+            --blue: #2563eb;
+            --blue-bg: #eff6ff;
+            --purple: #7c3aed;
+            --purple-bg: #f5f3ff;
+            --cyan: #0891b2;
+            --cyan-bg: #ecfeff;
+            --gold: #ca8a04;
+            --gold-bg: #fefce8;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            background: #fff;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 0 32px;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .brand {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-sub {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .header-right .tagline {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 4px 12px;
+            border-radius: 100px;
+            display: inline-block;
+        }
+
+        /* ===== HERO / HOOK ===== */
+        .hook {
+            padding: 36px 0 28px;
+            text-align: center;
+        }
+
+        .hook h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.35;
+            max-width: 750px;
+            margin: 0 auto 12px;
+        }
+
+        .hook h1 em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .hook p {
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* ===== SECTION HEADING ===== */
+        .section-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 32px 0 16px;
+        }
+
+        .section-head .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .section-head h2 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== KEY BENEFITS ===== */
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .benefit {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fafbfc;
+        }
+
+        .benefit .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .benefit h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: var(--primary);
+        }
+
+        .benefit p {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .flow-step {
+            text-align: center;
+            padding: 16px 10px;
+            background: linear-gradient(135deg, var(--accent-soft), #fff);
+            border: 1px solid #e0e7ff;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .flow-step .step-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
+
+        .flow-step .emoji {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .flow-step h4 {
+            font-size: 11.5px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .flow-step p {
+            font-size: 10px;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        /* ===== FEATURES LIST ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .feat {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fafbfc;
+            border: 1px solid var(--border);
+        }
+
+        .feat .check {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .feat span {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        /* ===== TARGET AUDIENCE ===== */
+        .audience-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .audience-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 100px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+        }
+
+        .audience-chip .emoji {
+            font-size: 14px;
+        }
+
+        /* ===== CTA ===== */
+        .cta {
+            margin: 32px 0 0;
+            padding: 28px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .cta-left h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .cta-left p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .cta-right {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .cta-right .contact-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            justify-content: flex-end;
+        }
+
+        .cta-right .contact-line strong {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 10px 24px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 8px;
+            text-decoration: none;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== CLOSING QUOTE ===== */
+        .closing {
+            text-align: center;
+            padding: 24px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 24px;
+        }
+
+        .closing blockquote {
+            font-size: 13px;
+            font-style: italic;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .closing blockquote em {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 16px 0 32px;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .page {
+                max-width: 100%;
+                padding: 0 24px;
+            }
+
+            .cta {
+                -webkit-print-color-adjust: exact !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 12mm 10mm;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .benefits {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .cta {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cta-right {
+                text-align: center;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="header-left">
+                <div class="brand">Kalalak Insight</div>
+                <div class="brand-sub">Hotel Guest Intelligence Platform</div>
+            </div>
+            <div class="header-right">
+                <span class="tagline">By Acculead</span>
+            </div>
+        </div>
+
+        <!-- ===== HOOK ===== -->
+        <div class="hook">
+            <h1>"Stop guessing which department let your guest down — <em>know exactly where to fix</em>, before the
+                bad review goes public."</h1>
+            <p>A real-time feedback platform that collects per-department guest ratings via QR codes,
+                alerts you instantly for low scores, and routes happy guests to leave Google Reviews.</p>
+        </div>
+
+        <!-- ===== STATS BAR ===== -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-num">30s</div>
+                <div class="stat-label">Guest Feedback Time</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">Real-Time</div>
+                <div class="stat-label">Dashboard Analytics</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">Instant</div>
+                <div class="stat-label">Low-Rating Alerts</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">Smart</div>
+                <div class="stat-label">Google Review Routing</div>
+            </div>
+        </div>
+
+        <!-- ===== KEY BENEFITS ===== -->
+        <div class="section-head">
+            <div class="dot"></div>
+            <h2>Why Hotels Choose This</h2>
+        </div>
+        <div class="benefits">
+            <div class="benefit">
+                <div class="icon" style="background: var(--blue-bg); color: var(--blue);">🎯</div>
+                <div>
+                    <h3>Pinpoint Weak Departments</h3>
+                    <p>Every rating is tied to a specific department — Room, Front Office, F&B. Stop guessing, start
+                        knowing which team needs attention this month.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="icon" style="background: var(--red-bg); color: var(--red);">🔔</div>
+                <div>
+                    <h3>Instant Alerts for Low Ratings</h3>
+                    <p>When a guest rates ≤ 2 stars, you get an instant notification with their name, phone & room
+                        number. Reach out and recover before they check out.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="icon" style="background: var(--green-bg); color: var(--green);">⭐</div>
+                <div>
+                    <h3>Boost Your Google Ratings</h3>
+                    <p>Happy guests (4+ stars) are automatically prompted to leave a Google Review — turning
+                        satisfaction into public 5-star ratings that attract new bookings.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="icon" style="background: var(--orange-bg); color: var(--orange);">📈</div>
+                <div>
+                    <h3>Track Improvement Over Time</h3>
+                    <p>12-month trend charts, department comparisons, and composite KPIs show if your investments are
+                        working — with downloadable PDF reports for ownership.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== HOW IT WORKS ===== -->
+        <div class="section-head">
+            <div class="dot"></div>
+            <h2>How It Works</h2>
+        </div>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="step-num">1</div>
+                <div class="emoji">📱</div>
+                <h4>Guest Scans QR</h4>
+                <p>Unique QR per department. No app download needed.</p>
+            </div>
+            <div class="flow-step">
+                <div class="step-num">2</div>
+                <div class="emoji">⭐</div>
+                <h4>Rates in 30 Seconds</h4>
+                <p>5–7 targeted questions on a 1–5 star scale. Fast & mobile-friendly.</p>
+            </div>
+            <div class="flow-step">
+                <div class="step-num">3</div>
+                <div class="emoji">📊</div>
+                <h4>You See It Instantly</h4>
+                <p>Real-time dashboard with trends, comparisons & alerts.</p>
+            </div>
+            <div class="flow-step">
+                <div class="step-num">4</div>
+                <div class="emoji">🔔</div>
+                <h4>Smart Routing</h4>
+                <p>Low rating → instant alert. High rating → Google Review prompt.</p>
+            </div>
+        </div>
+
+        <!-- ===== FEATURES ===== -->
+        <div class="section-head">
+            <div class="dot"></div>
+            <h2>Platform Features</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feat">
+                <div class="check" style="background: var(--accent-soft); color: var(--accent);">✓</div>
+                <span>Department-Level Dashboards</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--green-bg); color: var(--green);">✓</div>
+                <span>Composite KPI Scoring</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--orange-bg); color: var(--orange);">✓</div>
+                <span>Low-Rated Question Reports</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--cyan-bg); color: var(--cyan);">✓</div>
+                <span>Department QR Codes</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--purple-bg); color: var(--purple);">✓</div>
+                <span>Custom Hotel Branding</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--gold-bg); color: var(--gold);">✓</div>
+                <span>Dynamic Question Builder</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--red-bg); color: var(--red);">✓</div>
+                <span>Instant Alert Notifications</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--green-bg); color: var(--green);">✓</div>
+                <span>Google Review Routing</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--blue-bg); color: var(--blue);">✓</div>
+                <span>Yearly PDF Reports</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--accent-soft); color: var(--accent);">✓</div>
+                <span>Guest Info Capture</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--purple-bg); color: var(--purple);">✓</div>
+                <span>Role-Based Access Control</span>
+            </div>
+            <div class="feat">
+                <div class="check" style="background: var(--cyan-bg); color: var(--cyan);">✓</div>
+                <span>Multi-Hotel Support</span>
+            </div>
+        </div>
+
+        <!-- ===== TARGET AUDIENCE ===== -->
+        <div class="section-head">
+            <div class="dot"></div>
+            <h2>Built For</h2>
+        </div>
+        <div class="audience-row">
+            <div class="audience-chip"><span class="emoji">🏨</span> Hotel General Managers</div>
+            <div class="audience-chip"><span class="emoji">🏢</span> Hotel Chains & Groups</div>
+            <div class="audience-chip"><span class="emoji">💎</span> Boutique & Luxury Hotels</div>
+            <div class="audience-chip"><span class="emoji">🌴</span> Resorts & Spas</div>
+            <div class="audience-chip"><span class="emoji">📋</span> Hospitality Consultants</div>
+        </div>
+
+        <!-- ===== CTA ===== -->
+        <div class="cta">
+            <div class="cta-left">
+                <h3>Ready to see your hotel's real score?</h3>
+                <p>We'll set up your hotel in 15 minutes. No credit card required.</p>
+            </div>
+            <div class="cta-right">
+                <div class="contact-line">🌐 <strong>insight.kalalak.com</strong></div>
+                <div class="contact-line">📧 <strong>hello@kalalak.com</strong></div>
+                <div class="contact-line">📞 <strong>+91-XXXXX-XXXXX</strong></div>
+                <a class="cta-btn" href="https://insight.kalalak.com">Schedule a Free Demo →</a>
+            </div>
+        </div>
+
+        <!-- ===== CLOSING QUOTE ===== -->
+        <div class="closing">
+            <blockquote>
+                "Every bad review you get on Google started as an internal problem you didn't catch in time.
+                <em>Kalalak Insight catches it in real-time</em> — department by department — so you can fix it
+                before the guest opens Google."
+            </blockquote>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="footer">
+            © 2025–2026 Acculead. All rights reserved. | Kalalak Insight — Hotel Guest Intelligence Platform
+        </div>
+
+    </div>
+</body>
+
+</html>

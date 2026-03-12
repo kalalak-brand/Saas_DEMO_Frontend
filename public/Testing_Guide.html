@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalalak Insight – Google Review Funnel</title>
+  <meta
+    name="description"
+    content="Kalalak Insight Google Review Funnel – protect your Google rating before checkout by routing happy guests to reviews and unhappy guests to internal recovery."
+  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #06080f;
+      --surface: #0d1117;
+      --surface-2: #151b28;
+      --border: #1e2a45;
+      --text: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --green: #22c55e;
+      --green-soft: rgba(34, 197, 94, 0.12);
+      --red: #ef4444;
+      --red-soft: rgba(239, 68, 68, 0.12);
+      --purple: #a855f7;
+      --purple-soft: rgba(168, 85, 247, 0.18);
+      --radius: 18px;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.16), transparent 60%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.14), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1080px;
+      border-radius: 24px;
+      background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.16), transparent 55%), var(--surface);
+      border: 1px solid rgba(30, 64, 175, 0.5);
+      box-shadow:
+        0 32px 90px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 26px 26px 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: 0.35;
+      pointer-events: none;
+      mask-image: radial-gradient(circle at center, black, transparent 80%);
+      -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        padding: 20px 18px 18px;
+      }
+      .content {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    header {
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      background: rgba(8, 47, 73, 0.7);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bae6fd;
+      margin-bottom: 10px;
+    }
+
+    .eyebrow-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+    }
+
+    h1 {
+      font-size: clamp(26px, 3vw, 32px);
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #f9fafb 0%, #c7d2fe 40%, #a855f7 75%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 420px;
+    }
+
+    /* Funnel layout */
+    .funnel {
+      background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.16), transparent 60%), var(--surface-2);
+      border-radius: var(--radius);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      padding: 16px 16px 14px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      position: relative;
+    }
+
+    .stage + .stage {
+      margin-top: 4px;
+    }
+
+    .stage-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .stage-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stage-metric {
+      font-size: 12px;
+      font-weight: 500;
+      justify-self: end;
+      color: #e5e7eb;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+    }
+
+    .pill strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .arrow {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 2px 0 4px;
+    }
+
+    .arrow span {
+      opacity: 0.7;
+    }
+
+    /* Split stage blocks */
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .block {
+      border-radius: 14px;
+      padding: 10px 10px 9px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .block small {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .block strong {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .block-green {
+      background: linear-gradient(135deg, var(--green-soft), rgba(15, 23, 42, 0.96));
+      border-color: rgba(34, 197, 94, 0.7);
+    }
+
+    .block-red {
+      background: linear-gradient(135deg, var(--red-soft), rgba(15, 23, 42, 0.96));
+      border-color: rgba(239, 68, 68, 0.7);
+    }
+
+    .block-purple {
+      background: linear-gradient(135deg, var(--purple-soft), rgba(15, 23, 42, 0.98));
+      border-color: rgba(168, 85, 247, 0.85);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--text-muted);
+      margin-top: 3px;
+      align-self: flex-start;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .badge-dot.red {
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(248, 113, 113, 0.9);
+    }
+
+    .badge-dot.purple {
+      background: #a855f7;
+      box-shadow: 0 0 8px rgba(192, 132, 252, 0.9);
+    }
+
+    /* Right column: explanation */
+    .panel {
+      background: rgba(6, 8, 15, 0.9);
+      border-radius: var(--radius);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .panel-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .script {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 9px 10px 8px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+    }
+
+    .script strong {
+      color: #e5e7eb;
+    }
+
+    .stat {
+      margin-top: 6px;
+      padding-top: 7px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.5);
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat strong {
+      font-size: 12px;
+      color: #facc15;
+    }
+
+    @media (max-width: 600px) {
+      .stage {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+      }
+      .stage-metric {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="content">
+      <!-- LEFT: FUNNEL VISUAL -->
+      <section>
+        <header>
+          <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            Google Rating Protection
+          </div>
+          <h1>Google Review Funnel</h1>
+          <p class="subtitle">Protect your Google rating before checkout by routing feedback inside the hotel.</p>
+        </header>
+
+        <div class="funnel">
+          <!-- Stage 1 -->
+          <div class="stage">
+            <div>
+              <div class="stage-label">Stage 1</div>
+              <div class="stage-title">Guests staying in hotel</div>
+            </div>
+            <div class="stage-metric">100 hotel guests</div>
+          </div>
+          <div class="arrow"><span>↓</span></div>
+
+          <!-- Stage 2 -->
+          <div class="stage">
+            <div>
+              <div class="stage-label">Stage 2</div>
+              <div class="stage-title">QR feedback capture</div>
+            </div>
+            <div class="stage-metric">40 guests scan QR</div>
+          </div>
+          <div class="arrow"><span>↓</span></div>
+
+          <!-- Stage 3: Split -->
+          <div class="stage">
+            <div>
+              <div class="stage-label">Stage 3</div>
+              <div class="stage-title">Experience split</div>
+            </div>
+            <div class="stage-metric">🙂 Happy &nbsp;&nbsp;|&nbsp;&nbsp; 😡 Unhappy</div>
+          </div>
+          <div class="split">
+            <div class="block block-green">
+              <small>Happy Guests</small>
+              <strong>“Everything was good.”</strong>
+              <span>Ready to recommend your hotel.</span>
+              <div class="badge">
+                <span class="badge-dot"></span>
+                Ideal for public reviews
+              </div>
+            </div>
+            <div class="block block-red">
+              <small>Unhappy Guests</small>
+              <strong>“Something was wrong.”</strong>
+              <span>Need quick recovery before checkout.</span>
+              <div class="badge">
+                <span class="badge-dot red"></span>
+                Needs internal attention
+              </div>
+            </div>
+          </div>
+          <div class="arrow"><span>↓</span></div>
+
+          <!-- Stage 4: Kalalak Smart Routing -->
+          <div class="stage">
+            <div>
+              <div class="stage-label">Stage 4</div>
+              <div class="stage-title">Kalalak smart routing</div>
+            </div>
+          </div>
+          <div class="split">
+            <div class="block block-green">
+              <small>Happy → Google</small>
+              <strong>Redirect to Google review link</strong>
+              <span>Increase 5★ public reviews for the property.</span>
+            </div>
+            <div class="block block-purple">
+              <small>Unhappy → Internal</small>
+              <strong>Alert to manager / duty team</strong>
+              <span>Issue worked on inside the hotel, not on Google.</span>
+              <div class="badge">
+                <span class="badge-dot purple"></span>
+                Kalalak smart routing engine
+              </div>
+            </div>
+          </div>
+          <div class="arrow"><span>↓</span></div>
+
+          <!-- Stage 5 -->
+          <div class="stage">
+            <div>
+              <div class="stage-label">Stage 5</div>
+              <div class="stage-title">Reputation result</div>
+            </div>
+          </div>
+          <div class="split">
+            <div class="block block-green">
+              <strong>More 5★ reviews</strong>
+              <span>Happy guests are guided directly to Google.</span>
+            </div>
+            <div class="block block-red">
+              <strong>Fewer public complaints</strong>
+              <span>Unhappy guests are handled privately inside the hotel.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: SALES EXPLANATION -->
+      <aside class="panel">
+        <div>
+          <div class="panel-title">How to explain this slide to the GM</div>
+          <p class="panel-text">
+            Start with the real problem: most hotels only see complaints after they are already public on Google.
+            Then show how Kalalak inserts a smart step <em>inside</em> the stay – using a simple QR – to catch issues
+            before the guest checks out.
+          </p>
+        </div>
+
+        <div class="script">
+          <p><strong>Suggested script:</strong></p>
+          <p style="margin-top:4px;">
+            “Sir, most hotels only see complaints after they appear on Google.”
+          </p>
+          <p style="margin-top:4px;">
+            “Kalalak captures guest feedback inside the hotel first.”
+          </p>
+          <p style="margin-top:4px;">
+            “Happy guests are guided straight to Google reviews. Unhappy guests trigger an internal alert for your team.”
+          </p>
+          <p style="margin-top:4px;">
+            “So complaints get fixed <strong>before</strong> they become public reviews.”
+          </p>
+        </div>
+
+        <div>
+          <div class="panel-title">Why this funnel is powerful</div>
+          <p class="panel-text">
+            This slide does not sell “feedback software”. It sells what actually matters to hotel owners and GMs:
+            <strong>Google rating protection</strong>. Kalalak becomes a shield in front of your online reputation,
+            not just another tool.
+          </p>
+        </div>
+
+        <div class="stat">
+          <span><strong>89% of travellers</strong> read reviews before booking.</span>
+          <span>Turning quiet happy guests into 5★ reviews is as important as fixing the unhappy ones.</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

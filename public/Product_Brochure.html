@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Brochure — Kalalak Insight</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary: #1B4D3E; --primary-light: #2D6A55; --accent: #E4B580; --accent-dark: #c9a06a;
+      --text: #1a1a2e; --muted: #64748b; --border: #e2e8f0; --bg: #f8fafc; --card: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, var(--primary) 55%, var(--primary-light) 100%);
+      min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center; padding: 80px 40px; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(228,181,128,0.08) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(45,106,85,0.3) 0%, transparent 50%);
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero .tagline {
+      display: inline-block; background: rgba(228,181,128,0.15); border: 1px solid rgba(228,181,128,0.4);
+      color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      padding: 8px 22px; border-radius: 30px; margin-bottom: 32px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 7vw, 76px); font-weight: 900; color: white; line-height: 1.05;
+      margin-bottom: 24px; letter-spacing: -1.5px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero .subtitle {
+      font-size: clamp(16px, 2.5vw, 20px); color: rgba(255,255,255,0.72);
+      max-width: 620px; line-height: 1.65; margin-bottom: 44px;
+    }
+    .hero-cta {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent); color: #1a1a2e; font-weight: 700; font-size: 15px;
+      padding: 14px 32px; border-radius: 10px; text-decoration: none;
+      box-shadow: 0 8px 24px rgba(228,181,128,0.4); transition: all .2s;
+    }
+    .btn-outline {
+      background: transparent; color: white; font-weight: 600; font-size: 15px;
+      padding: 14px 32px; border-radius: 10px; text-decoration: none;
+      border: 2px solid rgba(255,255,255,0.3); transition: all .2s;
+    }
+    .hero-stats {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.25); backdrop-filter: blur(10px);
+      display: flex; justify-content: center; gap: 0; border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-item {
+      padding: 22px 40px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-item .num { font-size: 28px; font-weight: 800; color: var(--accent); }
+    .stat-item .label { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+    /* SECTIONS */
+    .section { padding: 80px 40px; }
+    .section.alt { background: white; }
+    .section.dark { background: linear-gradient(135deg, var(--primary), #1a1a2e); color: white; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-tag {
+      font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 14px; color: var(--accent);
+    }
+    .section-tag.dark { color: var(--muted); }
+    .section h2 { font-size: clamp(26px, 4vw, 42px); font-weight: 800; margin-bottom: 14px; line-height: 1.15; }
+    .section.alt h2, .section.dark h2 { color: var(--text); }
+    .section.dark h2 { color: white; }
+    .section p.lead { font-size: 17px; color: var(--muted); max-width: 680px; line-height: 1.7; margin-bottom: 48px; }
+    .section.dark p.lead { color: rgba(255,255,255,0.68); }
+
+    /* BENEFITS */
+    .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .benefit-card {
+      background: var(--card); border-radius: 16px; padding: 30px;
+      border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .benefit-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.1); }
+    .benefit-card .icon { font-size: 32px; margin-bottom: 16px; }
+    .benefit-card h3 { font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
+    .benefit-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+    /* FEATURES */
+    .features-list { display: flex; flex-direction: column; gap: 20px; }
+    .feature-row {
+      display: grid; grid-template-columns: 72px 1fr; gap: 20px;
+      background: var(--card); border-radius: 14px; padding: 24px;
+      border: 1px solid var(--border); align-items: start;
+    }
+    .feature-icon-box {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+      box-shadow: 0 6px 16px rgba(27,77,62,0.25);
+    }
+    .feature-text h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .feature-text p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .feature-text .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .tag {
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+      background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0;
+    }
+
+    /* WHY US */
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .why-card {
+      border-radius: 14px; padding: 24px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .why-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .why-card h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 8px; }
+    .why-card p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+
+    /* TARGET USERS */
+    .users-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .user-card {
+      background: var(--card); border-radius: 14px; padding: 26px;
+      border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .user-avatar {
+      width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+    }
+    .user-card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .user-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* VALUE BANNER */
+    .value-banner {
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      border-radius: 20px; padding: 48px; text-align: center;
+    }
+    .value-banner h2 { font-size: 30px; font-weight: 800; color: #1a1a2e; margin-bottom: 14px; }
+    .value-banner p { font-size: 16px; color: rgba(26,26,46,0.75); max-width: 600px; margin: 0 auto 28px; }
+    .value-metrics { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    .vm .num { font-size: 36px; font-weight: 900; color: var(--primary); }
+    .vm p { font-size: 13px; color: rgba(26,26,46,0.65); margin-top: 4px; font-weight: 500; }
+
+    /* FOOTER */
+    footer {
+      background: #0f1923; color: rgba(255,255,255,0.5);
+      padding: 40px; text-align: center; font-size: 13px;
+    }
+    footer .brand { font-size: 20px; font-weight: 800; color: white; margin-bottom: 8px; }
+    footer p { max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: 20px; padding: 40px;
+      max-width: 480px; width: 90%; box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+      position: relative; animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-box h3 { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+    .modal-box p.sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .modal-box label { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+    .modal-box input, .modal-box textarea {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif;
+      color: var(--text); margin-bottom: 16px; transition: border .2s;
+      outline: none;
+    }
+    .modal-box input:focus, .modal-box textarea:focus { border-color: var(--primary); }
+    .modal-box textarea { resize: vertical; min-height: 80px; }
+    .modal-box .btn-wa {
+      width: 100%; padding: 13px; border-radius: 10px; border: none; cursor: pointer;
+      background: #25D366; color: white; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background .2s; font-family: 'Inter', sans-serif;
+    }
+    .modal-box .btn-wa:hover { background: #1ebe5d; }
+    .modal-close {
+      position: absolute; top: 16px; right: 18px; background: none; border: none;
+      font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    @media (max-width: 768px) {
+      .section { padding: 60px 24px; }
+      .hero { padding: 64px 24px 120px; }
+      .hero-stats { flex-wrap: wrap; position: static; margin-top: 40px; }
+      .stat-item { flex: 1; min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="tagline">Product Brochure · 2025–2026</div>
+    <h1>Transform Guest Feedback<br/>into <span>Real Intelligence</span></h1>
+    <p class="subtitle">Kalalak Insight is the all-in-one analytics platform built exclusively for hotels — turning every guest review into a measurable, actionable performance metric.</p>
+    <div class="hero-cta">
+      <button onclick="document.getElementById('demoModal').classList.add('open')" class="btn-primary" style="border:none;cursor:pointer;font-family:'Inter',sans-serif;">🚀 Request a Demo</button>
+      <a href="User_Guide.html#intro" class="btn-outline">Explore Features ↓</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="num">Real-Time</div><div class="label">Guest Feedback Processing</div></div>
+    <div class="stat-item"><div class="num">4+</div><div class="label">Hotel Departments Tracked</div></div>
+    <div class="stat-item"><div class="num">PDF</div><div class="label">Instant Report Generation</div></div>
+    <div class="stat-item"><div class="num">RBAC</div><div class="label">Role-Based Team Access</div></div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section class="section alt">
+  <div class="section-inner">
+    <div class="section-tag dark">Product Overview</div>
+    <h2>One Platform for Your<br/>Entire Hotel Operation</h2>
+    <p class="lead">Kalalak Insight is a SaaS analytics platform designed to help hotel management teams continuously monitor guest satisfaction across every department — and act on that data in real time, not weeks later.</p>
+
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="icon">📊</div>
+        <h3>Centralized Analytics</h3>
+        <p>Every department — Rooms, Food &amp; Beverage, Pool, Spa — is tracked in a single, beautiful dashboard. No more switching between spreadsheets or waiting for monthly reports.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="icon">📱</div>
+        <h3>Frictionless Guest Feedback</h3>
+        <p>Guests scan a unique QR code and submit their feedback from their smartphone in under 2 minutes. No app download. No paper form. No lost feedback.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="icon">🔔</div>
+        <h3>Instant Low-Rating Alerts</h3>
+        <p>When a guest scores <strong>3 or below</strong>, an instant alert goes to your management team — so issues are resolved before check-out. When a guest scores <strong>4 or above</strong>, they're shown your Google Review link to turn satisfaction into public reputation.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="icon">🔐</div>
+        <h3>Department-Level RBAC</h3>
+        <p>Assign team members to exactly what they need to see. Your F&amp;B Head sees only F&amp;B data. Your General Manager sees everything. Zero information overload.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="icon">📥</div>
+        <h3>One-Click PDF Reports</h3>
+        <p>Any chart or report in the system can be exported as a formatted PDF instantly. Management meetings become more focused, factual, and efficient.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="icon">⭐</div>
+        <h3>Automatic Google Review Growth</h3>
+        <p>Happy guests (rating ≥ 4) are automatically prompted with your Google Review link immediately after submitting feedback — converting in-house satisfaction into public five-star reviews that drive new bookings.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-tag">Core Features</div>
+    <h2>Everything Your Team Needs</h2>
+    <p class="lead">Built specifically for hotel operations — not a generic analytics tool adapted for hospitality.</p>
+
+    <div class="features-list">
+      <div class="feature-row">
+        <div class="feature-icon-box">📊</div>
+        <div class="feature-text">
+          <h3>Real-Time Analytics Dashboard</h3>
+          <p>An always-live dashboard showing guest satisfaction scores for every composite and individual question, broken down by department and time period. Bar, donut, and line charts for every data view.</p>
+          <div class="tags"><span class="tag">Weekly View</span><span class="tag">Monthly View</span><span class="tag">Annual View</span><span class="tag">Custom Range</span></div>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon-box">📱</div>
+        <div class="feature-text">
+          <h3>QR Code Guest Feedback Collection</h3>
+          <p>Each department gets its own unique QR code that links directly to a customized guest feedback form. Place codes at room entry, at restaurant tables, at the pool — guests scan and submit instantly.</p>
+          <div class="tags"><span class="tag">Custom Questions</span><span class="tag">Rating + Yes/No</span><span class="tag">Guest Details</span><span class="tag">Instant Sync</span></div>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon-box">🔀</div>
+        <div class="feature-text">
+          <h3>Compare Analytics</h3>
+          <p>Side-by-side comparison of departments, composites, or time periods. Instantly see which area of your hotel outperforms others, and identify where resources need reallocating.</p>
+          <div class="tags"><span class="tag">Cross-Department</span><span class="tag">Multi-Period</span></div>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon-box">⚠️</div>
+        <div class="feature-text">
+          <h3>Low-Rating Alert System</h3>
+          <p>Automated flagging and notification whenever a guest review contains a score of 3 or below. View the guest's name, contact, room number, and the specific question that was rated poorly — all in one place.</p>
+          <div class="tags"><span class="tag">Real-Time Alerts</span><span class="tag">Guest Info</span><span class="tag">Filter by Period</span></div>
+        </div>
+      </div>
+      <div class="feature-row" style="border-left: 4px solid var(--accent);">
+        <div class="feature-icon-box" style="background: linear-gradient(135deg, #b45309, #d97706);">⭐</div>
+        <div class="feature-text">
+          <h3>Smart Guest Routing — Alert vs. Google Review</h3>
+          <p>Every guest review is automatically categorised by score. <strong>Rating ≤ 3</strong> → an instant in-app alert is pushed to the management team so they can intervene before the guest leaves. <strong>Rating ≥ 4</strong> → happy guests are shown a prompt with your hotel's <em>Google Review link</em>, turning satisfied stays into public five-star reviews that drive future bookings.</p>
+          <div class="tags">
+            <span class="tag" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;">⚠️ Rating ≤ 3 → Staff Alert</span>
+            <span class="tag" style="background:#f0fdf4;color:#065f46;border-color:#bbf7d0;">⭐ Rating ≥ 4 → Google Review Prompt</span>
+            <span class="tag">Automatic Routing</span>
+            <span class="tag">Reputation Growth</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-row">
+        <div class="feature-icon-box">📋</div>
+        <div class="feature-text">
+          <h3>Yes/No Response Reports</h3>
+          <p>A dedicated report view for all Yes/No question responses — such as "Was your meal served at the correct temperature?" Filter by date range, export to PDF for compliance and training records.</p>
+          <div class="tags"><span class="tag">Date Filter</span><span class="tag">PDF Download</span></div>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon-box">🔐</div>
+        <div class="feature-text">
+          <h3>Role-Based Access Control</h3>
+          <p>Four user roles: Super Admin, Admin, Viewer (Manager), and Department Viewer. Every user sees exactly what they need — nothing more, nothing less. Department heads are scoped to their assigned categories.</p>
+          <div class="tags"><span class="tag">Super Admin</span><span class="tag">Admin</span><span class="tag">Viewer</span><span class="tag">Dept. Head</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-tag">Why Kalalak Insight</div>
+    <h2>The Smarter Alternative to<br/>Guesswork and Spreadsheets</h2>
+    <p class="lead">Hotels that use Kalalak Insight stop reacting and start leading — with real data behind every management decision.</p>
+    <div class="why-grid">
+      <div class="why-card"><div class="icon">⚡</div><h3>Built for Speed</h3><p>From the moment a guest submits feedback, it's visible in your dashboard. Zero delay. Zero manual data entry.</p></div>
+      <div class="why-card"><div class="icon">🧩</div><h3>Customizable Forms</h3><p>Create questions and composites that match your exact service standards. No generic templates — your metrics, your way.</p></div>
+      <div class="why-card"><div class="icon">🏨</div><h3>Multi-Hotel Support</h3><p>Manage multiple properties under one organization. Each hotel has its own isolated data environment and team.</p></div>
+      <div class="why-card"><div class="icon">🌍</div><h3>Zero Installation</h3><p>Completely browser-based. No software to install. Works on any desktop or laptop. Guests submit from any smartphone.</p></div>
+      <div class="why-card"><div class="icon">📐</div><h3>Hospitality-First Design</h3><p>Every feature is built around how hotel teams actually work — by department, by shift, by service area.</p></div>
+      <div class="why-card"><div class="icon">🔒</div><h3>Secure &amp; Private</h3><p>Role-based authentication ensures every user can only access data relevant to their position. Guest data stays protected.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TARGET USERS -->
+<section class="section alt">
+  <div class="section-inner">
+    <div class="section-tag dark">Target Users</div>
+    <h2>Who Uses Kalalak Insight</h2>
+    <p class="lead">Designed for every level of hotel leadership — from the general manager to the department head on the floor.</p>
+    <div class="users-grid">
+      <div class="user-card"><div class="user-avatar">👔</div><h3>General Manager</h3><p>Gets a single-screen view of the entire hotel's performance across all departments. Makes data-driven staffing and training decisions.</p></div>
+      <div class="user-card"><div class="user-avatar">🛠️</div><h3>Hotel Administrator</h3><p>Manages digital forms, QR codes, user accounts, and categories. Full control over what gets measured and by whom.</p></div>
+      <div class="user-card"><div class="user-avatar">🏠</div><h3>Room Service Head</h3><p>Sees only room department data. Tracks cleanliness, comfort, and amenity scores week by week with drill-down to question level.</p></div>
+      <div class="user-card"><div class="user-avatar">🍽️</div><h3>F&amp;B Manager</h3><p>Monitors food quality, service speed, and guest satisfaction trends for the restaurant. Downloads reports for kitchen briefings.</p></div>
+      <div class="user-card"><div class="user-avatar">🌊</div><h3>Facilities Manager</h3><p>Tracks Pool &amp; Leisure area performance with guest-reported safety and cleanliness scores. Acts on low-rating alerts immediately.</p></div>
+      <div class="user-card"><div class="user-avatar">💼</div><h3>Hotel Ownership / Board</h3><p>Views high-level trend analytics, historical comparisons, and downloadable reports to assess ROI and guest experience quality.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS VALUE -->
+<section class="section">
+  <div class="section-inner">
+    <div class="value-banner">
+      <h2>Measurable Business Value</h2>
+      <p>Hotels using guest analytics platforms report significant improvements in satisfaction scores, review response rates, and operational efficiency within 90 days of adoption.</p>
+      <div class="value-metrics">
+        <div class="vm"><div class="num">2 min</div><p>Average feedback<br/>submission time</p></div>
+        <div class="vm"><div class="num">0 hrs</div><p>Time spent on<br/>manual report building</p></div>
+        <div class="vm"><div class="num">&lt; 1 sec</div><p>Alert speed for<br/>low-rated reviews</p></div>
+        <div class="vm"><div class="num">∞</div><p>Historical data<br/>retained and searchable</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="brand">Kalalak Insight</div>
+  <p>Hotel Department Efficiency Analyzer · Product Brochure 2025–2026<br/>Contact us to schedule a demo for your property.</p>
+  <div style="margin-top:20px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="Demo_Credentials.html" style="color:var(--accent);text-decoration:none;font-weight:600;">🔑 Demo Credentials</a>
+    <a href="User_Guide.html#intro" style="color:var(--accent);text-decoration:none;font-weight:600;">📖 User Guide</a>
+    <a href="Problem_Solution.html" style="color:var(--accent);text-decoration:none;font-weight:600;">💡 Problem–Solution</a>
+  </div>
+</footer>
+
+<!-- DEMO REQUEST MODAL -->
+<div class="modal-overlay" id="demoModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('demoModal').classList.remove('open')" aria-label="Close">&times;</button>
+    <h3>📋 Request a Demo</h3>
+    <p class="sub">Fill in your details and we'll reach out on WhatsApp within 24 hours.</p>
+    <form id="demoForm" onsubmit="sendToWhatsApp(event)">
+      <label>Organisation Name *</label>
+      <input type="text" id="orgName" placeholder="e.g. Grand Resort Hotel" required />
+      <label>Contact Person *</label>
+      <input type="text" id="contactName" placeholder="Your full name" required />
+      <label>Phone Number *</label>
+      <input type="tel" id="contactPhone" placeholder="+91 98765 43210" required />
+      <label>Email Address</label>
+      <input type="email" id="contactEmail" placeholder="you@hotel.com" />
+      <label>Anything you'd like us to know?</label>
+      <textarea id="extraNote" placeholder="No. of hotels, departments, current system used…"></textarea>
+      <button type="submit" class="btn-wa">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.558 4.121 1.529 5.847L0 24l6.335-1.507A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.787 9.787 0 01-5.028-1.384l-.36-.214-3.762.895.952-3.677-.235-.376A9.787 9.787 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+        Send via WhatsApp
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function sendToWhatsApp(e) {
+  e.preventDefault();
+  const org   = document.getElementById('orgName').value.trim();
+  const name  = document.getElementById('contactName').value.trim();
+  const phone = document.getElementById('contactPhone').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const note  = document.getElementById('extraNote').value.trim();
+
+  let msg = `🏨 *Demo Request — Kalalak Insight*\n\n`
+          + `*Organisation:* ${org}\n`
+          + `*Contact Person:* ${name}\n`
+          + `*Phone:* ${phone}`;
+  if (email) msg += `\n*Email:* ${email}`;
+  if (note)  msg += `\n\n*Notes:*\n${note}`;
+
+  const wa = `https://wa.me/918089632186?text=${encodeURIComponent(msg)}`;
+  window.open(wa, '_blank');
+  document.getElementById('demoModal').classList.remove('open');
+  document.getElementById('demoForm').reset();
+}
+
+// Close modal on overlay click
+document.getElementById('demoModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('demoModal').classList.remove('open');
+});
+</script>
+
+</body>
+</html>
