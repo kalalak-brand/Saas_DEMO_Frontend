@@ -178,8 +178,8 @@ export const useRatingLabels = () => {
   return {
     max: 5,
     maxLabel: 'Excellent',
-    minLabel: 'Poor',
-    labels: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
+    minLabel: 'Very Poor',
+    labels: ['Very Poor', 'Poor', 'Average', 'Good', 'Excellent'],
   };
 };
 

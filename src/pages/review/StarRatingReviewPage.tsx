@@ -85,10 +85,10 @@ const StarRating: React.FC<StarRatingProps> = ({
    Rating Label Helper
 ───────────────────────────────── */
 const getRatingLabel = (value: number): string => {
-    if (value <= 1) return "Poor";
-    if (value <= 2) return "Fair";
-    if (value <= 3) return "Good";
-    if (value <= 4) return "Very Good";
+    if (value <= 1) return "Very Poor";
+    if (value <= 2) return "Poor";
+    if (value <= 3) return "Average";
+    if (value <= 4) return "Good";
     return "Excellent";
 };
 
