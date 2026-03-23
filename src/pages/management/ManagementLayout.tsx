@@ -16,6 +16,7 @@ import {
     FileText,
     Shield,
     QrCode,
+    Bell,
     type LucideIcon,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -46,6 +47,7 @@ interface NavGroup {
  * Form Builder / Survey Settings navigation items
  */
 const formBuilderItems: NavItem[] = [
+    { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
     { href: '/management/questions', icon: HelpCircle, label: 'Questions' },
     { href: '/management/composites', icon: Layers, label: 'Composites' },
     { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
@@ -159,6 +161,7 @@ const ManagementLayout: React.FC = () => {
                     title: 'Reports',
                     icon: BarChart2,
                     items: [
+                        { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
                         { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
                         { href: '/management/report/low-rated-questions', icon: BarChart2, label: 'Low Rating Reports' },
                     ],

@@ -48,6 +48,9 @@ const CategoriesPage = lazy(
 const QRCodesPage = lazy(
   () => import("./pages/management/QRCodesPage")
 );
+const ServiceRequestsPage = lazy(
+  () => import("./pages/management/ServiceRequestsPage")
+);
 
 // Super Admin pages
 const SuperAdminLayout = lazy(
@@ -170,6 +173,7 @@ function App() {
                   <Route index element={<ManagementIndexRedirect />} />
                   {/* Shared report routes — accessible by all roles including viewers */}
                   <Route path="responses" element={<GuestIssuesPage />} />
+                  <Route path="service-requests" element={<ServiceRequestsPage />} />
                   <Route
                     path="report/low-rated-questions"
                     element={<LowRatedQuestionsPage />}
