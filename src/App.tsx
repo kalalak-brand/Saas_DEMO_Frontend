@@ -25,6 +25,8 @@ const GuestIssuesPage = lazy(
   () => import("./pages/management/YesNoResponsesPage")
 );
 const ReviewRouter = lazy(() => import("./pages/review/ReviewRouter"));
+const GuestLandingPage = lazy(() => import("./pages/review/GuestLandingPage"));
+const ServiceRequestForm = lazy(() => import("./pages/review/ServiceRequestForm"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
 const ProtectedRoute = lazy(() => import("./components/auth/ProtectedRoute"));
 import { useCompositeStore } from "./stores/compositeStore";
@@ -204,7 +206,16 @@ function App() {
             </Route>
 
             {/* Public Review Routes - No Auth Required */}
-            {/* Org-aware route (new QR codes) */}
+            {/* QR Landing Page (new — unified entry point) */}
+            <Route path="/:orgSlug/:hotelCode" element={<GuestLandingPage />} />
+            <Route path="/:hotelCode" element={<GuestLandingPage />} />
+            {/* Service Request Form */}
+            <Route path="/:orgSlug/:hotelCode/service-request" element={<ServiceRequestForm />} />
+            <Route path="/:hotelCode/service-request" element={<ServiceRequestForm />} />
+            {/* Feedback / Review Routes */}
+            <Route path="/:orgSlug/:hotelCode/feedback" element={<ReviewRouter />} />
+            <Route path="/:hotelCode/feedback" element={<ReviewRouter />} />
+            {/* Org-aware review route (existing QR codes) */}
             <Route path="/:orgSlug/:hotelCode/:category" element={<ReviewRouter />} />
             {/* Legacy route (backward compatible) */}
             <Route path="/:hotelCode/:category" element={<ReviewRouter />} />
