@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 
 const ServiceRequestForm: React.FC = () => {
-    const { hotelCode, orgSlug } = useParams<{ hotelCode: string; orgSlug?: string }>();
+    const { hotelCode, orgSlug, roomNumber: urlRoomNumber } = useParams<{ hotelCode: string; orgSlug?: string; roomNumber?: string }>();
+    const isRoomFromQR = Boolean(urlRoomNumber);
     const navigate = useNavigate();
     const {
         requestTypes,
@@ -31,7 +32,7 @@ const ServiceRequestForm: React.FC = () => {
     } = useServiceRequestStore();
 
     const [selectedType, setSelectedType] = useState<string>('');
-    const [roomNumber, setRoomNumber] = useState('');
+    const [roomNumber, setRoomNumber] = useState(urlRoomNumber || '');
     const [guestName, setGuestName] = useState('');
     const [guestPhone, setGuestPhone] = useState('');
     const [customMessage, setCustomMessage] = useState('');
@@ -68,7 +69,8 @@ const ServiceRequestForm: React.FC = () => {
     };
 
     const handleBack = () => {
-        const path = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const base = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const path = urlRoomNumber ? `${base}/room/${urlRoomNumber}` : base;
         navigate(path);
     };
 
@@ -177,17 +179,26 @@ const ServiceRequestForm: React.FC = () => {
                     <label style={styles.sectionLabel}>Your Details</label>
 
                     <div style={styles.inputGroup}>
-                        <div style={styles.inputWrap}>
-                            <span style={styles.inputIcon}>🔑</span>
-                            <input
-                                type="text"
-                                value={roomNumber}
-                                onChange={(e) => { setRoomNumber(e.target.value); setShowError(''); }}
-                                placeholder="Room Number *"
-                                style={styles.input}
-                                maxLength={20}
-                            />
-                        </div>
+                        {isRoomFromQR ? (
+                            /* Room pre-filled from QR — show locked badge */
+                            <div style={styles.lockedRoomBadge}>
+                                <span style={styles.inputIcon}>🔑</span>
+                                <span style={{ fontSize: '15px', fontWeight: 600, color: '#1B4D3E' }}>Room {roomNumber}</span>
+                                <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: 'auto' }}>From QR</span>
+                            </div>
+                        ) : (
+                            <div style={styles.inputWrap}>
+                                <span style={styles.inputIcon}>🔑</span>
+                                <input
+                                    type="text"
+                                    value={roomNumber}
+                                    onChange={(e) => { setRoomNumber(e.target.value); setShowError(''); }}
+                                    placeholder="Room Number *"
+                                    style={styles.input}
+                                    maxLength={20}
+                                />
+                            </div>
+                        )}
 
                         <div style={styles.inputWrap}>
                             <span style={styles.inputIcon}>👤</span>
@@ -372,6 +383,15 @@ const styles: Record<string, React.CSSProperties> = {
         border: '1.5px solid #e2e8f0',
         background: '#fafafa',
         transition: 'border-color 0.2s',
+    },
+    lockedRoomBadge: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '14px 16px',
+        borderRadius: '14px',
+        border: '1.5px solid rgba(27,77,62,0.2)',
+        background: 'rgba(27,77,62,0.04)',
     },
     inputIcon: {
         fontSize: '18px',

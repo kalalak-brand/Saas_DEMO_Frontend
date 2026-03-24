@@ -13,7 +13,7 @@ import { useServiceRequestStore } from '../../stores/serviceRequestStore';
 import { Bell, MessageSquareHeart, ChevronRight, Loader2, Hotel } from 'lucide-react';
 
 const GuestLandingPage: React.FC = () => {
-    const { hotelCode, orgSlug } = useParams<{ hotelCode: string; orgSlug?: string }>();
+    const { hotelCode, orgSlug, roomNumber } = useParams<{ hotelCode: string; orgSlug?: string; roomNumber?: string }>();
     const navigate = useNavigate();
     const { hotelInfo, fetchHotelInfo } = useServiceRequestStore();
     const [isLoading, setIsLoading] = useState(true);
@@ -25,17 +25,18 @@ const GuestLandingPage: React.FC = () => {
     }, [hotelCode, orgSlug, fetchHotelInfo]);
 
     const handleRequestService = () => {
-        const path = orgSlug
-            ? `/${orgSlug}/${hotelCode}/service-request`
-            : `/${hotelCode}/service-request`;
+        const base = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const path = roomNumber
+            ? `${base}/room/${roomNumber}/service-request`
+            : `${base}/service-request`;
         navigate(path);
     };
 
     const handleShareFeedback = () => {
-        // Navigate to existing review categories page
-        const path = orgSlug
-            ? `/${orgSlug}/${hotelCode}/feedback`
-            : `/${hotelCode}/feedback`;
+        const base = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const path = roomNumber
+            ? `${base}/room/${roomNumber}/feedback`
+            : `${base}/feedback`;
         navigate(path);
     };
 
@@ -68,6 +69,11 @@ const GuestLandingPage: React.FC = () => {
                 <div style={styles.titleSection}>
                     <h1 style={styles.title}>Kalalak Guest Experience</h1>
                     <p style={styles.subtitle}>How can we assist you today?</p>
+                    {roomNumber && (
+                        <div style={styles.roomBadge}>
+                            <span>🔑 Room {roomNumber}</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Action Buttons */}
@@ -224,6 +230,19 @@ const styles: Record<string, React.CSSProperties> = {
         color: '#64748b',
         margin: 0,
         fontWeight: '400',
+    },
+    roomBadge: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '8px 16px',
+        borderRadius: '12px',
+        background: 'rgba(27,77,62,0.06)',
+        border: '1px solid rgba(27,77,62,0.12)',
+        color: '#1B4D3E',
+        fontSize: '14px',
+        fontWeight: '600',
+        marginTop: '12px',
     },
     buttonsContainer: {
         display: 'flex',

@@ -57,6 +57,9 @@ const ServiceAnalyticsPage = lazy(
 const PostServiceFeedback = lazy(
   () => import("./pages/review/PostServiceFeedback")
 );
+const RoomQRGenerator = lazy(
+  () => import("./pages/management/RoomQRGenerator")
+);
 
 // Super Admin pages
 const SuperAdminLayout = lazy(
@@ -199,6 +202,7 @@ function App() {
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="qr-codes" element={<QRCodesPage />} />
+                    <Route path="room-qr-codes" element={<RoomQRGenerator />} />
                   </Route>
                 </Route>
 
@@ -217,10 +221,19 @@ function App() {
             </Route>
 
             {/* Public Review Routes - No Auth Required */}
-            {/* QR Landing Page (new — unified entry point) */}
+
+            {/* Room-specific QR routes (/:hotelCode/room/:roomNumber/...) */}
+            <Route path="/:orgSlug/:hotelCode/room/:roomNumber" element={<GuestLandingPage />} />
+            <Route path="/:hotelCode/room/:roomNumber" element={<GuestLandingPage />} />
+            <Route path="/:orgSlug/:hotelCode/room/:roomNumber/service-request" element={<ServiceRequestForm />} />
+            <Route path="/:hotelCode/room/:roomNumber/service-request" element={<ServiceRequestForm />} />
+            <Route path="/:orgSlug/:hotelCode/room/:roomNumber/feedback" element={<ReviewRouter />} />
+            <Route path="/:hotelCode/room/:roomNumber/feedback" element={<ReviewRouter />} />
+
+            {/* Generic QR Landing Page (no room) */}
             <Route path="/:orgSlug/:hotelCode" element={<GuestLandingPage />} />
             <Route path="/:hotelCode" element={<GuestLandingPage />} />
-            {/* Service Request Form */}
+            {/* Service Request Form (no room) */}
             <Route path="/:orgSlug/:hotelCode/service-request" element={<ServiceRequestForm />} />
             <Route path="/:hotelCode/service-request" element={<ServiceRequestForm />} />
             {/* Feedback / Review Routes */}
