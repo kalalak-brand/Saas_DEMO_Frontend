@@ -51,6 +51,12 @@ const QRCodesPage = lazy(
 const ServiceRequestsPage = lazy(
   () => import("./pages/management/ServiceRequestsPage")
 );
+const ServiceAnalyticsPage = lazy(
+  () => import("./pages/management/ServiceAnalyticsPage")
+);
+const PostServiceFeedback = lazy(
+  () => import("./pages/review/PostServiceFeedback")
+);
 
 // Super Admin pages
 const SuperAdminLayout = lazy(
@@ -174,6 +180,7 @@ function App() {
                   {/* Shared report routes — accessible by all roles including viewers */}
                   <Route path="responses" element={<GuestIssuesPage />} />
                   <Route path="service-requests" element={<ServiceRequestsPage />} />
+                  <Route path="service-analytics" element={<ServiceAnalyticsPage />} />
                   <Route
                     path="report/low-rated-questions"
                     element={<LowRatedQuestionsPage />}
@@ -219,6 +226,9 @@ function App() {
             {/* Feedback / Review Routes */}
             <Route path="/:orgSlug/:hotelCode/feedback" element={<ReviewRouter />} />
             <Route path="/:hotelCode/feedback" element={<ReviewRouter />} />
+            {/* Post-service feedback (after request completion) */}
+            <Route path="/:orgSlug/:hotelCode/service-feedback/:requestId" element={<PostServiceFeedback />} />
+            <Route path="/:hotelCode/service-feedback/:requestId" element={<PostServiceFeedback />} />
             {/* Org-aware review route (existing QR codes) */}
             <Route path="/:orgSlug/:hotelCode/:category" element={<ReviewRouter />} />
             {/* Legacy route (backward compatible) */}

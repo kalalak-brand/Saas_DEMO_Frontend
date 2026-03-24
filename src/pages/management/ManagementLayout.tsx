@@ -17,6 +17,7 @@ import {
     Shield,
     QrCode,
     Bell,
+    BarChart3,
     type LucideIcon,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -48,6 +49,7 @@ interface NavGroup {
  */
 const formBuilderItems: NavItem[] = [
     { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
+    { href: '/management/service-analytics', icon: BarChart3, label: 'Service Analytics' },
     { href: '/management/questions', icon: HelpCircle, label: 'Questions' },
     { href: '/management/composites', icon: Layers, label: 'Composites' },
     { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
@@ -162,6 +164,7 @@ const ManagementLayout: React.FC = () => {
                     icon: BarChart2,
                     items: [
                         { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
+                        { href: '/management/service-analytics', icon: BarChart3, label: 'Service Analytics' },
                         { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
                         { href: '/management/report/low-rated-questions', icon: BarChart2, label: 'Low Rating Reports' },
                     ],
