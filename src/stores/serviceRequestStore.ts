@@ -251,7 +251,7 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
             // Update local state optimistically
             set((state) => ({
                 requests: state.requests.map((r) =>
-                    r._id === id ? { ...r, status: status as any } : r
+                    r._id === id ? { ...r, status: status as ServiceRequest['status'] } : r
                 ),
             }));
             return true;

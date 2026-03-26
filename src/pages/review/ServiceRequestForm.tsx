@@ -113,7 +113,7 @@ const ServiceRequestForm: React.FC = () => {
             <div style={styles.formCard}>
                 {/* Header */}
                 <div style={styles.header}>
-                    <button onClick={handleBack} style={styles.backBtn}>
+                    <button onClick={handleBack} style={styles.backBtn} aria-label="Go back">
                         <ArrowLeft style={{ width: 20, height: 20 }} />
                     </button>
                     <div>
@@ -138,6 +138,8 @@ const ServiceRequestForm: React.FC = () => {
                                 <button
                                     key={type.value}
                                     onClick={() => { setSelectedType(type.value); setShowError(''); }}
+                                    aria-label={`Select ${type.label}`}
+                                    aria-pressed={selectedType === type.value}
                                     style={{
                                         ...styles.typeBtn,
                                         ...(selectedType === type.value ? styles.typeBtnSelected : {}),

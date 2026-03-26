@@ -83,6 +83,7 @@ const GuestLandingPage: React.FC = () => {
                         onClick={handleRequestService}
                         style={styles.serviceBtn}
                         id="request-service-btn"
+                        aria-label="Request a service"
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-4px)';
                             e.currentTarget.style.boxShadow = '0 12px 40px rgba(27, 77, 62, 0.35)';
@@ -107,6 +108,7 @@ const GuestLandingPage: React.FC = () => {
                         onClick={handleShareFeedback}
                         style={styles.feedbackBtn}
                         id="share-feedback-btn"
+                        aria-label="Share your feedback"
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-4px)';
                             e.currentTarget.style.boxShadow = '0 12px 40px rgba(228, 181, 128, 0.35)';

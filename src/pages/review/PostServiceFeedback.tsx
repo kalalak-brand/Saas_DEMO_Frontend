@@ -142,7 +142,7 @@ const PostServiceFeedback: React.FC = () => {
             <div style={{ ...styles.card, animation: 'fadeInUp 0.5s ease-out' }}>
                 {/* Header */}
                 <div style={styles.headerRow}>
-                    <button onClick={handleBack} style={styles.backBtn}>
+                    <button onClick={handleBack} style={styles.backBtn} aria-label="Go back">
                         <ArrowLeft style={{ width: 18, height: 18 }} />
                     </button>
                     <div style={styles.hotelBadge}>
@@ -165,6 +165,7 @@ const PostServiceFeedback: React.FC = () => {
                             onMouseEnter={() => setHoveredStar(star)}
                             onMouseLeave={() => setHoveredStar(0)}
                             style={styles.starBtn}
+                            aria-label={`Rate ${star} out of 5 stars`}
                         >
                             <Star
                                 style={{

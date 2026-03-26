@@ -90,7 +90,11 @@ const ServiceRequestsPage: React.FC = () => {
         fetchStats();
     }, [fetchRequests, fetchStats]);
 
-    // Socket.IO real-time updates
+    // Track current filters via ref to avoid socket reconnect on filter change
+    const filtersRef = React.useRef({ statusFilter, deptFilter });
+    filtersRef.current = { statusFilter, deptFilter };
+
+    // Socket.IO real-time updates — connects ONCE on mount, not on every filter change
     useEffect(() => {
         const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
         const socket = io(socketUrl, {
@@ -98,18 +102,17 @@ const ServiceRequestsPage: React.FC = () => {
             transports: ['websocket', 'polling'],
         });
 
-        socket.on('new_service_request', () => {
-            fetchRequests({ status: statusFilter !== 'all' ? statusFilter : undefined, department: deptFilter !== 'all' ? deptFilter : undefined });
+        const refetchWithCurrentFilters = () => {
+            const { statusFilter: sf, deptFilter: df } = filtersRef.current;
+            fetchRequests({ status: sf !== 'all' ? sf : undefined, department: df !== 'all' ? df : undefined });
             fetchStats();
-        });
+        };
 
-        socket.on('request_status_changed', () => {
-            fetchRequests({ status: statusFilter !== 'all' ? statusFilter : undefined, department: deptFilter !== 'all' ? deptFilter : undefined });
-            fetchStats();
-        });
+        socket.on('new_service_request', refetchWithCurrentFilters);
+        socket.on('request_status_changed', refetchWithCurrentFilters);
 
         return () => { socket.disconnect(); };
-    }, [token, fetchRequests, fetchStats, statusFilter, deptFilter]);
+    }, [token, fetchRequests, fetchStats]);
 
     // Refresh handler
     const handleRefresh = useCallback(async () => {
@@ -146,17 +149,8 @@ const ServiceRequestsPage: React.FC = () => {
         return Array.from(depts).sort();
     }, [requests]);
 
-    // Filtered requests
-    const filteredRequests = useMemo(() => {
-        let filtered = requests;
-        if (statusFilter !== 'all') {
-            filtered = filtered.filter((r) => r.status === statusFilter);
-        }
-        if (deptFilter !== 'all') {
-            filtered = filtered.filter((r) => r.department === deptFilter);
-        }
-        return filtered;
-    }, [requests, statusFilter, deptFilter]);
+    // Server returns pre-filtered data via query params — no client-side filtering needed
+    // Time: O(1) — just a reference alias
 
     const overview = stats?.overview || { total: 0, pending: 0, inProgress: 0, completed: 0, avgResponseTime: null };
 
@@ -238,6 +232,7 @@ const ServiceRequestsPage: React.FC = () => {
                     <select
                         value={deptFilter}
                         onChange={(e) => handleFilterChange('dept', e.target.value)}
+                        aria-label="Filter by department"
                         className="appearance-none bg-surface border border-border rounded-xl pl-3 pr-8 py-2.5 text-sm text-primary-dark font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                     >
                         <option value="all">All Departments</option>
@@ -266,14 +261,14 @@ const ServiceRequestsPage: React.FC = () => {
                     <div className="flex items-center justify-center py-16">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>
-                ) : filteredRequests.length === 0 ? (
+                ) : requests.length === 0 ? (
                     <div className="text-center py-16">
                         <Bell className="w-12 h-12 text-secondary/30 mx-auto mb-3" />
                         <p className="text-secondary text-sm font-medium">No service requests found</p>
                         <p className="text-secondary/60 text-xs mt-1">New requests will appear here in real-time</p>
                     </div>
                 ) : (
-                    filteredRequests.map((req) => (
+                    requests.map((req) => (
                         <RequestCard
                             key={req._id}
                             request={req}
