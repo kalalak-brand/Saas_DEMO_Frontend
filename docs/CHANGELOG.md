@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2026-03-30] — feat(push): Web Push Service Worker for guest notifications
+
+- **Type:** feat
+- **Scope:** Guest Experience, Push Notifications
+- **Description:** Implemented frontend Service Worker and push subscription utility to enable native browser push notifications for guests. When a guest submits a service request, they are offered a "Get notified when ready" button. Clicking it registers a service worker, requests notification permission, subscribes via PushManager with VAPID keys, and sends the subscription to the backend. When staff later updates the request status, the guest receives a native OS notification even if the browser tab is closed.
+- **Files Changed:**
+  - [NEW] `public/sw.js` — Service Worker handling push events and notification clicks
+  - [NEW] `src/utils/pushSubscription.ts` — Push subscription lifecycle utility
+  - [MODIFY] `src/pages/review/ServiceRequestForm.tsx` — Push opt-in button on success screen
+  - [MODIFY] `.env` — Added VITE_PUBLIC_WEB_PUSH_KEY for browser VAPID auth
+- **Breaking Changes:** None. Push is opt-in; existing functionality unchanged.
+
+---
+
 ## [2026-03-25] — refactor(frontend): Rules compliance audit fixes
 
 - **Type:** refactor

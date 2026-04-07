@@ -12,6 +12,7 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useServiceRequestStore } from '../../stores/serviceRequestStore';
+import { useAuthStore, isDepartmentScopedRole } from '../../stores/authStore';
 import {
     Clock, CheckCircle2, Loader2, BarChart3,
     TrendingUp, Star, RefreshCw, Calendar, Bell
@@ -20,28 +21,37 @@ import clsx from 'clsx';
 
 const ServiceAnalyticsPage: React.FC = () => {
     const { stats, isLoadingStats, fetchStats } = useServiceRequestStore();
+    const user = useAuthStore((s) => s.user);
     const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // Dept-scoped roles see only their department. Time: O(1)
+    const isDeptScoped = isDepartmentScopedRole(user?.role || '');
+    const userDeptName = user?.departmentId?.name || '';
+
     useEffect(() => {
-        fetchStats();
-    }, [fetchStats]);
+        fetchStats({
+            department: isDeptScoped && userDeptName ? userDeptName : undefined,
+        });
+    }, [fetchStats, isDeptScoped, userDeptName]);
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         await fetchStats({
             startDate: dateRange.start || undefined,
             endDate: dateRange.end || undefined,
+            department: isDeptScoped && userDeptName ? userDeptName : undefined,
         });
         setIsRefreshing(false);
-    }, [fetchStats, dateRange]);
+    }, [fetchStats, dateRange, isDeptScoped, userDeptName]);
 
     const handleDateFilter = useCallback(() => {
         fetchStats({
             startDate: dateRange.start || undefined,
             endDate: dateRange.end || undefined,
+            department: isDeptScoped && userDeptName ? userDeptName : undefined,
         });
-    }, [fetchStats, dateRange]);
+    }, [fetchStats, dateRange, isDeptScoped, userDeptName]);
 
     const overview = stats?.overview || {
         total: 0, pending: 0, inProgress: 0, completed: 0,

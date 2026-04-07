@@ -308,14 +308,37 @@ export const useActiveCategories = () => {
             .filter((c) => c.isActive)
             .sort((a, b) => a.order - b.order);
 
-        // Filter by allowedCategories for department_viewer
-        if (user?.role === 'department_viewer' && user.allowedCategories && user.allowedCategories.length > 0) {
-            const allowed = new Set(
-                user.allowedCategories.map((ac) =>
-                    typeof ac === 'string' ? ac : (ac as { _id: string })._id
-                )
-            );
-            return active.filter((c) => allowed.has(c._id));
+        // Hide specific dashboard shortcut categories for dept-level roles (Spec: Area Heads + Staff Members)
+        // Matches both slug variants and name variants defensively.
+        if (user?.role === 'hotel_dept_supervisor' || user?.role === 'hotel_dept_staff') {
+            const blockedSlugs = new Set([
+                'room_service', 'room-service',
+                'food_beverage', 'food-beverage', 'food-and-beverage',
+                'responses',
+                'low_ratings', 'low-ratings', 'low-rating',
+            ]);
+            const blockedName = (name: string) => {
+                const n = name.toLowerCase();
+                return (
+                    n.includes('room service') ||
+                    n.includes('food') && n.includes('beverage') ||
+                    n.includes('responses') ||
+                    n.includes('low ratings') ||
+                    n.includes('low rating')
+                );
+            };
+            let filtered = active.filter((c) => !blockedSlugs.has(c.slug) && !blockedName(c.name));
+
+            if (user.role === 'hotel_dept_supervisor' && user.allowedCategories && user.allowedCategories.length > 0) {
+                const allowed = new Set(
+                    user.allowedCategories.map((ac) =>
+                        typeof ac === 'string' ? ac : (ac as { _id: string })._id
+                    )
+                );
+                filtered = filtered.filter((category) => allowed.has(category._id));
+            }
+
+            return filtered;
         }
 
         return active;

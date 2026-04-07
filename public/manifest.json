@@ -1,0 +1,33 @@
+{
+  "id": "kalalak-insight",
+  "name": "Kalalak Insight Dashboard",
+  "short_name": "Kalalak",
+  "description": "Hotel Operations & Efficiency Analytics Dashboard — Real-time service management, feedback analytics, and SLA monitoring.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f0f7f4",
+  "theme_color": "#1B4D3E",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "prefer_related_applications": false
+}

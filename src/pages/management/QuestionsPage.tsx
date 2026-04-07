@@ -109,7 +109,7 @@ const QuestionsPage: React.FC = () => {
   // Get user role and hotel info
   const { user } = useAuthStore();
   const { hotels, fetchHotels } = useHotelStore();
-  const isSuperAdmin = user?.role === 'super_admin';
+  const isSuperAdmin = user?.role === 'saas_superAdmin';
   const [selectedHotelId, setSelectedHotelId] = useState<string>('');
 
   // Fetch hotels for super_admin on mount

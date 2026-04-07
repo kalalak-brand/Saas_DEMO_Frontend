@@ -39,7 +39,7 @@ interface UserFormData {
     fullName: string;
     username: string;
     password: string;
-    role: 'admin' | 'viewer';
+    role: 'hotel_owner' | 'hotel_gm' | 'hotel_supervisor' | 'hotel_dept_supervisor' | 'hotel_dept_staff';
     hotelId: string;
 }
 
@@ -47,14 +47,17 @@ const EMPTY_FORM: UserFormData = {
     fullName: '',
     username: '',
     password: '',
-    role: 'admin',
+    role: 'hotel_owner',
     hotelId: '',
 };
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-    super_admin: { label: 'Super Admin', color: 'bg-purple-50 text-purple-700', icon: Shield },
-    admin: { label: 'Admin', color: 'bg-blue-50 text-blue-700', icon: UserCog },
-    viewer: { label: 'Viewer', color: 'bg-gray-50 text-gray-600', icon: Eye },
+    saas_superAdmin: { label: 'SaaS Admin', color: 'bg-purple-50 text-purple-700', icon: Shield },
+    hotel_owner: { label: 'Owner', color: 'bg-indigo-50 text-indigo-700', icon: Shield },
+    hotel_gm: { label: 'General Manager', color: 'bg-blue-50 text-blue-700', icon: Eye },
+    hotel_supervisor: { label: 'Supervisor', color: 'bg-teal-50 text-teal-700', icon: UserCog },
+    hotel_dept_supervisor: { label: 'Dept Head', color: 'bg-amber-50 text-amber-700', icon: UserCog },
+    hotel_dept_staff: { label: 'Staff', color: 'bg-gray-50 text-gray-600', icon: Users },
 };
 
 /* ─── Component ─── */
@@ -107,7 +110,7 @@ const SAUsersPage: React.FC = () => {
             fullName: user.fullName,
             username: user.username,
             password: '', // don't pre-fill
-            role: user.role as 'admin' | 'viewer',
+            role: user.role as UserFormData['role'],
             hotelId,
         });
         setShowModal(true);
@@ -169,7 +172,7 @@ const SAUsersPage: React.FC = () => {
 
     const handleDelete = useCallback(
         async (user: IUserRow) => {
-            if (user.role === 'super_admin') {
+            if (user.role === 'saas_superAdmin') {
                 toast.error('Cannot delete super admin');
                 return;
             }
@@ -270,7 +273,7 @@ const SAUsersPage: React.FC = () => {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filtered.map((user) => {
-                                    const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.viewer;
+                                    const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.staff;
                                     const RoleIcon = roleConf.icon;
                                     return (
                                         <tr key={user._id} className="hover:bg-gray-50/50 transition-colors group">
@@ -314,7 +317,7 @@ const SAUsersPage: React.FC = () => {
                                                 </span>
                                             </td>
                                             <td className="px-5 py-4 text-right">
-                                                {user.role !== 'super_admin' && (
+                                                {user.role !== 'saas_superAdmin' && (
                                                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={() => openEditModal(user)}
@@ -419,8 +422,11 @@ const SAUsersPage: React.FC = () => {
                                         onChange={updateField('role')}
                                         className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                                     >
-                                        <option value="admin">Admin</option>
-                                        <option value="viewer">Viewer</option>
+                                        <option value="hotel_owner">Owner</option>
+                                        <option value="hotel_gm">General Manager</option>
+                                        <option value="hotel_supervisor">Supervisor</option>
+                                        <option value="hotel_dept_supervisor">Department Head</option>
+                                        <option value="hotel_dept_staff">Staff</option>
                                     </select>
                                 </div>
                                 <div>

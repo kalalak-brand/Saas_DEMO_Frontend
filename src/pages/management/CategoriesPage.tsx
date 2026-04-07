@@ -210,7 +210,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 const CategoriesPage: React.FC = () => {
     // Auth store for role check
     const user = useAuthStore((state) => state.user);
-    const isSuperAdmin = user?.role === 'super_admin';
+    const isSuperAdmin = user?.role === 'saas_superAdmin';
 
     // Hotel store for super_admin hotel selection
     const { hotels, fetchHotels } = useHotelStore();

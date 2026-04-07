@@ -97,8 +97,10 @@ export interface Hotel extends BaseEntity {
  */
 export interface User extends BaseEntity {
     username: string;
-    role: 'admin' | 'viewer' | 'staff' | string;
+    role: 'saas_superAdmin' | 'hotel_owner' | 'hotel_gm' | 'hotel_supervisor' | 'hotel_dept_supervisor' | 'hotel_dept_staff';
     hotelId?: Hotel | string;
+    departmentId?: string;
+    allowedHotels?: string[];
     isActive?: boolean;
 }
 

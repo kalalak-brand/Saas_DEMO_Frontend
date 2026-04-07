@@ -6,10 +6,11 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
-import { Building2, Users, LogOut, Menu, Shield } from 'lucide-react';
+import { Building2, Users, LogOut, Menu, Shield, Briefcase } from 'lucide-react';
 
 const NAV_ITEMS = [
     { to: '/super-admin/hotels', label: 'Hotels', icon: Building2 },
+    { to: '/super-admin/departments', label: 'Departments', icon: Briefcase },
     { to: '/super-admin/users', label: 'Users', icon: Users },
 ];
 

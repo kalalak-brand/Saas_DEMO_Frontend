@@ -10,7 +10,7 @@ import { Eye, EyeOff, Loader2, Bell, X } from 'lucide-react';
 // Redirect based on user role
 // Time: O(1), Space: O(1)
 const getRedirectPath = (role?: string): string => {
-  if (role === 'super_admin') return '/super-admin';
+  if (role === 'saas_superAdmin') return '/super-admin';
   return '/';
 };
 
@@ -57,12 +57,14 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showNotifBanner, setShowNotifBanner] = useState(false);
-  const { login, isLoading, error, user } = useAuthStore();
+  const { login, isLoading, error, user, isValidating } = useAuthStore();
   const { theme } = useSettingsStore();
   const navigate = useNavigate();
 
-  // Redirect to dashboard on login and check notification permission
+  // Redirect to dashboard on login — but ONLY after token validation completes
+  // This prevents redirect loops caused by stale tokens in localStorage
   useEffect(() => {
+    if (isValidating) return; // Wait for startup token validation to finish
     if (user && !isLoading) {
       // Check if permission has NOT been decided yet — show the banner
       if ('Notification' in window && Notification.permission === 'default') {
@@ -77,7 +79,7 @@ const LoginPage: React.FC = () => {
         navigate(getRedirectPath(user.role), { replace: true });
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, isValidating, navigate]);
 
   const handleAllowNotifications = async () => {
     try {

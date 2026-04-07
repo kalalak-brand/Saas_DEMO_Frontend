@@ -33,7 +33,7 @@ export interface ServiceRequest {
     requestType: string;
     department: string;
     customMessage?: string;
-    status: 'pending' | 'in_progress' | 'completed';
+    status: 'pending' | 'in_progress' | 'completed' | 'escalated';
     assignedTo?: { _id: string; fullName: string };
     completedAt?: string;
     responseTimeMinutes?: number;
@@ -77,12 +77,14 @@ export interface HotelPublicInfo {
 interface ServiceRequestState {
     // Guest-facing state
     requestTypes: ServiceRequestType[];
+    requestTypesHotelId: string | null;
     hotelInfo: HotelPublicInfo | null;
     isLoadingTypes: boolean;
     isSubmitting: boolean;
     submitSuccess: boolean;
     submitResult: {
         requestId?: string;
+        referenceId?: string;
         department?: string;
         requestLabel?: string;
     } | null;
@@ -100,7 +102,7 @@ interface ServiceRequestState {
     };
 
     // Actions — Public (no auth)
-    fetchRequestTypes: () => Promise<void>;
+    fetchRequestTypes: (hotelId?: string) => Promise<void>;
     fetchHotelInfo: (hotelCode: string, orgSlug?: string) => Promise<void>;
     submitServiceRequest: (data: {
         hotelCode: string;
@@ -130,12 +132,14 @@ interface ServiceRequestState {
     fetchStats: (filters?: {
         startDate?: string;
         endDate?: string;
+        department?: string;
     }) => Promise<void>;
 }
 
 export const useServiceRequestStore = create<ServiceRequestState>((set, get) => ({
     // Initial state
     requestTypes: [],
+    requestTypesHotelId: null,
     hotelInfo: null,
     isLoadingTypes: false,
     isSubmitting: false,
@@ -150,15 +154,27 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
     // ── Public Actions ──
 
     /** Fetch available service request types. Time: O(1), Space: O(t) */
-    fetchRequestTypes: async () => {
-        if (get().requestTypes.length > 0) return; // Cache
+    fetchRequestTypes: async (hotelId) => {
+        if (!hotelId) {
+            set({ requestTypes: [], requestTypesHotelId: null, isLoadingTypes: false });
+            return;
+        }
+
+        if (get().requestTypesHotelId === hotelId && get().requestTypes.length > 0) return;
+
         set({ isLoadingTypes: true });
         try {
-            const { data } = await axios.get(`${PUBLIC_API}/public/service-request-types`);
-            set({ requestTypes: data.data?.types || [], isLoadingTypes: false });
+            const { data } = await axios.get(`${PUBLIC_API}/public/service-request-types`, {
+                params: { hotelId },
+            });
+            set({
+                requestTypes: data.data?.types || [],
+                requestTypesHotelId: hotelId,
+                isLoadingTypes: false,
+            });
         } catch (err) {
             console.error('[ServiceRequestStore] fetchRequestTypes failed:', err);
-            set({ isLoadingTypes: false });
+            set({ isLoadingTypes: false, requestTypes: [], requestTypesHotelId: hotelId });
         }
     },
 
@@ -185,6 +201,7 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
                 submitSuccess: true,
                 submitResult: {
                     requestId: data.data?.requestId,
+                    referenceId: data.data?.referenceId,
                     department: data.data?.department,
                     requestLabel: data.data?.requestLabel,
                 },
@@ -268,6 +285,7 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
             const params: Record<string, string> = {};
             if (filters?.startDate) params.startDate = filters.startDate;
             if (filters?.endDate) params.endDate = filters.endDate;
+            if (filters?.department) params.department = filters.department;
 
             const { data } = await apiClient.get('/service-requests/stats', { params });
             set({ stats: data.data || null, isLoadingStats: false });

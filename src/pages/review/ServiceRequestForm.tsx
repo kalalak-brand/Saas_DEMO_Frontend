@@ -9,9 +9,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useServiceRequestStore } from '../../stores/serviceRequestStore';
+import { isPushSupported, subscribeToPush } from '../../utils/pushSubscription';
 import {
     ArrowLeft, CheckCircle2, Loader2, Hotel,
-    Send, MessageSquare
+    Send, MessageSquare, Bell, BellOff, BellRing
 } from 'lucide-react';
 
 const ServiceRequestForm: React.FC = () => {
@@ -37,16 +38,28 @@ const ServiceRequestForm: React.FC = () => {
     const [guestPhone, setGuestPhone] = useState('');
     const [customMessage, setCustomMessage] = useState('');
     const [showError, setShowError] = useState('');
+    const [pushState, setPushState] = useState<'idle' | 'loading' | 'subscribed' | 'denied' | 'unsupported'>('idle');
 
     useEffect(() => {
-        fetchRequestTypes();
-        if (hotelCode && !hotelInfo) {
+        if (hotelCode && !hotelInfo?._id) {
             fetchHotelInfo(hotelCode, orgSlug);
         }
+    }, [fetchHotelInfo, hotelCode, hotelInfo?._id, orgSlug]);
+
+    useEffect(() => {
+        if (hotelInfo?._id) {
+            fetchRequestTypes(hotelInfo._id);
+        }
+    }, [fetchRequestTypes, hotelInfo?._id]);
+
+    useEffect(() => {
         return () => resetSubmitState();
-    }, [hotelCode, orgSlug, fetchRequestTypes, fetchHotelInfo, hotelInfo, resetSubmitState]);
+    }, [resetSubmitState]);
 
     const handleSubmit = async () => {
+        // #region agent log
+        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H3',location:'ServiceRequestForm.tsx:55',message:'Guest submit attempt',data:{hotelCode:hotelCode||null,hasOrgSlug:Boolean(orgSlug),selectedType,hasRoomNumber:Boolean(roomNumber?.trim()),isRoomFromQR},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion agent log
         if (!selectedType) {
             setShowError('Please select a service');
             return;
@@ -57,7 +70,7 @@ const ServiceRequestForm: React.FC = () => {
         }
         setShowError('');
 
-        await submitServiceRequest({
+        const ok = await submitServiceRequest({
             hotelCode: hotelCode || '',
             orgSlug,
             requestType: selectedType,
@@ -66,6 +79,9 @@ const ServiceRequestForm: React.FC = () => {
             guestPhone: guestPhone.trim() || undefined,
             customMessage: selectedType === 'other' ? customMessage.trim() : undefined,
         });
+        // #region agent log
+        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H3',location:'ServiceRequestForm.tsx:79',message:'Guest submit finished',data:{ok,submitSuccess,referenceId:submitResult?.referenceId||null,requestId:submitResult?.requestId||null},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion agent log
     };
 
     const handleBack = () => {
@@ -75,7 +91,32 @@ const ServiceRequestForm: React.FC = () => {
     };
 
     // ── Success Screen ──
+    /**
+     * Handle push notification opt-in.
+     * Registers SW, requests permission, subscribes, sends to backend.
+     * Time: O(1), Space: O(1)
+     */
+    const handleEnablePush = async () => {
+        if (!submitResult?.requestId) return;
+        setPushState('loading');
+
+        const success = await subscribeToPush(submitResult.requestId);
+        setPushState(success ? 'subscribed' : 'denied');
+    };
+
     if (submitSuccess) {
+        const showPushButton = isPushSupported() && pushState !== 'subscribed';
+        const pushButtonDisabled = pushState === 'loading' || pushState === 'denied';
+        const etaRange = (() => {
+            const d = (submitResult?.department || '').toLowerCase();
+            if (d.includes('house')) return '10–20';
+            if (d.includes('room service')) return '15–30';
+            if (d.includes('maint')) return '20–45';
+            return '15–35';
+        })();
+        const trackingBase = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const trackingUrl = submitResult?.requestId ? `${trackingBase}/service-request/${submitResult.requestId}` : undefined;
+
         return (
             <div style={styles.container}>
                 <div style={styles.successCard}>
@@ -88,6 +129,23 @@ const ServiceRequestForm: React.FC = () => {
                         <strong>{submitResult?.department || 'the team'}</strong>.
                     </p>
                     <div style={styles.successDetail}>
+                        <span style={styles.successLabel}>Reference ID</span>
+                        <span style={{ ...styles.successValue, color: '#1B4D3E', fontWeight: 700 }}>
+                            {submitResult?.referenceId || 'Pending...'}
+                        </span>
+                    </div>
+                    <div style={styles.successDetail}>
+                        <span style={styles.successLabel}>Status</span>
+                        <span style={styles.successValue}>
+                            <span style={{ color: '#22c55e', marginRight: 6 }}>●</span>
+                            In Progress
+                        </span>
+                    </div>
+                    <div style={styles.successDetail}>
+                        <span style={styles.successLabel}>ETA</span>
+                        <span style={styles.successValue}>Expected within {etaRange} minutes</span>
+                    </div>
+                    <div style={styles.successDetail}>
                         <span style={styles.successLabel}>Service</span>
                         <span style={styles.successValue}>{submitResult?.requestLabel}</span>
                     </div>
@@ -95,6 +153,88 @@ const ServiceRequestForm: React.FC = () => {
                         <span style={styles.successLabel}>Room</span>
                         <span style={styles.successValue}>{roomNumber}</span>
                     </div>
+
+                    {/* Optimistic UI Tracking Timeline */}
+                    <div style={styles.trackingContainer}>
+                        <div style={styles.trackingTimeline}>
+                            {/* Step 1: Sent (Active) */}
+                            <div style={styles.trackStep}>
+                                <div style={{...styles.trackDot, background: '#22c55e', borderColor: '#22c55e'}}>
+                                    <CheckCircle2 style={{ width: 12, height: 12, color: '#fff' }} />
+                                </div>
+                                <div style={styles.trackContent}>
+                                    <p style={styles.trackTitle}>Request Received</p>
+                                    <p style={styles.trackTime}>Just now</p>
+                                </div>
+                            </div>
+                            <div style={{...styles.trackLine, background: '#22c55e'}} />
+                            
+                            {/* Step 2: In Progress (Pending) */}
+                            <div style={styles.trackStep}>
+                                <div style={{...styles.trackDot, borderColor: '#e2e8f0', background: '#fff'}}></div>
+                                <div style={styles.trackContent}>
+                                    <p style={{...styles.trackTitle, color: '#64748b'}}>In Progress</p>
+                                    <p style={styles.trackTime}>ETA: {etaRange} mins</p>
+                                </div>
+                            </div>
+                            <div style={styles.trackLine} />
+                            
+                            {/* Step 3: Completed (Pending) */}
+                            <div style={styles.trackStep}>
+                                <div style={{...styles.trackDot, borderColor: '#e2e8f0', background: '#fff'}}></div>
+                                <div style={styles.trackContent}>
+                                    <p style={{...styles.trackTitle, color: '#64748b'}}>Completed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Push Notification Opt-in */}
+                    {pushState === 'subscribed' ? (
+                        <div style={styles.pushSuccessBanner}>
+                            <BellRing style={{ width: 20, height: 20, color: '#22c55e', flexShrink: 0 }} />
+                            <span>We'll notify you when your request is updated!</span>
+                        </div>
+                    ) : showPushButton ? (
+                        <button
+                            onClick={handleEnablePush}
+                            disabled={pushButtonDisabled}
+                            style={{
+                                ...styles.pushBtn,
+                                opacity: pushButtonDisabled ? 0.6 : 1,
+                            }}
+                            aria-label="Enable push notifications"
+                        >
+                            {pushState === 'loading' ? (
+                                <Loader2 style={{ width: 20, height: 20, animation: 'spin 1s linear infinite' }} />
+                            ) : pushState === 'denied' ? (
+                                <BellOff style={{ width: 20, height: 20 }} />
+                            ) : (
+                                <Bell style={{ width: 20, height: 20 }} />
+                            )}
+                            <span>
+                                {pushState === 'loading'
+                                    ? 'Enabling...'
+                                    : pushState === 'denied'
+                                        ? 'Notifications blocked'
+                                        : 'Get notified when ready'}
+                            </span>
+                        </button>
+                    ) : null}
+
+                    <p style={{ ...styles.footerText, marginTop: 16, marginBottom: 0 }}>
+                        If there’s any delay, our team is automatically alerted.
+                    </p>
+
+                    {trackingUrl && (
+                        <button
+                            onClick={() => navigate(trackingUrl)}
+                            style={{ ...styles.backToHomeBtn, borderColor: '#1B4D3E', color: '#1B4D3E' }}
+                        >
+                            Track status in real-time →
+                        </button>
+                    )}
+
                     <button onClick={handleBack} style={styles.backToHomeBtn}>
                         Back to Home
                     </button>
@@ -102,7 +242,10 @@ const ServiceRequestForm: React.FC = () => {
                         Powered by <strong style={{ color: '#1B4D3E' }}>Kalalak</strong>
                     </p>
                 </div>
-                <style>{`@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+                <style>{`
+                    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                    @keyframes spin { to { transform: rotate(360deg); } }
+                `}</style>
             </div>
         );
     }
@@ -497,7 +640,7 @@ const styles: Record<string, React.CSSProperties> = {
         fontWeight: '600',
     },
     backToHomeBtn: {
-        marginTop: '24px',
+        marginTop: '16px',
         padding: '14px 32px',
         borderRadius: '14px',
         border: '1.5px solid #e2e8f0',
@@ -508,12 +651,99 @@ const styles: Record<string, React.CSSProperties> = {
         cursor: 'pointer',
         fontFamily: 'inherit',
     },
+    pushBtn: {
+        width: '100%',
+        marginTop: '20px',
+        padding: '14px 20px',
+        borderRadius: '14px',
+        border: 'none',
+        background: 'linear-gradient(135deg, #1B4D3E 0%, #2d6a4f 100%)',
+        color: '#fff',
+        fontSize: '15px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        boxShadow: '0 4px 16px rgba(27,77,62,0.2)',
+        transition: 'all 0.3s ease',
+    },
+    pushSuccessBanner: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '14px 16px',
+        borderRadius: '14px',
+        background: 'rgba(34,197,94,0.06)',
+        border: '1px solid rgba(34,197,94,0.15)',
+        color: '#15803d',
+        fontSize: '14px',
+        fontWeight: '500',
+        marginTop: '20px',
+    },
     footerText: {
         fontSize: '13px',
         color: '#94a3b8',
         margin: '24px 0 0',
         textAlign: 'center',
     },
+    // Tracking Timeline Styles
+    trackingContainer: {
+        marginTop: '24px',
+        padding: '16px',
+        borderRadius: '16px',
+        background: '#f8fafc',
+        border: '1px solid #f1f5f9',
+        textAlign: 'left'
+    },
+    trackingTimeline: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    trackStep: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px',
+        position: 'relative',
+        zIndex: 2,
+    },
+    trackDot: {
+        width: '20px',
+        height: '20px',
+        borderRadius: '50%',
+        border: '2px solid',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        marginTop: '2px'
+    },
+    trackContent: {
+        flex: 1,
+    },
+    trackTitle: {
+        fontSize: '14px',
+        fontWeight: '600',
+        color: '#0f172a',
+        margin: 0,
+    },
+    trackTime: {
+        fontSize: '12px',
+        color: '#64748b',
+        margin: '2px 0 0',
+    },
+    trackLine: {
+        width: '2px',
+        height: '32px',
+        background: '#e2e8f0',
+        marginLeft: '9px',
+        marginTop: '-4px',
+        marginBottom: '-4px',
+        position: 'relative',
+        zIndex: 1,
+    }
 };
 
 export default ServiceRequestForm;

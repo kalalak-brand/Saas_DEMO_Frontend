@@ -25,7 +25,7 @@ const GuestLandingPage: React.FC = () => {
     }, [hotelCode, orgSlug, fetchHotelInfo]);
 
     const handleRequestService = () => {
-        const base = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const base = `/${hotelCode}`;
         const path = roomNumber
             ? `${base}/room/${roomNumber}/service-request`
             : `${base}/service-request`;
@@ -33,7 +33,7 @@ const GuestLandingPage: React.FC = () => {
     };
 
     const handleShareFeedback = () => {
-        const base = orgSlug ? `/${orgSlug}/${hotelCode}` : `/${hotelCode}`;
+        const base = `/${hotelCode}`;
         const path = roomNumber
             ? `${base}/room/${roomNumber}/feedback`
             : `${base}/feedback`;

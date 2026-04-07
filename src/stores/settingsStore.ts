@@ -1,6 +1,7 @@
 // src/stores/settingsStore.ts
 import { create } from 'zustand';
 import apiClient from '../utils/apiClient';
+import { useAuthStore } from './authStore';
 
 /**
  * Theme configuration that can be customized per hotel
@@ -61,6 +62,12 @@ const defaultTheme: ThemeConfig = {
 // Cache duration: 5 minutes
 const CACHE_DURATION = 5 * 60 * 1000;
 
+const getScopedHotelId = (): string | undefined => {
+  const hotel = useAuthStore.getState().user?.hotelId;
+  if (!hotel) return undefined;
+  return hotel._id;
+};
+
 /**
  * Settings store with backend sync and local persistence
  */
@@ -90,7 +97,10 @@ export const useSettingsStore = create<SettingsState>()(
       set({ isLoading: true, error: null });
 
       try {
-        const response = await apiClient.get('/settings');
+        const hotelId = getScopedHotelId();
+        const response = await apiClient.get('/settings', {
+          params: hotelId ? { hotelId } : undefined,
+        });
         const settings = response.data.data?.settings || response.data.data;
 
         if (settings) {
@@ -119,8 +129,13 @@ export const useSettingsStore = create<SettingsState>()(
 
       try {
         const { reviewDesign, theme } = get();
+        const hotelId = getScopedHotelId();
 
-        await apiClient.put('/settings', { reviewDesign, theme });
+        await apiClient.put('/settings', {
+          reviewDesign,
+          theme,
+          hotelId,
+        });
 
         set({ isLoading: false, isSynced: true, lastFetched: Date.now() });
         return true;
@@ -148,7 +163,9 @@ export const useSettingsStore = create<SettingsState>()(
       set({ isLoading: true });
 
       try {
-        await apiClient.post('/settings/reset');
+        const hotelId = getScopedHotelId();
+
+        await apiClient.post('/settings/reset', hotelId ? { hotelId } : {});
 
         set({
           theme: { ...defaultTheme },

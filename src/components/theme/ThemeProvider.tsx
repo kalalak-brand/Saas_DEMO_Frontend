@@ -104,13 +104,14 @@ const generateColorVariants = (baseColor: string) => {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const { theme, setTheme, resetTheme, fetchSettings } = useSettingsStore();
     const token = useAuthStore((state) => state.token);
+    const hotelId = useAuthStore((state) => state.user?.hotelId);
 
-    // Only fetch settings when user is authenticated
+    // Only fetch settings when the session has an active hotel context.
     useEffect(() => {
-        if (token) {
+        if (token && hotelId) {
             fetchSettings();
         }
-    }, [token, fetchSettings]);
+    }, [fetchSettings, hotelId, token]);
 
     // Generate CSS variables from theme
     const cssVariables = useMemo(() => {

@@ -8,12 +8,13 @@
  *   - Quick status transition buttons
  *   - Socket.IO live updates
  *   - Responsive: phone → desktop
+ *   - Dept-scoped roles auto-filter to their assigned department
  *
  * Time: O(n) render, Space: O(n) where n = page size
  */
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useServiceRequestStore, ServiceRequest } from '../../stores/serviceRequestStore';
-import { useAuthStore } from '../../stores/authStore';
+import { useAuthStore, isDepartmentScopedRole } from '../../stores/authStore';
 import {
     Clock, CheckCircle2, Loader2, AlertCircle,
     RefreshCw, ChevronDown, ArrowRight, Bell, X,
@@ -22,12 +23,39 @@ import {
 import clsx from 'clsx';
 import io from 'socket.io-client';
 
+/** Play a short audible beep for new/escalated service requests. Time: O(1) */
+const playServiceAlertSound = () => {
+    try {
+        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const now = ctx.currentTime;
+        const beep = (freq: number, start: number, duration: number) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.35, now + start);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + start + duration);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + start);
+            osc.stop(now + start + duration);
+        };
+        beep(660, 0, 0.12);
+        beep(880, 0.18, 0.12);
+        beep(660, 0.36, 0.18);
+        setTimeout(() => ctx.close(), 700);
+    } catch {
+        // ignore
+    }
+};
+
 // ── Status badge component ──
+// Time: O(1), Space: O(1)
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const config: Record<string, { bg: string; text: string; label: string }> = {
         pending: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Pending' },
         in_progress: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'In Progress' },
         completed: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Completed' },
+        escalated: { bg: 'bg-red-50', text: 'text-red-700', label: 'Escalated' },
     };
     const c = config[status] || config.pending;
     return (
@@ -52,6 +80,7 @@ const REQUEST_TYPE_LABELS: Record<string, string> = {
 };
 
 // ── Time ago helper ──
+// Time: O(1), Space: O(1)
 const timeAgo = (dateStr: string): string => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
@@ -78,17 +107,26 @@ const ServiceRequestsPage: React.FC = () => {
     } = useServiceRequestStore();
 
     const token = useAuthStore((s) => s.token);
+    const user = useAuthStore((s) => s.user);
+
+    // Dept-scoped roles: auto-filter to their department, no "All" option
+    // Time: O(1)
+    const isDeptScoped = isDepartmentScopedRole(user?.role || '');
+    const userDeptName = user?.departmentId?.name || '';
 
     const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [deptFilter, setDeptFilter] = useState<string>('all');
+    const [deptFilter, setDeptFilter] = useState<string>(
+        isDeptScoped && userDeptName ? userDeptName : 'all'
+    );
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-    // Fetch data on mount
+    // Fetch data on mount — pass department filter for dept-scoped roles
     useEffect(() => {
-        fetchRequests();
+        const deptParam = isDeptScoped && userDeptName ? userDeptName : undefined;
+        fetchRequests({ department: deptParam });
         fetchStats();
-    }, [fetchRequests, fetchStats]);
+    }, [fetchRequests, fetchStats, isDeptScoped, userDeptName]);
 
     // Track current filters via ref to avoid socket reconnect on filter change
     const filtersRef = React.useRef({ statusFilter, deptFilter });
@@ -108,11 +146,35 @@ const ServiceRequestsPage: React.FC = () => {
             fetchStats();
         };
 
-        socket.on('new_service_request', refetchWithCurrentFilters);
+        socket.on('new_service_request', () => {
+            playServiceAlertSound();
+            refetchWithCurrentFilters();
+        });
         socket.on('request_status_changed', refetchWithCurrentFilters);
+        socket.on('request_escalated', () => {
+            playServiceAlertSound();
+            refetchWithCurrentFilters();
+        });
 
         return () => { socket.disconnect(); };
     }, [token, fetchRequests, fetchStats]);
+
+    // Listen for push notification sound requests from the Service Worker.
+    // Time: O(1) per message, Space: O(1)
+    useEffect(() => {
+        const handleSWMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'PLAY_NOTIFICATION_SOUND') {
+                playServiceAlertSound();
+            }
+            if (event.data?.type === 'NAVIGATE' && event.data?.url) {
+                window.location.href = event.data.url;
+            }
+        };
+        navigator.serviceWorker?.addEventListener('message', handleSWMessage);
+        return () => {
+            navigator.serviceWorker?.removeEventListener('message', handleSWMessage);
+        };
+    }, []);
 
     // Refresh handler
     const handleRefresh = useCallback(async () => {
@@ -144,6 +206,7 @@ const ServiceRequestsPage: React.FC = () => {
     }, [fetchRequests, statusFilter, deptFilter]);
 
     // Get unique departments from requests
+    // Time: O(n), Space: O(d) where d = unique departments
     const departments = useMemo(() => {
         const depts = new Set(requests.map((r) => r.department));
         return Array.from(depts).sort();
@@ -160,7 +223,11 @@ const ServiceRequestsPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-primary-dark">Service Requests</h1>
-                    <p className="text-sm text-secondary mt-1">Manage guest service requests in real-time</p>
+                    <p className="text-sm text-secondary mt-1">
+                        {isDeptScoped && userDeptName
+                            ? `${userDeptName} — Manage your department requests`
+                            : 'Manage guest service requests in real-time'}
+                    </p>
                 </div>
                 <button
                     onClick={handleRefresh}
@@ -227,26 +294,33 @@ const ServiceRequestsPage: React.FC = () => {
 
             {/* Filters */}
             <div className="flex flex-wrap gap-3">
-                {/* Department Filter */}
-                <div className="relative">
-                    <select
-                        value={deptFilter}
-                        onChange={(e) => handleFilterChange('dept', e.target.value)}
-                        aria-label="Filter by department"
-                        className="appearance-none bg-surface border border-border rounded-xl pl-3 pr-8 py-2.5 text-sm text-primary-dark font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                    >
-                        <option value="all">All Departments</option>
-                        {departments.map((d) => (
-                            <option key={d} value={d}>{d}</option>
-                        ))}
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
-                </div>
+                {/* Department Filter — hidden for dept-scoped roles */}
+                {!isDeptScoped && (
+                    <div className="relative">
+                        <select
+                            value={deptFilter}
+                            onChange={(e) => handleFilterChange('dept', e.target.value)}
+                            aria-label="Filter by department"
+                            className="appearance-none bg-surface border border-border rounded-xl pl-3 pr-8 py-2.5 text-sm text-primary-dark font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                        >
+                            <option value="all">All Departments</option>
+                            {departments.map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
+                    </div>
+                )}
 
                 {/* Active filter badges */}
-                {(statusFilter !== 'all' || deptFilter !== 'all') && (
+                {(statusFilter !== 'all' || (!isDeptScoped && deptFilter !== 'all')) && (
                     <button
-                        onClick={() => { setStatusFilter('all'); setDeptFilter('all'); fetchRequests(); }}
+                        onClick={() => {
+                            setStatusFilter('all');
+                            const resetDept = isDeptScoped && userDeptName ? userDeptName : 'all';
+                            setDeptFilter(resetDept);
+                            fetchRequests({ department: resetDept !== 'all' ? resetDept : undefined });
+                        }}
                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-error/10 text-error text-xs font-medium hover:bg-error/20 transition-colors"
                     >
                         <X className="w-3.5 h-3.5" />
@@ -286,7 +360,7 @@ const ServiceRequestsPage: React.FC = () => {
 // SUB-COMPONENTS
 // ══════════════════════════════════════════
 
-/** Stats overview card */
+/** Stats overview card. Time: O(1), Space: O(1) */
 const StatsCard: React.FC<{
     label: string;
     value: number;
@@ -327,7 +401,7 @@ const StatsCard: React.FC<{
     );
 };
 
-/** Individual request card */
+/** Individual request card. Time: O(1), Space: O(1) */
 const RequestCard: React.FC<{
     request: ServiceRequest;
     onStatusChange: (id: string, status: string) => void;
@@ -335,6 +409,7 @@ const RequestCard: React.FC<{
 }> = ({ request, onStatusChange, isUpdating }) => {
     const nextStatus: Record<string, { label: string; value: string; color: string } | null> = {
         pending: { label: 'Start', value: 'in_progress', color: 'bg-blue-600 hover:bg-blue-700' },
+        escalated: { label: 'Take Over', value: 'in_progress', color: 'bg-red-600 hover:bg-red-700' },
         in_progress: { label: 'Complete', value: 'completed', color: 'bg-emerald-600 hover:bg-emerald-700' },
         completed: null,
     };
@@ -347,6 +422,7 @@ const RequestCard: React.FC<{
             'bg-surface border border-border rounded-xl p-4 md:p-5',
             'hover:shadow-sm transition-all duration-200',
             request.status === 'pending' && 'border-l-4 border-l-amber-400',
+            request.status === 'escalated' && 'border-l-4 border-l-red-400',
             request.status === 'in_progress' && 'border-l-4 border-l-blue-400',
             request.status === 'completed' && 'border-l-4 border-l-emerald-400 opacity-75',
         )}>
@@ -356,6 +432,7 @@ const RequestCard: React.FC<{
                     <div className={clsx(
                         'w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold',
                         request.status === 'pending' ? 'bg-amber-500' :
+                        request.status === 'escalated' ? 'bg-red-500' :
                         request.status === 'in_progress' ? 'bg-blue-500' : 'bg-emerald-500'
                     )}>
                         {request.guestInfo.roomNumber}
@@ -386,7 +463,7 @@ const RequestCard: React.FC<{
             {/* Custom message */}
             {request.customMessage && (
                 <p className="text-xs text-secondary bg-background rounded-lg px-3 py-2 mb-3 italic">
-                    "{request.customMessage}"
+                    &quot;{request.customMessage}&quot;
                 </p>
             )}
 

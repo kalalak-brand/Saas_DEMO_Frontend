@@ -20,6 +20,12 @@ const UsersPage = lazy(() => import("./pages/management/UsersPage"));
 const HotelsManagementPage = lazy(
   () => import("./pages/management/HotelManagementPage")
 );
+const HotelSelectionPage = lazy(
+  () => import("./pages/HotelSelectionPage")
+);
+const AnalyticsHubPage = lazy(
+  () => import("./pages/management/AnalyticsHubPage")
+);
 
 const GuestIssuesPage = lazy(
   () => import("./pages/management/YesNoResponsesPage")
@@ -27,6 +33,7 @@ const GuestIssuesPage = lazy(
 const ReviewRouter = lazy(() => import("./pages/review/ReviewRouter"));
 const GuestLandingPage = lazy(() => import("./pages/review/GuestLandingPage"));
 const ServiceRequestForm = lazy(() => import("./pages/review/ServiceRequestForm"));
+const ServiceRequestStatusPage = lazy(() => import("./pages/review/ServiceRequestStatusPage"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
 const ProtectedRoute = lazy(() => import("./components/auth/ProtectedRoute"));
 import { useCompositeStore } from "./stores/compositeStore";
@@ -71,6 +78,9 @@ const SAHotelsPage = lazy(
 const SAUsersPage = lazy(
   () => import("./pages/superadmin/SAUsersPage")
 );
+const SADepartmentsPage = lazy(
+  () => import("./pages/superadmin/SADepartmentsPage")
+);
 
 
 
@@ -86,23 +96,54 @@ const LoadingFallback: React.FC = () => (
 );
 
 /**
- * Smart redirect for /management index
- * Viewers → /management/responses (Yes/No page, the only thing they can see)
- * Admins  → /management/questions (first admin page)
+ * Smart redirect for /management index based on role (Spec §3).
+ * staff       → service-requests (queue only)
+ * supervisor  → service-requests (all dept view)
+ * dept_head   → service-requests (own dept view)
+ * owner       → service-requests (analytics hub)
+ * gm          → service-requests (analytics hub)
+ * saas_admin  → questions (config page)
  * Time: O(1), Space: O(1)
  */
 const ManagementIndexRedirect: React.FC = () => {
   const { user } = useAuthStore();
-  const isViewerOnly = user?.role === 'viewer' || user?.role === 'department_viewer';
-  return <Navigate to={isViewerOnly ? '/management/responses' : '/management/questions'} replace />;
+  const role = user?.role;
+
+  // Intercept owners & gms if they haven't explicitly set a working hotel in state yet
+  if ((role === 'hotel_owner' || role === 'hotel_gm') && !user?.hotelId) {
+    return <Navigate to="/select-hotel" replace />;
+  }
+
+  // Only saas_admin goes to config; everyone else goes to service requests
+  if (role === 'saas_superAdmin') {
+    return <Navigate to="/management/questions" replace />;
+  }
+  // Owners & GMs land on the analytics hub (service + feedback)
+  if (role === 'hotel_owner' || role === 'hotel_gm') {
+    return <Navigate to="/management/analytics" replace />;
+  }
+  return <Navigate to="/management/service-requests" replace />;
 };
 
 
 
-// Index Redirect Logic
+/**
+ * Index Redirect Logic (Spec §6)
+ * staff/supervisor/dept_head → service-requests (no feedback dashboard)
+ * owner/gm/saas_admin → composite analytics dashboard (feedback view)
+ * Time: O(1) for service roles, O(n) for analytics roles where n = composites
+ */
 const IndexRedirect: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const role = user?.role;
+
+  // Intercept owners & gms if they haven't explicitly set a working hotel in state yet
+  if ((role === 'hotel_owner' || role === 'hotel_gm') && !user?.hotelId) {
+    return <Navigate to="/select-hotel" replace />;
+  }
+
+  // All hooks must be called unconditionally (React Rules of Hooks)
   const {
     composites,
     fetchComposites,
@@ -113,14 +154,18 @@ const IndexRedirect: React.FC = () => {
   const fetchAttempted = React.useRef(false);
 
   useEffect(() => {
+    // Service-only roles don't need composites
+    if (role === 'hotel_dept_staff' || role === 'hotel_supervisor' || role === 'hotel_dept_supervisor') return;
     resetAnalytics();
     if (composites.length === 0 && !isLoadingComposites && !fetchAttempted.current) {
       fetchAttempted.current = true;
       fetchComposites();
     }
-  }, [composites, fetchComposites, isLoadingComposites, resetAnalytics]);
+  }, [composites, fetchComposites, isLoadingComposites, resetAnalytics, role]);
 
   useEffect(() => {
+    // Service-only roles don't need composites
+    if (role === 'hotel_dept_staff' || role === 'hotel_supervisor' || role === 'hotel_dept_supervisor') return;
     if (!isLoadingComposites && composites.length > 0) {
       let firstComposite = composites.find(
         (c) => c.category === initialCategory
@@ -131,7 +176,12 @@ const IndexRedirect: React.FC = () => {
         navigate(`/view/${firstComposite._id}`, { replace: true });
       }
     }
-  }, [isLoadingComposites, composites, initialCategory, navigate]);
+  }, [isLoadingComposites, composites, initialCategory, navigate, role]);
+
+  // Service-only roles skip analytics dashboard entirely (Spec §3.5-§3.7)
+  if (role === 'hotel_dept_staff' || role === 'hotel_supervisor' || role === 'hotel_dept_supervisor') {
+    return <Navigate to="/management/service-requests" replace />;
+  }
 
   if (isLoadingComposites) {
     return <LoadingFallback />;
@@ -142,7 +192,7 @@ const IndexRedirect: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)] text-gray-500">
         <p className="text-xl font-semibold mb-2">No Data Dashboard Configured</p>
         <p className="mb-6">There are no analytics composites set up yet.</p>
-        {(user?.role === 'admin' || user?.role === 'super_admin') && (
+        {user?.role === 'saas_superAdmin' && (
           <button
             onClick={() => navigate('/management/composites')}
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
@@ -165,9 +215,10 @@ function App() {
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/select-hotel" element={<HotelSelectionPage />} />
             {/* Admin & Viewer Routes */}
             <Route
-              element={<ProtectedRoute allowedRoles={["super_admin", "admin", "viewer", "department_viewer"]} />}
+              element={<ProtectedRoute allowedRoles={["saas_superAdmin", "hotel_owner", "hotel_gm", "hotel_supervisor", "hotel_dept_supervisor", "hotel_dept_staff"]} />}
             >
               <Route path="/" element={<Layout />}>
                 <Route index element={<IndexRedirect />} />
@@ -176,25 +227,33 @@ function App() {
               </Route>
               <Route path="/compare/:category" element={<ComparePage />} />
               {/* Management Routes */}
-              <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin", "viewer", "department_viewer"]} />}>
+              <Route element={<ProtectedRoute allowedRoles={["saas_superAdmin", "hotel_owner", "hotel_gm", "hotel_supervisor", "hotel_dept_supervisor", "hotel_dept_staff"]} />}>
                 <Route path="/management" element={<ManagementLayout />}>
                   {/* Smart index redirect based on role */}
                   <Route index element={<ManagementIndexRedirect />} />
-                  {/* Shared report routes — accessible by all roles including viewers */}
-                  <Route path="responses" element={<GuestIssuesPage />} />
+
+                  {/* Service operations — all authenticated roles (Spec §6) */}
                   <Route path="service-requests" element={<ServiceRequestsPage />} />
                   <Route path="service-analytics" element={<ServiceAnalyticsPage />} />
-                  <Route
-                    path="report/low-rated-questions"
-                    element={<LowRatedQuestionsPage />}
-                  />
-                  <Route
-                    path="report/question-detail/:questionId"
-                    element={<QuestionDetailReportPage />}
-                  />
+                  <Route element={<ProtectedRoute allowedRoles={["hotel_owner", "hotel_gm"]} />}>
+                    <Route path="analytics" element={<AnalyticsHubPage />} />
+                  </Route>
 
-                  {/* Admin-only sections */}
-                  <Route element={<ProtectedRoute allowedRoles={["super_admin", "admin"]} />}>
+                  {/* Feedback analytics — owner, gm, saas_admin only (Spec §7.3) */}
+                  <Route element={<ProtectedRoute allowedRoles={["saas_superAdmin", "hotel_owner", "hotel_gm"]} />}>
+                    <Route path="responses" element={<GuestIssuesPage />} />
+                    <Route
+                      path="report/low-rated-questions"
+                      element={<LowRatedQuestionsPage />}
+                    />
+                    <Route
+                      path="report/question-detail/:questionId"
+                      element={<QuestionDetailReportPage />}
+                    />
+                  </Route>
+
+                  {/* Configuration — saas_admin only (Spec §3.3: owner is view-only) */}
+                  <Route element={<ProtectedRoute allowedRoles={["saas_superAdmin"]} />}>
                     <Route path="composites" element={<CompositesPageMngt />} />
                     <Route path="questions" element={<QuestionsPage />} />
                     <Route path="users" element={<UsersPage />} />
@@ -211,11 +270,12 @@ function App() {
 
             {/* Super Admin Routes — separate UI */}
             <Route
-              element={<ProtectedRoute allowedRoles={["super_admin"]} />}
+              element={<ProtectedRoute allowedRoles={["saas_superAdmin"]} />}
             >
               <Route path="/super-admin" element={<SuperAdminLayout />}>
                 <Route index element={<Navigate to="hotels" replace />} />
                 <Route path="hotels" element={<SAHotelsPage />} />
+                <Route path="departments" element={<SADepartmentsPage />} />
                 <Route path="users" element={<SAUsersPage />} />
               </Route>
             </Route>
@@ -223,19 +283,23 @@ function App() {
             {/* Public Review Routes - No Auth Required */}
 
             {/* Room-specific QR routes (/:hotelCode/room/:roomNumber/...) */}
-            <Route path="/:orgSlug/:hotelCode/room/:roomNumber" element={<GuestLandingPage />} />
             <Route path="/:hotelCode/room/:roomNumber" element={<GuestLandingPage />} />
-            <Route path="/:orgSlug/:hotelCode/room/:roomNumber/service-request" element={<ServiceRequestForm />} />
             <Route path="/:hotelCode/room/:roomNumber/service-request" element={<ServiceRequestForm />} />
-            <Route path="/:orgSlug/:hotelCode/room/:roomNumber/feedback" element={<ReviewRouter />} />
             <Route path="/:hotelCode/room/:roomNumber/feedback" element={<ReviewRouter />} />
+            <Route path="/:hotelCode/room/:roomNumber/service-request/service-request" element={<Navigate to="../service-request" replace />} />
+            <Route path="/:hotelCode/room/:roomNumber/feedback/feedback" element={<Navigate to="../feedback" replace />} />
 
-            {/* Generic QR Landing Page (no room) */}
-            <Route path="/:orgSlug/:hotelCode" element={<GuestLandingPage />} />
+            {/* Category QR routes — facility-level QR codes without room number (Spec §10.1) */}
+            <Route path="/:hotelCode/category/:categorySlug" element={<GuestLandingPage />} />
+            <Route path="/:hotelCode/category/:categorySlug/service-request" element={<ServiceRequestForm />} />
+            <Route path="/:hotelCode/category/:categorySlug/feedback" element={<ReviewRouter />} />
+
+            {/* Generic QR Landing Page (no room, no category) */}
             <Route path="/:hotelCode" element={<GuestLandingPage />} />
             {/* Service Request Form (no room) */}
-            <Route path="/:orgSlug/:hotelCode/service-request" element={<ServiceRequestForm />} />
             <Route path="/:hotelCode/service-request" element={<ServiceRequestForm />} />
+            {/* Live status tracking */}
+            <Route path="/:hotelCode/service-request/:requestId" element={<ServiceRequestStatusPage />} />
             {/* Feedback / Review Routes */}
             <Route path="/:orgSlug/:hotelCode/feedback" element={<ReviewRouter />} />
             <Route path="/:hotelCode/feedback" element={<ReviewRouter />} />

@@ -46,7 +46,7 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
     const { uploadLogo, deleteLogo } = useHotelStore();
     const { updateHotelLogo } = useAuthStore();
     const userRole = useAuthStore((s) => s.user?.role);
-    const isSuperAdmin = userRole === 'super_admin';
+    const isSuperAdmin = userRole === 'saas_superAdmin';
 
     // Crop modal state
     const [cropSrc, setCropSrc] = useState<string | null>(null);

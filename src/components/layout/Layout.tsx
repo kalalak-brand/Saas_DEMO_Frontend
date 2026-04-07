@@ -24,14 +24,25 @@ function usePrevious<T>(value: T): T | undefined {
   return ref.current; // Return value from *previous* render
 }
 
-// useResponsive hook
+/**
+ * useResponsive hook
+ * Returns true for mobile/tablet (<1024px) — overlay sidebar.
+ * Returns false for desktop (≥1024px) — persistent sidebar bar.
+ * Time: O(1), Space: O(1)
+ */
 const useResponsive = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth < 1024;
+  });
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const mql = window.matchMedia('(max-width: 1023px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
   }, []);
+
   return isMobile;
 };
 
@@ -40,7 +51,7 @@ export const Layout = () => {
   const navigate = useNavigate();
   const params = useParams<{ itemId?: string }>();
 
-  const [isSidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [isSidebarOpen, setSidebarOpen] = useState(!isMobile); // Open by default on desktop
   const [sidebarMode, setSidebarMode] =
     useState<AnalyticsItemType>("composite"); // ✅ CHANGED: Data stores consolidated to useManagementStore
 
@@ -93,10 +104,10 @@ export const Layout = () => {
     fetchAvailableYears();
   }, [fetchComposites, fetchQuestions, fetchCategories, fetchAvailableYears]); // Adjust sidebar open state (no change)
 
+  // Auto-open sidebar on desktop, auto-close on mobile
   useEffect(() => {
-    if (!isMobile) setSidebarOpen(true);
-    else setSidebarOpen(false);
-  }, [isMobile]); // Handle selecting an item (no change)
+    setSidebarOpen(!isMobile);
+  }, [isMobile]);
 
   const handleSelectItem = useCallback(
     (id: string, name: string, type: AnalyticsItemType) => {
@@ -297,8 +308,9 @@ export const Layout = () => {
           currentItemId={analyticsItemId ?? undefined}
         />
 
-        {/* Responsive main content: phone(p-2) tablet(p-4) laptop(p-6) desktop(p-8) 4K/TV(p-10) */}
-        <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 lg:p-2 2xl:p bg-gray-100">
+        {/* Responsive main content: phone(p-2) tablet(p-4) desktop(p-6) */}
+        {/* On desktop (≥1024px), offset by sidebar width (w-64 = 16rem) */}
+        <main className={`flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 lg:p-2 2xl:p bg-gray-100 transition-[margin] duration-300 ${!isMobile && isSidebarOpen ? 'lg:ml-64' : ''}`}>
           <div className="max-w-[2400px] mx-auto">
             <Outlet />
           </div>

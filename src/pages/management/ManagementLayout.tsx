@@ -154,16 +154,55 @@ const ManagementLayout: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const user = useAuthStore((state) => state.user);
-    const isViewerOnly = user?.role === 'viewer' || user?.role === 'department_viewer';
+    const role = user?.role || '';
 
-    // Generate nav groups dynamically based on role
+    /**
+     * Role-based navigation (Spec §3, §7.3):
+     *   saas_admin  → Full config (Form Builder + System Admin)
+     *   owner       → Analytics only (service + feedback) — NO config (Spec §3.3)
+     *   gm          → Analytics only (service + feedback) — NO config (Spec §3.4)
+     *   supervisor  → Service operations only — NO feedback analytics (Spec §3.5)
+     *   dept_head   → Service operations only — NO feedback analytics (Spec §3.6)
+     *   staff       → Service requests queue only — NO analytics (Spec §3.7)
+     */
     const activeNavGroups = useMemo(() => {
-        if (isViewerOnly) {
+        // Staff: minimal view — service request queue only
+        if (role === 'hotel_dept_staff') {
             return [
                 {
-                    title: 'Reports',
+                    title: 'My Queue',
+                    icon: Bell,
+                    items: [
+                        { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
+                    ],
+                    defaultOpen: true,
+                }
+            ];
+        }
+
+        // Supervisor / Dept Head: service operations only, NO feedback analytics
+        if (role === 'hotel_supervisor' || role === 'hotel_dept_supervisor') {
+            return [
+                {
+                    title: 'Operations',
                     icon: BarChart2,
                     items: [
+                        { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
+                        { href: '/management/service-analytics', icon: BarChart3, label: 'Service Analytics' },
+                    ],
+                    defaultOpen: true,
+                }
+            ];
+        }
+
+        // Owner / GM: analytics only (both service + feedback), NO config
+        if (role === 'hotel_owner' || role === 'hotel_gm') {
+            return [
+                {
+                    title: 'Analytics',
+                    icon: BarChart2,
+                    items: [
+                        { href: '/management/analytics', icon: BarChart3, label: 'Analytics Home' },
                         { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
                         { href: '/management/service-analytics', icon: BarChart3, label: 'Service Analytics' },
                         { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
@@ -173,6 +212,8 @@ const ManagementLayout: React.FC = () => {
                 }
             ];
         }
+
+        // saas_admin: full access (config + analytics)
         return [
             {
                 title: 'Form Builder',
@@ -187,7 +228,7 @@ const ManagementLayout: React.FC = () => {
                 defaultOpen: true,
             },
         ];
-    }, [isViewerOnly]);
+    }, [role]);
 
     // Track which groups are expanded
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
@@ -223,8 +264,9 @@ const ManagementLayout: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-background">
-            {/* Mobile Header */}
-            <div className="md:hidden flex items-center justify-between p-4 bg-surface shadow-sm sticky top-0 z-40">
+            {/* Top Header — always visible with hamburger toggle */}
+            <Nav category={category} setCategory={setCategory} />
+            <div className="flex items-center justify-between p-3 px-4 bg-surface shadow-sm sticky top-0 z-40 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                     <Link
                         to="/"
@@ -244,29 +286,22 @@ const ManagementLayout: React.FC = () => {
                 </button>
             </div>
 
-            {/* Desktop Nav */}
-            <div className="hidden md:block">
-                <Nav category={category} setCategory={setCategory} />
-            </div>
-
             <div className="flex flex-1 overflow-hidden">
-                {/* Sidebar Overlay (Mobile) */}
+                {/* Sidebar Overlay Backdrop — always visible when open */}
                 {isSidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
                         onClick={toggleSidebar}
                         aria-hidden="true"
                     />
                 )}
 
-                {/* Sidebar */}
+                {/* Sidebar — always overlay-style */}
                 <aside
                     className={clsx(
                         'fixed inset-y-0 left-0 z-50 flex flex-col w-72 bg-primary shadow-xl',
                         'transition-transform duration-300 ease-out',
-                        isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
-                        'md:relative md:translate-x-0 md:shadow-lg md:rounded-2xl md:ml-3 md:my-3',
-                        'md:h-[calc(100vh-88px)]'
+                        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     )}
                 >
                     {/* Sidebar Header */}
@@ -284,7 +319,7 @@ const ManagementLayout: React.FC = () => {
                         </div>
                         <button
                             onClick={toggleSidebar}
-                            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg md:hidden transition-colors"
+                            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                             aria-label="Close menu"
                         >
                             <X size={20} />

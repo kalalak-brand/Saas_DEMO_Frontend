@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works — Kalalak Hotel Intelligence Platform</title>
+    <meta name="description" content="Step-by-step guide: From QR code scan to real-time analytics. See how Kalalak transforms hotel guest service operations.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green: #1B4D3E;
+            --green-light: #2d6a4f;
+            --green-pale: rgba(27,77,62,0.06);
+            --gold: #D4A574;
+            --gold-light: #e8c9a4;
+            --bg: #f8fafc;
+            --bg-dark: #0a1a14;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --card: #ffffff;
+            --shadow: 0 4px 32px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 48px rgba(27,77,62,0.12);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ── Navigation ── */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(248,250,252,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(27,77,62,0.08);
+            padding: 0 24px;
+        }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+        }
+        .nav-logo {
+            font-size: 20px; font-weight: 800; color: var(--green);
+            text-decoration: none; letter-spacing: -0.5px;
+        }
+        .nav-logo span { color: var(--gold); }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a {
+            font-size: 14px; font-weight: 500; color: var(--text-muted);
+            text-decoration: none; transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--green); }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 100px 24px 60px;
+            background: linear-gradient(180deg, #f0f7f4 0%, var(--bg) 100%);
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -200px; right: -200px;
+            width: 600px; height: 600px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(27,77,62,0.04) 0%, transparent 70%);
+        }
+        .hero::after {
+            content: ''; position: absolute; bottom: -150px; left: -150px;
+            width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,165,116,0.06) 0%, transparent 70%);
+        }
+        .hero-inner {
+            max-width: 1100px; margin: 0 auto; text-align: center;
+            position: relative; z-index: 1;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 20px; border-radius: 100px;
+            background: var(--green-pale); color: var(--green);
+            font-size: 13px; font-weight: 600; margin-bottom: 28px;
+            border: 1px solid rgba(27,77,62,0.1);
+        }
+        .hero-badge svg { width: 16px; height: 16px; }
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 64px); font-weight: 900;
+            line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 50%, var(--gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 18px; color: var(--text-muted); max-width: 600px;
+            margin: 0 auto 40px; line-height: 1.7;
+        }
+        .hero-image {
+            max-width: 700px; width: 100%; margin: 0 auto;
+            border-radius: 24px; overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            animation: floatUp 1s ease-out;
+        }
+        .hero-image img { width: 100%; display: block; }
+
+        /* ── Section Shared ── */
+        .section {
+            padding: 100px 24px;
+            position: relative;
+        }
+        .section-header {
+            text-align: center; max-width: 700px; margin: 0 auto 64px;
+        }
+        .section-header h2 {
+            font-size: clamp(28px, 4vw, 40px); font-weight: 800;
+            letter-spacing: -1px; margin-bottom: 16px; color: var(--text);
+        }
+        .section-header p {
+            font-size: 17px; color: var(--text-muted); line-height: 1.7;
+        }
+
+        /* ── Timeline ── */
+        .timeline {
+            max-width: 1000px; margin: 0 auto;
+            position: relative;
+        }
+        .timeline::before {
+            content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+            width: 3px; background: linear-gradient(180deg, var(--green) 0%, var(--gold) 50%, var(--green-light) 100%);
+            transform: translateX(-50%);
+            border-radius: 3px;
+        }
+
+        .step {
+            display: flex; align-items: flex-start; margin-bottom: 80px;
+            position: relative;
+            opacity: 0; transform: translateY(40px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .step.visible { opacity: 1; transform: translateY(0); }
+        .step:nth-child(even) { flex-direction: row-reverse; }
+
+        .step-content {
+            flex: 1; padding: 0 48px;
+        }
+        .step:nth-child(odd) .step-content { text-align: right; }
+        .step:nth-child(even) .step-content { text-align: left; }
+
+        .step-visual {
+            flex: 1; padding: 0 48px;
+        }
+
+        .step-number {
+            position: absolute; left: 50%; top: 12px;
+            transform: translateX(-50%);
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--green-light));
+            color: #fff; font-size: 20px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(27,77,62,0.3);
+            z-index: 2;
+        }
+        .step:nth-child(4) .step-number,
+        .step:nth-child(5) .step-number {
+            background: linear-gradient(135deg, var(--gold), #c49660);
+            box-shadow: 0 4px 20px rgba(212,165,116,0.3);
+        }
+        .step:nth-child(6) .step-number,
+        .step:nth-child(7) .step-number {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            box-shadow: 0 4px 20px rgba(14,165,233,0.3);
+        }
+
+        .step-icon {
+            font-size: 40px; margin-bottom: 12px; display: block;
+        }
+        .step-title {
+            font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+            margin-bottom: 10px; color: var(--text);
+        }
+        .step-desc {
+            font-size: 15px; color: var(--text-muted); line-height: 1.7;
+        }
+        .step-tag {
+            display: inline-block; padding: 4px 12px; border-radius: 6px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-top: 12px;
+        }
+        .tag-guest { background: rgba(27,77,62,0.08); color: var(--green); }
+        .tag-system { background: rgba(212,165,116,0.15); color: #a0753a; }
+        .tag-staff { background: rgba(14,165,233,0.1); color: #0369a1; }
+        .tag-owner { background: rgba(139,92,246,0.1); color: #7c3aed; }
+
+        .step-screenshot {
+            border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .step-screenshot img {
+            width: 100%; display: block;
+        }
+
+        /* ── Summary Cards ── */
+        .summary-section {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0f2b1f 100%);
+            padding: 100px 24px; color: #fff;
+        }
+        .summary-section .section-header h2 { color: #fff; }
+        .summary-section .section-header p { color: rgba(255,255,255,0.6); }
+
+        .summary-grid {
+            max-width: 1000px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .summary-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 32px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s;
+        }
+        .summary-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(212,165,116,0.3);
+        }
+        .summary-card-icon {
+            font-size: 36px; margin-bottom: 16px; display: block;
+        }
+        .summary-card h3 {
+            font-size: 18px; font-weight: 700; margin-bottom: 8px;
+        }
+        .summary-card p {
+            font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6;
+        }
+
+        /* ── Roles Section ── */
+        .roles-grid {
+            max-width: 1000px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .role-card {
+            background: var(--card); border-radius: 20px; padding: 28px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: var(--shadow);text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .role-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .role-emoji { font-size: 36px; margin-bottom: 12px; }
+        .role-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+        .role-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center; padding: 48px 24px;
+            border-top: 1px solid rgba(0,0,0,0.04);
+        }
+        .footer-logo { font-size: 24px; font-weight: 800; color: var(--green); margin-bottom: 8px; }
+        .footer-logo span { color: var(--gold); }
+        .footer p { font-size: 13px; color: var(--text-light); }
+
+        /* ── Animations ── */
+        @keyframes floatUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .fade-in {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .timeline::before { left: 28px; }
+            .step { flex-direction: column !important; padding-left: 72px; }
+            .step-number { left: 28px !important; transform: translateX(-50%); }
+            .step-content, .step-visual { padding: 0; text-align: left !important; }
+            .step-visual { margin-top: 20px; }
+            .nav-links { display: none; }
+            .hero { min-height: auto; padding: 100px 24px 60px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="#" class="nav-logo">Kalalak<span>.</span></a>
+        <div class="nav-links">
+            <a href="#how-it-works">How It Works</a>
+            <a href="#roles">Roles</a>
+            <a href="#features">Features</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Hotel Intelligence Platform
+        </div>
+        <h1>From QR Scan<br>to Actionable Insights</h1>
+        <p>See how Kalalak transforms hotel operations — from the moment a guest scans a QR code to real-time performance analytics on your dashboard.</p>
+        <div class="hero-image">
+            <img src="/images/flow-hero.png" alt="Kalalak workflow overview" loading="eager">
+        </div>
+    </div>
+</section>
+
+<!-- Timeline Section -->
+<section class="section" id="how-it-works">
+    <div class="section-header">
+        <h2>The Complete Journey</h2>
+        <p>Every service request follows this seamless 7-step lifecycle — from guest request to management insight.</p>
+    </div>
+
+    <div class="timeline">
+
+        <!-- Step 1 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">📱</span>
+                <h3 class="step-title">Guest Scans QR Code</h3>
+                <p class="step-desc">A unique QR code is placed in each hotel room. When a guest needs anything — towels, cleaning, room service — they simply scan the code with their phone camera. No app download required.</p>
+                <span class="step-tag tag-guest">Guest Action</span>
+            </div>
+            <div class="step-number">1</div>
+            <div class="step-visual">
+                <div class="step-screenshot">
+                    <img src="/images/step-landing.png" alt="Guest landing page after QR scan" loading="lazy">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">🛎️</span>
+                <h3 class="step-title">Select a Service</h3>
+                <p class="step-desc">The guest sees a beautiful menu of available services — Need Towel, Room Cleaning, AC Not Working, and more. One tap selects the service. Room number is auto-detected from the QR code.</p>
+                <span class="step-tag tag-guest">Guest Action</span>
+            </div>
+            <div class="step-number">2</div>
+            <div class="step-visual">
+                <div class="step-screenshot">
+                    <img src="/images/step-form.png" alt="Service request selection form" loading="lazy">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">✅</span>
+                <h3 class="step-title">Request Confirmed</h3>
+                <p class="step-desc">Instant confirmation. The guest sees which department received the request (e.g., Housekeeping) and can opt-in for push notifications to get real-time updates on their request status.</p>
+                <span class="step-tag tag-guest">Guest Action</span>
+            </div>
+            <div class="step-number">3</div>
+            <div class="step-visual">
+                <div class="step-screenshot">
+                    <img src="/images/step-success.png" alt="Request sent confirmation" loading="lazy">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">⚡</span>
+                <h3 class="step-title">Real-Time Staff Alert</h3>
+                <p class="step-desc">The moment a request is submitted, the assigned department staff receives an instant notification via Socket.IO and web push — with room number, service type, and priority level. No delays.</p>
+                <span class="step-tag tag-system">System — Instant</span>
+            </div>
+            <div class="step-number">4</div>
+            <div class="step-visual">
+                <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 16px; padding: 32px; color: #fff;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                        <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(239,68,68,0.15); display:flex; align-items:center; justify-content:center; font-size: 20px;">🔔</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 15px;">New Service Request</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.5);">Just now</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; border-left: 3px solid #ef4444;">
+                        <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">🧺 Need Towel — Room 101</div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.5);">Department: Housekeeping</div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.5);">Status: <span style="color: #f59e0b; font-weight: 600;">Pending</span></div>
+                    </div>
+                    <div style="margin-top: 16px; display: flex; gap: 10px;">
+                        <div style="flex:1; padding: 10px; border-radius: 10px; background: rgba(34,197,94,0.15); text-align: center; font-size: 13px; font-weight: 600; color: #22c55e; cursor: pointer;">▶ Start</div>
+                        <div style="flex:1; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.06); text-align: center; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);">Details</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">🏃</span>
+                <h3 class="step-title">Staff Starts Service</h3>
+                <p class="step-desc">The staff member clicks <strong>"Start"</strong> to begin servicing the request. The status changes to <em>In Progress</em> and the response timer begins. If no one picks it up within 30 minutes, an automatic SLA escalation is triggered.</p>
+                <span class="step-tag tag-staff">Staff Action</span>
+            </div>
+            <div class="step-number">5</div>
+            <div class="step-visual">
+                <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 16px; padding: 32px; color: #fff;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                        <div style="flex: 1; background: rgba(59,130,246,0.1); border-radius: 12px; padding: 16px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 800; color: #3b82f6;">25</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4);">Total</div>
+                        </div>
+                        <div style="flex: 1; background: rgba(245,158,11,0.1); border-radius: 12px; padding: 16px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 800; color: #f59e0b;">7</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4);">Pending</div>
+                        </div>
+                        <div style="flex: 1; background: rgba(34,197,94,0.1); border-radius: 12px; padding: 16px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 800; color: #22c55e;">1</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4);">In Progress</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; border-left: 3px solid #3b82f6;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600;">🧺 Need Towel — Room 101</div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">Housekeeping · 3 min ago</div>
+                            </div>
+                            <div style="padding: 6px 14px; border-radius: 8px; background: rgba(59,130,246,0.2); color: #60a5fa; font-size: 12px; font-weight: 600;">In Progress</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; padding: 10px 16px; border-radius: 10px; background: rgba(34,197,94,0.12); text-align: center; font-size: 13px; font-weight: 600; color: #22c55e;">✓ Mark Complete</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">⭐</span>
+                <h3 class="step-title">Guest Rates Service</h3>
+                <p class="step-desc">After the service is completed, the guest receives a push notification inviting them to rate the experience (1-5 stars). Ratings ≥ 4 prompt a Google Review redirect. Ratings ≤ 3 create an internal alert for management.</p>
+                <span class="step-tag tag-guest">Guest Feedback</span>
+            </div>
+            <div class="step-number">6</div>
+            <div class="step-visual">
+                <div style="background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">⭐⭐⭐⭐⭐</div>
+                    <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">How was our service?</h4>
+                    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">Your feedback helps us improve</p>
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(27,77,62,0.06); display:flex;align-items:center;justify-content:center;font-size:22px; border: 2px solid transparent;">😞</div>
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(27,77,62,0.06); display:flex;align-items:center;justify-content:center;font-size:22px; border: 2px solid transparent;">😐</div>
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(27,77,62,0.06); display:flex;align-items:center;justify-content:center;font-size:22px; border: 2px solid transparent;">🙂</div>
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(27,77,62,0.06); display:flex;align-items:center;justify-content:center;font-size:22px; border: 2px solid transparent;">😊</div>
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(27,77,62,0.08); display:flex;align-items:center;justify-content:center;font-size:22px; border: 2px solid var(--green);">🤩</div>
+                    </div>
+                    <div style="padding: 12px; border-radius: 10px; background: linear-gradient(135deg, var(--green), var(--green-light)); color: #fff; font-weight: 600; font-size: 14px;">Submit Feedback</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step">
+            <div class="step-content">
+                <span class="step-icon">📊</span>
+                <h3 class="step-title">Management Analytics</h3>
+                <p class="step-desc">Hotel owners and GMs access a powerful analytics dashboard showing real-time KPIs: total requests, completion rates, average response times, satisfaction scores, and department-level performance breakdowns.</p>
+                <span class="step-tag tag-owner">Owner / GM View</span>
+            </div>
+            <div class="step-number">7</div>
+            <div class="step-visual">
+                <div class="step-screenshot">
+                    <img src="/images/step-analytics.png" alt="Service analytics dashboard" loading="lazy">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Roles Section -->
+<section class="section" id="roles" style="background: #f0f7f4;">
+    <div class="section-header">
+        <h2>Built for Every Role</h2>
+        <p>Each user sees exactly what they need — nothing more, nothing less. Role-based access control ensures security and clarity.</p>
+    </div>
+    <div class="roles-grid">
+        <div class="role-card fade-in">
+            <div class="role-emoji">👑</div>
+            <div class="role-name">Hotel Owner</div>
+            <div class="role-desc">Full analytics: service performance, feedback reports, department KPIs, satisfaction trends</div>
+        </div>
+        <div class="role-card fade-in">
+            <div class="role-emoji">🎩</div>
+            <div class="role-name">General Manager</div>
+            <div class="role-desc">Same analytics as owner. Service + feedback insights for strategic decisions</div>
+        </div>
+        <div class="role-card fade-in">
+            <div class="role-emoji">👔</div>
+            <div class="role-name">Supervisor</div>
+            <div class="role-desc">Cross-department service monitoring. View all requests, track response times</div>
+        </div>
+        <div class="role-card fade-in">
+            <div class="role-emoji">📋</div>
+            <div class="role-name">Dept Head</div>
+            <div class="role-desc">Own department requests only. Department-scoped analytics and team performance</div>
+        </div>
+        <div class="role-card fade-in">
+            <div class="role-emoji">🛠️</div>
+            <div class="role-name">Staff</div>
+            <div class="role-desc">Service request queue. Start, complete, and manage assigned tasks in real-time</div>
+        </div>
+        <div class="role-card fade-in">
+            <div class="role-emoji">🏨</div>
+            <div class="role-name">Guest</div>
+            <div class="role-desc">No login needed. Scan QR → request service → rate experience. Simple and fast</div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Summary -->
+<section class="summary-section" id="features">
+    <div class="section-header">
+        <h2>Engineered for Excellence</h2>
+        <p>Every feature is designed to eliminate operational blind spots and delight guests.</p>
+    </div>
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-icon">⚡</span>
+            <h3>Real-Time Notifications</h3>
+            <p>WebSocket + Push Notifications ensure staff are alerted within milliseconds of a new request. Zero delay.</p>
+        </div>
+        <div class="summary-card">
+            <span class="summary-card-icon">⏱️</span>
+            <h3>30-Min SLA Escalation</h3>
+            <p>Requests not picked up within 30 minutes automatically escalate. A background cron job monitors every pending request.</p>
+        </div>
+        <div class="summary-card">
+            <span class="summary-card-icon">📈</span>
+            <h3>Department Analytics</h3>
+            <p>Completion rates, avg response times, and satisfaction scores broken down by Housekeeping, F&B, Front Office, and more.</p>
+        </div>
+        <div class="summary-card">
+            <span class="summary-card-icon">🔒</span>
+            <h3>Multi-Tenant Isolation</h3>
+            <p>Organization → Hotel → Department → User. Every query is scoped. Your data is always isolated and secure.</p>
+        </div>
+        <div class="summary-card">
+            <span class="summary-card-icon">📱</span>
+            <h3>QR Code System</h3>
+            <p>Generate room-specific and category-specific QR codes from the admin panel. Guests need zero setup.</p>
+        </div>
+        <div class="summary-card">
+            <span class="summary-card-icon">⚠️</span>
+            <h3>Low Rating Alerts</h3>
+            <p>Service ratings ≤ 3 stars create internal alerts visible only to management. Resolve issues before they escalate publicly.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-logo">Kalalak<span>.</span></div>
+    <p>Hotel Intelligence Platform — Transforming guest experience operations</p>
+    <p style="margin-top: 8px;">© 2026 Acculead Technologies. All rights reserved.</p>
+</footer>
+
+<!-- Scroll Animation Script -->
+<script>
+    // Intersection Observer for scroll-triggered animations
+    // Time: O(n) initial setup, O(1) per intersection callback
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    document.querySelectorAll('.step, .fade-in').forEach((el) => observer.observe(el));
+</script>
+
+</body>
+</html>

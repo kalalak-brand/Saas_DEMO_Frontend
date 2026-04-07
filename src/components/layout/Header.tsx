@@ -1,12 +1,15 @@
 //components/layout/header.tsx
 import { useState, useRef, useEffect } from "react";
-import { Menu, Settings, User, Building2, Shield, LogOut, ChevronDown, Bell, CheckCheck, AlertTriangle, Phone, DoorOpen, UserIcon, ChevronRight } from "lucide-react";
+import { Menu, Settings, User, Building2, Shield, LogOut, ChevronDown, Bell, CheckCheck, AlertTriangle, Phone, DoorOpen, UserIcon, ChevronRight, BarChart3 } from "lucide-react";
 import { FaDownload, FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useReportStore } from '../../stores/reportStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useNotificationStore, NotificationItem, LowRatedQuestionItem } from '../../stores/notificationStore';
 import YearlyReportModal from '../common/YearlyReportModal';
+import { PWAInstallButton } from '../../hooks/usePWA';
+import { subscribeCurrentUserToPush } from '../../utils/userPushSubscription';
+import toast from 'react-hot-toast';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -137,16 +140,22 @@ const NotificationCard = ({ notification: n, onMarkRead, timeAgo }: {
 
 export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const openModal = useReportStore((state) => state.openModal);
-  const { user, logout } = useAuthStore();
+  const { user, logout, token } = useAuthStore();
   const { unreadCount, notifications, loading, fetchNotifications, markAsRead, markAllAsRead, startPolling, stopPolling } = useNotificationStore();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const [pushEnabling, setPushEnabling] = useState(false);
 
-  // Show management link for hotel-level roles so they can access reports
-  const canAccessManagement = ['admin', 'super_admin', 'viewer', 'department_viewer'].includes(user?.role || '');
+  // Show management link only for config-capable roles (saas admin + owner)
+  // Time: O(1) via Set lookup
+  const canAccessManagement = user?.role === 'saas_superAdmin' || user?.role === 'hotel_owner';
+
+  // GM gets direct access to service analytics from the dashboard header
+  // Time: O(1)
+  const canAccessServiceAnalysis = user?.role === 'hotel_gm';
 
   // Close profile dropdown on outside click
   // Time: O(1), Space: O(1)
@@ -207,24 +216,33 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
     navigate('/login', { replace: true });
   };
 
+  const handleEnablePushForUser = async () => {
+    if (!token) return;
+    setPushEnabling(true);
+    const ok = await subscribeCurrentUserToPush(token);
+    setPushEnabling(false);
+    if (ok) toast.success('Notifications enabled on this device.');
+    else toast.error('Could not enable notifications. Check permission and VAPID key.');
+  };
+
   const roleLabels: Record<string, string> = {
-    saas_admin: 'SaaS Admin',
-    org_admin: 'Org Admin',
-    super_admin: 'Super Admin',
-    admin: 'Admin',
-    viewer: 'Viewer',
-    department_viewer: 'Dept. Viewer',
+    saas_superAdmin: 'SaaS Admin',
+    hotel_owner: 'Owner',
+    hotel_gm: 'General Manager',
+    hotel_supervisor: 'Supervisor',
+    hotel_dept_supervisor: 'Dept. Head',
+    hotel_dept_staff: 'Staff',
   };
   const roleColors: Record<string, string> = {
-    saas_admin: 'bg-red-100 text-red-700',
-    org_admin: 'bg-orange-100 text-orange-700',
-    super_admin: 'bg-purple-100 text-purple-700',
-    admin: 'bg-blue-100 text-blue-700',
-    viewer: 'bg-gray-100 text-gray-600',
-    department_viewer: 'bg-teal-100 text-teal-700',
+    saas_superAdmin: 'bg-red-100 text-red-700',
+    hotel_owner: 'bg-purple-100 text-purple-700',
+    hotel_gm: 'bg-blue-100 text-blue-700',
+    hotel_supervisor: 'bg-teal-100 text-teal-700',
+    hotel_dept_supervisor: 'bg-amber-100 text-amber-700',
+    hotel_dept_staff: 'bg-gray-100 text-gray-600',
   };
-  const roleLabel = roleLabels[user?.role || 'viewer'] || 'Viewer';
-  const roleColor = roleColors[user?.role || 'viewer'] || 'bg-gray-100 text-gray-600';
+  const roleLabel = roleLabels[user?.role || 'hotel_dept_staff'] || 'Staff';
+  const roleColor = roleColors[user?.role || 'hotel_dept_staff'] || 'bg-gray-100 text-gray-600';
 
   return (
     <>
@@ -257,7 +275,21 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
           </div>
 
           <div className="flex items-center gap-4 md:gap-6">
-            {/* Management Link for Admin/Super Admin */}
+            
+            <PWAInstallButton />
+
+            {/* Enable Push Notifications for staff/owner/gm */}
+            <button
+              onClick={handleEnablePushForUser}
+              disabled={pushEnabling}
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors text-sm font-semibold disabled:opacity-60"
+              title="Enable notifications on this device"
+            >
+              <Bell className="h-4 w-4" />
+              {pushEnabling ? 'Enabling…' : 'Enable Alerts'}
+            </button>
+
+            {/* Management Link for Admin / Owner */}
             {canAccessManagement && (
               <Link
                 to="/management/questions"
@@ -266,6 +298,18 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
               >
                 <Settings className="h-5 w-5" />
                 <span className="hidden md:inline">Management</span>
+              </Link>
+            )}
+
+            {/* Service Analysis Link for General Manager */}
+            {canAccessServiceAnalysis && (
+              <Link
+                to="/management/service-analytics"
+                className="flex items-center gap-2 font-semibold text-primary hover:text-primary/75 transition-colors"
+                title="Service Request Analysis"
+              >
+                <BarChart3 className="h-5 w-5" />
+                <span className="hidden md:inline">Service Analysis</span>
               </Link>
             )}
             <button onClick={openModal} title="Download Yearly Report" className="flex gap-4 font-semibold">

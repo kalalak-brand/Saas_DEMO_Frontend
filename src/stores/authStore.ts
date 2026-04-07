@@ -8,7 +8,7 @@ export interface IUser {
   _id: string;
   fullName: string;
   username: string;
-  role: 'saas_admin' | 'org_admin' | 'super_admin' | 'admin' | 'viewer' | 'department_viewer';
+  role: 'saas_superAdmin' | 'hotel_owner' | 'hotel_gm' | 'hotel_supervisor' | 'hotel_dept_supervisor' | 'hotel_dept_staff';
   organizationId?: {
     _id: string;
     name: string;
@@ -20,14 +20,45 @@ export interface IUser {
     code: string;
     logo?: { url: string; publicId: string };
   };
+  departmentId?: {
+    _id: string;
+    name: string;
+  };
+  allowedHotels?: Array<{ _id: string; name: string; code: string } | string>;
   allowedCategories?: Array<{ _id: string; name: string; slug: string }> | string[];
 }
 
 /**
- * Helper to check if a role is an admin-type role
+ * Helper: check if a role has dashboard/analytics access (hotel-level view)
+ * Time: O(1) via Set lookup
  */
+const DASHBOARD_ROLES = new Set(['hotel_owner', 'hotel_gm', 'hotel_supervisor', 'hotel_dept_supervisor', 'hotel_dept_staff']);
 export const isAdminRole = (role: string): boolean => {
-  return ['saas_admin', 'org_admin', 'super_admin', 'admin', 'viewer'].includes(role);
+  return DASHBOARD_ROLES.has(role);
+};
+
+/**
+ * Helper: check if a role can modify configuration (SaaS-level or owner)
+ * Time: O(1)
+ */
+export const isConfigRole = (role: string): boolean => {
+  return role === 'saas_superAdmin' || role === 'hotel_owner';
+};
+
+/**
+ * Helper: check if a role is analytics-only (read-only dashboard)
+ * Time: O(1)
+ */
+export const isAnalyticsOnlyRole = (role: string): boolean => {
+  return role === 'hotel_owner' || role === 'hotel_gm';
+};
+
+/**
+ * Helper: check if a role is department-scoped
+ * Time: O(1)
+ */
+export const isDepartmentScopedRole = (role: string): boolean => {
+  return role === 'hotel_dept_supervisor' || role === 'hotel_dept_staff';
 };
 
 interface AuthState {
@@ -35,10 +66,14 @@ interface AuthState {
   user: IUser | null;
   isLoading: boolean;
   error: string | null;
+  isValidating: boolean; // True while verifying persisted token on startup
   setAuth: (token: string, user: IUser) => void;
+  /** Persist selected working hotel for owner/gm contexts */
+  setSelectedHotel: (hotel: { _id: string; name: string; code: string; logo?: { url: string; publicId?: string } } | null) => void;
   logout: () => void;
   login: (username: string, password: string) => Promise<IUser | null>;
   updateHotelLogo: (logo: { url: string; publicId: string } | undefined) => void;
+  validateToken: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -48,9 +83,20 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isLoading: false,
       error: null,
+      isValidating: false,
 
       setAuth: (token, user) => {
         set({ token, user, isLoading: false, error: null });
+      },
+
+      setSelectedHotel: (hotel) => {
+        const user = get().user;
+        if (!user) return;
+        // Owner/GM can switch "working hotel" in the UI
+        set({ user: { ...user, hotelId: hotel ? (hotel as any) : undefined } });
+        if (hotel?._id) {
+          localStorage.setItem('lastSelectedHotelId', hotel._id);
+        }
       },
 
       logout: () => {
@@ -98,9 +144,55 @@ export const useAuthStore = create<AuthState>()(
           return null;
         }
       },
+
+      /**
+       * Validate persisted token against /api/auth/me.
+       * Called on app startup after Zustand rehydrates from localStorage.
+       * If the token is expired/invalid, clears auth state to prevent redirect loops.
+       * Time: O(1) network call, Space: O(1)
+       */
+      validateToken: async () => {
+        const { token } = get();
+        if (!token) {
+          set({ isValidating: false });
+          return;
+        }
+
+        set({ isValidating: true });
+        try {
+          const res = await axios.get(`${BASE_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 5000,
+          });
+          // Update user data from server (in case role/permissions changed)
+          const userData = res.data?.data?.user || res.data?.user;
+          if (userData) {
+            set({ user: userData, isValidating: false });
+          } else {
+            set({ isValidating: false });
+          }
+        } catch {
+          // Token is invalid/expired — clear everything
+          console.warn('[Auth] Persisted token invalid, clearing auth state');
+          set({ token: null, user: null, isValidating: false });
+          localStorage.removeItem('review-system-categories');
+          localStorage.removeItem('review-system-settings');
+        }
+      },
     }),
     {
       name: 'auth-storage',
+      // Auto-validate token when store rehydrates from localStorage
+      onRehydrateStorage: () => {
+        return (_state, error) => {
+          if (!error) {
+            // Defer validation to next tick to ensure store is fully initialized
+            setTimeout(() => {
+              useAuthStore.getState().validateToken();
+            }, 0);
+          }
+        };
+      },
     }
   )
 );

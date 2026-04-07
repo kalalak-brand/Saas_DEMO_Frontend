@@ -4,7 +4,9 @@ import { Edit, Trash2, PlusCircle, Home, Tag } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 import { useAuthStore, IUser } from '../../stores/authStore';
 import { useHotelStore } from '../../stores/hotelStore';
-import { useActiveCategories } from '../../stores/categoryStore';
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 type UserRole = IUser['role'];
 
@@ -28,10 +30,12 @@ const UsersPage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagementUser | null>(null);
-  const [selectedRole, setSelectedRole] = useState<string>('viewer');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>('hotel_dept_staff');
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [departments, setDepartments] = useState<{ _id: string, name: string }[]>([]);
 
-  const activeCategories = useActiveCategories();
+  // We need to fetch departments for the hotel Context
+  const hotelContextId = editingUser?.hotelId || loggedInUser?.hotelId?._id || '';
 
   useEffect(() => {
     fetchUsers();
@@ -41,21 +45,46 @@ const UsersPage: React.FC = () => {
     }
   }, [fetchUsers, fetchHotels, isSuperAdmin]);
 
+  useEffect(() => {
+    // Fetch departments for department roles
+    if (!isModalOpen || (selectedRole !== 'hotel_dept_supervisor' && selectedRole !== 'hotel_dept_staff')) {
+      return;
+    }
+
+    const fetchDepts = async () => {
+      try {
+        const token = useAuthStore.getState().token;
+        const url = hotelContextId 
+          ? `${BASE_URL}/departments?hotelId=${hotelContextId}`
+          : `${BASE_URL}/departments`;
+          
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setDepartments(res.data.data.departments || []);
+      } catch (error) {
+        console.error("Failed to fetch departments", error);
+      }
+    };
+    fetchDepts();
+  }, [isModalOpen, selectedRole, hotelContextId]);
+
   const openCreateModal = () => {
     setEditingUser(null);
-    setSelectedRole('viewer');
-    setSelectedCategories([]);
+    setSelectedRole('hotel_dept_staff');
+    setSelectedDepartment('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (user: ManagementUser) => {
     setEditingUser(user);
     setSelectedRole(user.role);
-    // Extract category IDs from populated objects or plain strings
-    const catIds = (user.allowedCategories || []).map((c: any) =>
-      typeof c === 'string' ? c : c._id
-    );
-    setSelectedCategories(catIds);
+    // Extract department ID
+    let deptId = '';
+    if (user.departmentId) {
+       deptId = typeof user.departmentId === 'string' ? user.departmentId : user.departmentId._id;
+    }
+    setSelectedDepartment(deptId);
     setIsModalOpen(true);
   };
 
@@ -73,8 +102,8 @@ const UsersPage: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
-    setSelectedRole('viewer');
-    setSelectedCategories([]);
+    setSelectedRole('hotel_dept_staff');
+    setSelectedDepartment('');
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -94,14 +123,14 @@ const UsersPage: React.FC = () => {
 
 
     if (editingUser) {
-      if (editingUser._id === currentAdminId && editingUser.role === 'admin' && role !== 'admin') {
-        alert("You cannot remove your own admin role.");
+      if (editingUser._id === currentAdminId && editingUser.role === 'hotel_owner' && role !== 'hotel_owner') {
+        alert("You cannot remove your own owner role.");
         return;
       }
       updateUser(editingUser._id, {
         fullName, username, role,
         hotelId: hotelId || undefined,
-        allowedCategories: role === 'department_viewer' ? selectedCategories : undefined,
+        departmentId: (role === 'hotel_dept_supervisor' || role === 'hotel_dept_staff') ? selectedDepartment : undefined,
       });
     } else {
       if (!password) {
@@ -111,7 +140,7 @@ const UsersPage: React.FC = () => {
       createUser({
         fullName, username, password, role,
         hotelId: hotelId || undefined,
-        allowedCategories: role === 'department_viewer' ? selectedCategories : undefined,
+        departmentId: (role === 'hotel_dept_supervisor' || role === 'hotel_dept_staff') ? selectedDepartment : undefined,
       });
     }
     closeModal();
@@ -151,11 +180,11 @@ const UsersPage: React.FC = () => {
                     {getHotelNameById(user.hotelId)}
                   </span>
                 )}
-                {/* Show assigned categories for department_viewer */}
-                {user.role === 'department_viewer' && user.allowedCategories && (user.allowedCategories as any[]).length > 0 && (
+                {/* Show assigned department for dept roles */}
+                {(user.role === 'hotel_dept_supervisor' || user.role === 'hotel_dept_staff') && user.departmentId && (
                   <span className="ml-2 text-xs text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
                     <Tag size={12} />
-                    {(user.allowedCategories as any[]).map((c: any) => typeof c === 'string' ? c : c.name).join(', ')}
+                    {typeof user.departmentId === 'string' ? user.departmentId : user.departmentId.name}
                   </span>
                 )}
               </div>
@@ -209,14 +238,16 @@ const UsersPage: React.FC = () => {
             <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
             <select
               name="role" id="role"
-              defaultValue={editingUser?.role || 'viewer'}
+              defaultValue={editingUser?.role || 'hotel_dept_staff'}
               onChange={(e) => setSelectedRole(e.target.value)}
               className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              disabled={editingUser?._id === currentAdminId && editingUser?.role === 'admin'}
+              disabled={editingUser?._id === currentAdminId && editingUser?.role === 'hotel_owner'}
             >
-              <option value="viewer">Manager (Viewer)</option>
-              <option value="department_viewer">Department Head (Dept. Viewer)</option>
-              <option value="admin">Admin</option>
+              <option value="hotel_dept_staff">Staff</option>
+              <option value="hotel_dept_supervisor">Department Head</option>
+              <option value="hotel_supervisor">Supervisor</option>
+              <option value="hotel_gm">General Manager</option>
+              <option value="hotel_owner">Owner</option>
             </select>
           </div>
 
@@ -248,37 +279,29 @@ const UsersPage: React.FC = () => {
           )}
           {/* <-- END: Hotel selection dropdown --> */}
 
-          {/* Category multi-select for department_viewer */}
-          {selectedRole === 'department_viewer' && (
+          {/* Department Single Select for Dept Roles */}
+          {(selectedRole === 'hotel_dept_supervisor' || selectedRole === 'hotel_dept_staff') && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Assign Categories <span className="text-red-500">*</span>
+                Assign Department <span className="text-red-500">*</span>
               </label>
               <p className="text-xs text-gray-500 mb-2">
-                Select the departments this viewer can access.
+                Select the department this user belongs to.
               </p>
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-md">
-                {activeCategories.map(cat => (
-                  <label key={cat._id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(cat._id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedCategories(prev => [...prev, cat._id]);
-                        } else {
-                          setSelectedCategories(prev => prev.filter(id => id !== cat._id));
-                        }
-                      }}
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    {cat.name}
-                  </label>
+              <select
+                name="departmentId"
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="mt-1 block py-2 px-4 w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              >
+                <option value="">Select a department...</option>
+                {departments.map(dept => (
+                  <option key={dept._id} value={dept._id}>{dept.name}</option>
                 ))}
-              </div>
-              {selectedCategories.length === 0 && (
-                <p className="mt-1 text-xs text-red-500">
-                  Please select at least one category.
+              </select>
+              {departments.length === 0 && (
+                <p className="mt-1 text-xs text-orange-500">
+                  No departments found. Please create departments first.
                 </p>
               )}
             </div>

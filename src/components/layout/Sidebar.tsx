@@ -58,17 +58,19 @@ export const Sidebar = ({
     }, [questions, categoryId]);
 
     // Sidebar container classes
+    // Desktop (≥1024px): persistent bar, static position, always visible
+    // Mobile/Tablet (<1024px): fixed overlay, slides in/out
+    // Time: O(1)
     const sidebarClasses = clsx(
         "bg-primary text-white transition-transform duration-300 ease-in-out",
         "flex flex-col",
         "overflow-hidden",
-        {
-            "fixed inset-y-0 left-0 h-full w-64 z-50 shadow-lg": isMobile,
-            "translate-x-0": isMobile && isSidebarOpen,
-            "-translate-x-full": isMobile && !isSidebarOpen,
-            "relative w-64 flex-shrink-0 md:h-[calc(93vh-80px)] md:rounded-[20px] md:ml-2 md:mb-2 md:shadow-md": !isMobile,
-            "hidden md:flex": !isMobile,
-        }
+        isMobile
+            ? clsx(
+                "fixed inset-y-0 left-0 h-full w-64 z-50 shadow-lg",
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            )
+            : "fixed inset-y-0 left-0 h-full w-64 z-30 shadow-sm translate-x-0"
     );
 
     // Item rendering function (uses button for better accessibility)
@@ -94,9 +96,9 @@ export const Sidebar = ({
 
     return (
         <>
-            {/* Overlay for mobile */}
+            {/* Backdrop overlay — only on mobile when sidebar is open */}
             {isMobile && isSidebarOpen && (
-                <div className="fixed inset-0 bg-black opacity-50 z-40 md:hidden" onClick={toggleSidebar}></div>
+                <div className="fixed inset-0 bg-black opacity-50 z-40" onClick={toggleSidebar}></div>
             )}
 
             {/* Sidebar element */}

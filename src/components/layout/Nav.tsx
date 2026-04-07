@@ -1,8 +1,6 @@
 // components/layout/Nav.tsx
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
-import { ClipboardList, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { useActiveCategories } from "../../stores/categoryStore";
 import apiClient from "../../utils/apiClient";
@@ -72,8 +70,7 @@ function Nav({ category, setCategory }: NavProps) {
     return () => { cancelled = true; };
   }, [hotelId, authLogoUrl, updateHotelLogo]);
 
-  // Viewer-only flag — controls report shortcut buttons
-  const isViewerOnly = user?.role === 'viewer' || user?.role === 'department_viewer';
+
 
   // Render logo area — Time: O(1), Space: O(1)
   const renderLogo = () => {
@@ -106,8 +103,8 @@ function Nav({ category, setCategory }: NavProps) {
         {renderLogo()}
       </div>
 
-      {/* Center: Category filter tabs */}
-      {(user?.role === 'admin' || user?.role === 'viewer' || user?.role === 'department_viewer') && activeCategories.length > 0 && (
+      {/* Center: Category filter tabs - Hiding from department staff entirely */}
+      {(user?.role === 'hotel_owner' || user?.role === 'hotel_gm' || user?.role === 'hotel_supervisor') && activeCategories.length > 0 && (
         <div className="flex items-center gap-2 bg-gray-200 p-1 rounded-lg overflow-x-auto">
           {activeCategories.map(cat => (
             <button
@@ -125,33 +122,8 @@ function Nav({ category, setCategory }: NavProps) {
         </div>
       )}
 
-      {/* Right: Quick report links (viewer only) + User info */}
+      {/* Right: User info */}
       <div className="flex items-center gap-3">
-
-        {/* Report shortcut buttons — only shown to viewer / department_viewer roles */}
-        {isViewerOnly && (
-          <>
-            {/* Yes/No Responses */}
-            <Link
-              to="/management/responses"
-              title="Yes/No Question Responses"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
-            >
-              <ClipboardList size={17} />
-              <span className="hidden sm:inline">Responses</span>
-            </Link>
-
-            {/* Low Rating Reports */}
-            <Link
-              to="/management/report/low-rated-questions"
-              title="Low Rating Reports"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-sm font-medium"
-            >
-              <AlertTriangle size={17} />
-              <span className="hidden sm:inline">Low Ratings</span>
-            </Link>
-          </>
-        )}
 
         {/* User Info */}
         <div className="flex items-center gap-2">
