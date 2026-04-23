@@ -1,10 +1,7 @@
-// frontend/pages/QuestionsPage.tsx
-
 import React, { useState, useEffect, useMemo } from "react";
 import { useManagementStore, Question } from "../../stores/managementStore";
 import { useActiveCategories } from "../../stores/categoryStore";
 import { useAuthStore } from "../../stores/authStore";
-import { useHotelStore } from "../../stores/hotelStore";
 import { Edit, Trash2, PlusCircle, Eye, EyeOff } from "lucide-react";
 import Modal from "../../components/common/Modal";
 import { clsx } from "clsx";
@@ -108,23 +105,8 @@ const QuestionsPage: React.FC = () => {
 
   // Get user role and hotel info
   const { user } = useAuthStore();
-  const { hotels, fetchHotels } = useHotelStore();
-  const isSuperAdmin = user?.role === 'saas_superAdmin';
-  const [selectedHotelId, setSelectedHotelId] = useState<string>('');
-
-  // Fetch hotels for super_admin on mount
-  useEffect(() => {
-    if (isSuperAdmin) {
-      fetchHotels();
-    }
-  }, [isSuperAdmin, fetchHotels]);
-
-  // Set default hotel when hotels load for super_admin
-  useEffect(() => {
-    if (isSuperAdmin && hotels.length > 0 && !selectedHotelId) {
-      setSelectedHotelId(hotels[0]._id);
-    }
-  }, [isSuperAdmin, hotels, selectedHotelId]);
+  // Owner's hotelId is set via setSelectedHotel after hotel selection.
+  // The apiClient interceptor auto-injects ?hotelId=xxx for owner/gm roles.
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
@@ -149,15 +131,9 @@ const QuestionsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // For super_admin, need hotelId; for others, hotelId is undefined
-    if (isSuperAdmin) {
-      if (selectedHotelId) {
-        fetchQuestions(true, selectedHotelId);
-      }
-    } else {
-      fetchQuestions(true);
-    }
-  }, [fetchQuestions, isSuperAdmin, selectedHotelId]);
+    // hotelId is injected automatically by the apiClient interceptor for owner/gm
+    fetchQuestions(true);
+  }, [fetchQuestions, user?.hotelId]);
 
   const openCreateModal = () => {
     setEditingQuestion(null);
@@ -198,11 +174,10 @@ const QuestionsPage: React.FC = () => {
       return;
     }
 
-    // Build payload - include hotelId for super_admin
-    const payload: any = { text, category, questionType, order, isActive };
-    if (isSuperAdmin && selectedHotelId) {
-      payload.hotelId = selectedHotelId;
-    }
+    // Build payload — hotelId is injected by apiClient interceptor automatically
+    const payload: { text: string; category: string; questionType: 'rating' | 'yes_no'; order: number; isActive: boolean } = {
+      text, category, questionType, order, isActive
+    };
 
     if (editingQuestion) {
       updateQuestion(editingQuestion._id, payload);
@@ -225,25 +200,10 @@ const QuestionsPage: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Manage Questions</h1>
         <div className="flex items-center flex-col sm:flex-row gap-4">
-          {/* Hotel selector for super_admin */}
-          {isSuperAdmin && (
-            <select
-              value={selectedHotelId}
-              onChange={(e) => setSelectedHotelId(e.target.value)}
-              className="p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select Hotel</option>
-              {hotels.map((hotel) => (
-                <option key={hotel._id} value={hotel._id}>
-                  {hotel.name}
-                </option>
-              ))}
-            </select>
-          )}
           <button
             onClick={openCreateModal}
             className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 shadow"
-            disabled={activeCategories.length === 0 || (isSuperAdmin && !selectedHotelId)}
+            disabled={activeCategories.length === 0}
           >
             <PlusCircle size={20} />
             Create Question

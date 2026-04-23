@@ -156,16 +156,15 @@ const ManagementLayout: React.FC = () => {
     const user = useAuthStore((state) => state.user);
     const role = user?.role || '';
 
-    /**
-     * Role-based navigation (Spec §3, §7.3):
-     *   saas_admin  → Full config (Form Builder + System Admin)
-     *   owner       → Analytics only (service + feedback) — NO config (Spec §3.3)
-     *   gm          → Analytics only (service + feedback) — NO config (Spec §3.4)
-     *   supervisor  → Service operations only — NO feedback analytics (Spec §3.5)
-     *   dept_head   → Service operations only — NO feedback analytics (Spec §3.6)
-     *   staff       → Service requests queue only — NO analytics (Spec §3.7)
-     */
-    const activeNavGroups = useMemo(() => {
+        /**
+         * Role-based navigation (Spec §3):
+         *   owner       → Analytics + Configuration (full access)
+         *   gm          → Analytics only (service + feedback) — NO config
+         *   supervisor  → Service operations only — NO feedback analytics
+         *   dept_head   → Service operations only — NO feedback analytics
+         *   staff       → Service requests queue only
+         */
+        const activeNavGroups = useMemo(() => {
         // Staff: minimal view — service request queue only
         if (role === 'hotel_dept_staff') {
             return [
@@ -195,8 +194,8 @@ const ManagementLayout: React.FC = () => {
             ];
         }
 
-        // Owner / GM: analytics only (both service + feedback), NO config
-        if (role === 'hotel_owner' || role === 'hotel_gm') {
+        // Owner / GM: analytics (both service + feedback)
+        if (role === 'hotel_gm') {
             return [
                 {
                     title: 'Analytics',
@@ -213,19 +212,31 @@ const ManagementLayout: React.FC = () => {
             ];
         }
 
-        // saas_admin: full access (config + analytics)
+        // Owner: analytics first, then full config access
         return [
+            {
+                title: 'Analytics',
+                icon: BarChart2,
+                items: [
+                    { href: '/management/analytics', icon: BarChart3, label: 'Analytics Home' },
+                    { href: '/management/service-requests', icon: Bell, label: 'Service Requests' },
+                    { href: '/management/service-analytics', icon: BarChart3, label: 'Service Analytics' },
+                    { href: '/management/responses', icon: ListChecks, label: 'Yes/No Responses' },
+                    { href: '/management/report/low-rated-questions', icon: BarChart2, label: 'Low Rating Reports' },
+                ],
+                defaultOpen: true,
+            },
             {
                 title: 'Form Builder',
                 icon: FileText,
                 items: formBuilderItems,
-                defaultOpen: true,
+                defaultOpen: false,
             },
             {
                 title: 'System Admin',
                 icon: Shield,
                 items: systemAdminItems,
-                defaultOpen: true,
+                defaultOpen: false,
             },
         ];
     }, [role]);

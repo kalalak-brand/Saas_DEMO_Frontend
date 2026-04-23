@@ -7,10 +7,11 @@ import { requestNotificationPermission } from '../utils/notificationPermission';
 import logo from '../assets/logo/Kalalak.png';
 import { Eye, EyeOff, Loader2, Bell, X } from 'lucide-react';
 
-// Redirect based on user role
+// Redirect based on user role after login.
+// Owner and GM must select a working hotel before any API calls fire.
 // Time: O(1), Space: O(1)
 const getRedirectPath = (role?: string): string => {
-  if (role === 'saas_superAdmin') return '/super-admin';
+  if (role === 'hotel_owner' || role === 'hotel_gm') return '/select-hotel';
   return '/';
 };
 
@@ -139,7 +140,7 @@ const LoginPage: React.FC = () => {
               className="text-2xl font-bold tracking-tight"
               style={{ color: theme.primaryColor }}
             >
-              Kalalak Insight
+              Kalalak Controll
             </h1>
             <p className="text-[0.7rem] tracking-[0.15em] uppercase font-medium mt-1"
               style={{ color: theme.accentColor }}
@@ -214,4 +215,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
-
+

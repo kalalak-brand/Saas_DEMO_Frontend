@@ -70,7 +70,7 @@ export const Sidebar = ({
                 "fixed inset-y-0 left-0 h-full w-64 z-50 shadow-lg",
                 isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             )
-            : "fixed inset-y-0 left-0 h-full w-64 z-30 shadow-sm translate-x-0"
+            : "fixed inset-y-32 left-0.5 h-[84vh] rounded-lg   w-64 z-30 shadow-sm translate-x-0"
     );
 
     // Item rendering function (uses button for better accessibility)

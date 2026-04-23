@@ -30,13 +30,28 @@ const createApiClient = (): AxiosInstance => {
         },
     });
 
-    // Request interceptor - add auth token
+    // Request interceptor - add auth token + auto-inject hotelId for platform roles
+    // Time: O(1), Space: O(1)
     client.interceptors.request.use(
         (config) => {
-            const token = useAuthStore.getState().token;
+            const { token, user } = useAuthStore.getState();
+            console.log('[DEBUG apiClient] Request interceptor fired:', config.method, config.url, 'token?', !!token, 'user?', !!user);
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
+
+            // Platform roles (owner/gm) must send hotelId as query param so the
+            // backend resolveHotelId() can scope the request to the selected hotel.
+            // The user.hotelId is set by setSelectedHotel() after hotel selection.
+            const PLATFORM_ROLES = new Set(['hotel_owner', 'hotel_gm']);
+            const hotelId = typeof user?.hotelId === 'object'
+                ? user?.hotelId?._id
+                : user?.hotelId;
+
+            if (user && PLATFORM_ROLES.has(user.role) && hotelId) {
+                config.params = { ...config.params, hotelId };
+            }
+
             return config;
         },
         (error) => Promise.reject(error)

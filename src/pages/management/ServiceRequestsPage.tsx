@@ -121,11 +121,37 @@ const ServiceRequestsPage: React.FC = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-    // Fetch data on mount — pass department filter for dept-scoped roles
+    // ── DEBUG: direct fetch to prove API connectivity ──
+    const [debugInfo, setDebugInfo] = useState<string>('Waiting...');
     useEffect(() => {
-        const deptParam = isDeptScoped && userDeptName ? userDeptName : undefined;
-        fetchRequests({ department: deptParam });
-        fetchStats();
+        const debugFetch = async () => {
+            setDebugInfo('Fetching...');
+            try {
+                const resp = await fetch('http://localhost:5000/api/service-requests?page=1&limit=5', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const json = await resp.json();
+                setDebugInfo(`Status: ${resp.status} | Total: ${json?.data?.meta?.total ?? 'N/A'} | Requests: ${json?.data?.requests?.length ?? 0}`);
+            } catch (err: unknown) {
+                setDebugInfo(`FETCH ERROR: ${(err as Error).message}`);
+            }
+        };
+        if (token) {
+            debugFetch();
+        } else {
+            setDebugInfo('NO TOKEN - user not authenticated');
+        }
+    }, [token]);
+
+    // Fetch data on mount.
+    // For dept-scoped roles the backend handles filtering via departmentId from the JWT.
+    // Do NOT send a department name param — it conflicts with the departmentId ObjectId filter.
+    // For non-scoped roles, pass department name if a filter is active.
+    // Time: O(1)
+    useEffect(() => {
+        console.log('[DEBUG ServiceRequestsPage] useEffect MOUNT - isDeptScoped:', isDeptScoped, 'userDeptName:', userDeptName, 'token:', !!token);
+        fetchRequests();
+        fetchStats({ department: isDeptScoped && userDeptName ? userDeptName : undefined });
     }, [fetchRequests, fetchStats, isDeptScoped, userDeptName]);
 
     // Track current filters via ref to avoid socket reconnect on filter change
@@ -142,8 +168,10 @@ const ServiceRequestsPage: React.FC = () => {
 
         const refetchWithCurrentFilters = () => {
             const { statusFilter: sf, deptFilter: df } = filtersRef.current;
-            fetchRequests({ status: sf !== 'all' ? sf : undefined, department: df !== 'all' ? df : undefined });
-            fetchStats();
+            // Dept-scoped roles: backend handles dept filtering via auth, don't send name param
+            const deptParam = !isDeptScoped && df !== 'all' ? df : undefined;
+            fetchRequests({ status: sf !== 'all' ? sf : undefined, department: deptParam });
+            fetchStats({ department: deptParam });
         };
 
         socket.on('new_service_request', () => {
@@ -179,12 +207,13 @@ const ServiceRequestsPage: React.FC = () => {
     // Refresh handler
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
+        const deptParam = !isDeptScoped && deptFilter !== 'all' ? deptFilter : undefined;
         await Promise.all([
-            fetchRequests({ status: statusFilter !== 'all' ? statusFilter : undefined, department: deptFilter !== 'all' ? deptFilter : undefined }),
-            fetchStats(),
+            fetchRequests({ status: statusFilter !== 'all' ? statusFilter : undefined, department: deptParam }),
+            fetchStats({ department: deptParam }),
         ]);
         setIsRefreshing(false);
-    }, [fetchRequests, fetchStats, statusFilter, deptFilter]);
+    }, [fetchRequests, fetchStats, statusFilter, deptFilter, isDeptScoped]);
 
     // Status change handler
     const handleStatusChange = useCallback(async (id: string, newStatus: string) => {
@@ -198,12 +227,15 @@ const ServiceRequestsPage: React.FC = () => {
     const handleFilterChange = useCallback((type: 'status' | 'dept', value: string) => {
         if (type === 'status') {
             setStatusFilter(value);
-            fetchRequests({ status: value !== 'all' ? value : undefined, department: deptFilter !== 'all' ? deptFilter : undefined });
+            const deptParam = !isDeptScoped && deptFilter !== 'all' ? deptFilter : undefined;
+            fetchRequests({ status: value !== 'all' ? value : undefined, department: deptParam });
         } else {
             setDeptFilter(value);
-            fetchRequests({ status: statusFilter !== 'all' ? statusFilter : undefined, department: value !== 'all' ? value : undefined });
+            const deptParam = !isDeptScoped && value !== 'all' ? value : undefined;
+            fetchRequests({ status: statusFilter !== 'all' ? statusFilter : undefined, department: deptParam });
+            fetchStats({ department: deptParam });
         }
-    }, [fetchRequests, statusFilter, deptFilter]);
+    }, [fetchRequests, fetchStats, statusFilter, deptFilter, isDeptScoped]);
 
     // Get unique departments from requests
     // Time: O(n), Space: O(d) where d = unique departments
@@ -219,6 +251,16 @@ const ServiceRequestsPage: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            {/* ── DEBUG BANNER (REMOVE AFTER FIXING) ── */}
+            <div className="bg-yellow-100 border-2 border-yellow-500 rounded-xl p-4 text-sm font-mono">
+                <strong>🔍 DEBUG API TEST:</strong> {debugInfo}
+                <br />
+                <strong>Token:</strong> {token ? `${token.substring(0, 20)}...` : 'NONE'}
+                <br />
+                <strong>User:</strong> {user?.username || 'N/A'} | <strong>Role:</strong> {user?.role || 'N/A'} | <strong>Dept:</strong> {user?.departmentId?.name || 'N/A'}
+                <br />
+                <strong>Store requests:</strong> {requests.length} | <strong>isLoadingRequests:</strong> {String(isLoadingRequests)}
+            </div>
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>

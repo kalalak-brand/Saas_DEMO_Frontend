@@ -30,7 +30,10 @@ const HotelSelectionPage: React.FC = () => {
 
                 let fetchedHotels: Hotel[] = res.data?.data?.hotels || [];
 
-                if (user?.role === 'hotel_gm' && user?.allowedHotels && user.allowedHotels.length > 0) {
+                // Owner and GM are filtered to their allowedHotels only.
+                // Time: O(n) where n = total hotels (small bounded set)
+                const isAllowedHotelsRole = user?.role === 'hotel_owner' || user?.role === 'hotel_gm';
+                if (isAllowedHotelsRole && user?.allowedHotels && user.allowedHotels.length > 0) {
                     fetchedHotels = fetchedHotels.filter((hotel) =>
                         user.allowedHotels!.some((allowedHotel) =>
                             (typeof allowedHotel === 'string' ? allowedHotel : allowedHotel._id) === hotel._id
@@ -39,10 +42,10 @@ const HotelSelectionPage: React.FC = () => {
                 }
 
                 if (!mounted) return;
-                
+
                 setHotels(fetchedHotels);
 
-                // Auto-redirect using last selected hotel (persists across logout/login)
+                // Auto-redirect if the user's last selected hotel is still available
                 const lastSelectedHotelId = localStorage.getItem('lastSelectedHotelId');
                 const lastSelected = lastSelectedHotelId
                     ? fetchedHotels.find(h => h._id === lastSelectedHotelId)
@@ -50,9 +53,11 @@ const HotelSelectionPage: React.FC = () => {
 
                 if (lastSelected) {
                     handleSelectHotel(lastSelected);
+                    return;
                 }
-                // Auto-redirect if only one hotel is available
-                else if (fetchedHotels.length === 1) {
+
+                // Auto-redirect if only one hotel is available (e.g. single-property Owner)
+                if (fetchedHotels.length === 1) {
                     handleSelectHotel(fetchedHotels[0]);
                 } else {
                     setIsLoading(false);
@@ -71,8 +76,9 @@ const HotelSelectionPage: React.FC = () => {
         // Persist working hotel selection into auth store + localStorage
         setSelectedHotel(hotel);
         
-        // Proceed to dashboard!
-        navigate('/management');
+        // Owner/GM land on feedback analytics dashboard (composite graphs)
+        // The IndexRedirect at "/" fetches composites and navigates to /view/:itemId
+        navigate('/');
     };
 
     const handleLogout = () => {
@@ -98,17 +104,19 @@ const HotelSelectionPage: React.FC = () => {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Select Property</h1>
                         <p className="text-gray-500 mt-2">
-                            Welcome back, <span className="capitalize font-medium text-gray-700">{user?.fullName || 'User'}</span>. 
+                            Welcome back, <span className="capitalize font-medium text-gray-700">{user?.fullName || 'User'}</span>.{' '}
                             Select a hotel location to manage operations.
                         </p>
                     </div>
-                    <button 
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 transition-colors font-medium"
-                    >
-                        <LogOut size={18} />
-                        Logout
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 transition-colors font-medium"
+                        >
+                            <LogOut size={18} />
+                            Logout
+                        </button>
+                    </div>
                 </div>
 
                 {/* Hotel Grid */}

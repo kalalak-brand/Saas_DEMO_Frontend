@@ -46,7 +46,8 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
     const { uploadLogo, deleteLogo } = useHotelStore();
     const { updateHotelLogo } = useAuthStore();
     const userRole = useAuthStore((s) => s.user?.role);
-    const isSuperAdmin = userRole === 'saas_superAdmin';
+    // Only hotel_owner can upload/manage logos in the hotel frontend
+    const isOwner = userRole === 'hotel_owner';
 
     // Crop modal state
     const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -140,8 +141,8 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
                 {/* Logo Preview / Fallback */}
                 <div
                     className={`${SIZE_MAP[size]} rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md overflow-hidden relative group cursor-pointer`}
-                    onClick={() => isSuperAdmin && !uploading && fileInputRef.current?.click()}
-                    title={isSuperAdmin ? 'Click to upload logo' : 'Hotel logo'}
+                    onClick={() => isOwner && !uploading && fileInputRef.current?.click()}
+                    title={isOwner ? 'Click to upload logo' : 'Hotel logo'}
                 >
                     {uploading ? (
                         <Loader2 className="w-6 h-6 animate-spin" />
@@ -156,8 +157,8 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
                         <span className="tracking-wider">LOGO</span>
                     )}
 
-                    {/* Hover overlay for super_admin */}
-                    {isSuperAdmin && !uploading && (
+                    {/* Hover overlay for hotel_owner */}
+                    {isOwner && !uploading && (
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-1">
                             <Camera className="w-5 h-5 text-white" />
                             <span className="text-[9px] text-white/80 font-medium">
@@ -167,8 +168,8 @@ const LogoUpload: React.FC<LogoUploadProps> = ({
                     )}
                 </div>
 
-                {/* Delete button — only shown to super_admin when logo exists */}
-                {isSuperAdmin && logoUrl && !uploading && (
+                {/* Delete button — only shown to hotel_owner when logo exists */}
+                {isOwner && logoUrl && !uploading && (
                     <button
                         onClick={handleDelete}
                         className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"

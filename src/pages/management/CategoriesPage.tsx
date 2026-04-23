@@ -11,11 +11,9 @@ import {
     X,
     AlertTriangle,
     Layers,
-    Building,
 } from 'lucide-react';
 import { useCategoryStore, Category, CategoryPayload } from '../../stores/categoryStore';
 import { useAuthStore } from '../../stores/authStore';
-import { useHotelStore } from '../../stores/hotelStore';
 import { Button, Card, Input, Badge } from '../../components/ui';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
@@ -210,10 +208,6 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 const CategoriesPage: React.FC = () => {
     // Auth store for role check
     const user = useAuthStore((state) => state.user);
-    const isSuperAdmin = user?.role === 'saas_superAdmin';
-
-    // Hotel store for super_admin hotel selection
-    const { hotels, fetchHotels } = useHotelStore();
 
     // Category store
     const {
@@ -226,37 +220,18 @@ const CategoriesPage: React.FC = () => {
         deleteCategory,
         toggleCategoryActive,
         selectedHotelId,
-        setSelectedHotelId,
     } = useCategoryStore();
 
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [deleteModalCategory, setDeleteModalCategory] = useState<Category | null>(null);
 
-    // Fetch hotels for super_admin
+    // Fetch categories on mount — hotelId is injected by apiClient for owner/gm
     useEffect(() => {
-        if (isSuperAdmin) {
-            fetchHotels();
-        }
-    }, [isSuperAdmin, fetchHotels]);
-
-    // Fetch categories when hotel is selected (for super_admin) or on mount (for others)
-    useEffect(() => {
-        if (isSuperAdmin) {
-            if (selectedHotelId) {
-                fetchCategories(true, selectedHotelId);
-            }
-        } else {
-            fetchCategories();
-        }
-    }, [isSuperAdmin, selectedHotelId, fetchCategories]);
+        fetchCategories();
+    }, [fetchCategories, user?.hotelId]);
 
     const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
-
-    const handleHotelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        const hotelId = e.target.value;
-        setSelectedHotelId(hotelId || null);
-    }, [setSelectedHotelId]);
 
     const handleFormSubmit = useCallback(
         async (data: CategoryPayload) => {
@@ -279,7 +254,6 @@ const CategoriesPage: React.FC = () => {
 
     const handleDelete = useCallback(async () => {
         if (deleteModalCategory) {
-            // Pass selectedHotelId for super_admin
             const success = await deleteCategory(deleteModalCategory._id, selectedHotelId || undefined);
             if (success) {
                 toast.success('Category deleted successfully');
@@ -290,7 +264,6 @@ const CategoriesPage: React.FC = () => {
 
     const handleToggleActive = useCallback(
         async (cat: Category) => {
-            // Pass selectedHotelId for super_admin
             await toggleCategoryActive(cat._id, selectedHotelId || undefined);
             toast.success(cat.isActive ? 'Category deactivated' : 'Category activated');
         },
@@ -307,9 +280,6 @@ const CategoriesPage: React.FC = () => {
         setIsFormModalOpen(true);
     }, []);
 
-    // Show hotel selector for super_admin
-    const canManage = !isSuperAdmin || selectedHotelId;
-
     return (
         <div className="space-y-6 animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -325,35 +295,10 @@ const CategoriesPage: React.FC = () => {
                 <Button
                     leftIcon={<Plus className="h-4 w-4" />}
                     onClick={openCreateModal}
-                    disabled={!canManage}
                 >
                     Add Category
                 </Button>
             </div>
-
-            {/* Hotel Selector for Super Admin */}
-            {isSuperAdmin && (
-                <Card padding="md" className="bg-primary-50 border-primary-100">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <Building className="h-5 w-5 text-primary" />
-                            <span className="font-medium text-primary">Select Hotel:</span>
-                        </div>
-                        <select
-                            value={selectedHotelId || ''}
-                            onChange={handleHotelChange}
-                            className="flex-1 px-4 py-2 border border-primary-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                            <option value="">-- Select a hotel to manage categories --</option>
-                            {hotels.map((hotel) => (
-                                <option key={hotel._id} value={hotel._id}>
-                                    {hotel.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </Card>
-            )}
 
             {error && (
                 <div className="p-4 rounded-lg bg-error-light text-error flex items-center gap-2">
@@ -362,17 +307,8 @@ const CategoriesPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Show message if super_admin hasn't selected a hotel */}
-            {isSuperAdmin && !selectedHotelId && (
-                <Card padding="lg" className="text-center">
-                    <Building className="h-12 w-12 mx-auto mb-3 text-text-muted opacity-50" />
-                    <p className="text-text-secondary">Please select a hotel above to manage its categories.</p>
-                </Card>
-            )}
-
-            {/* Category List - only show when hotel is selected (or for non-super_admin) */}
-            {canManage && (
-                <Card padding="none">
+            {/* Category List */}
+            <Card padding="none">
                     <div className="divide-y divide-border">
                         {sortedCategories.length === 0 ? (
                             <div className="p-8 text-center text-text-muted">
@@ -438,7 +374,6 @@ const CategoriesPage: React.FC = () => {
                         )}
                     </div>
                 </Card>
-            )}
 
             <CategoryFormModal
                 isOpen={isFormModalOpen}

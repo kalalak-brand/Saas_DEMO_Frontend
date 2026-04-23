@@ -28,7 +28,7 @@ export interface ManagementUser {
   fullName: string;
   username: string;
   isActive: boolean;
-  // Dynamic role - can be 'saas_superAdmin' | 'hotel_owner' | 'hotel_gm' | 'hotel_supervisor' | 'hotel_dept_supervisor' | 'hotel_dept_staff'
+  // role: hotel_owner | hotel_gm | hotel_supervisor | hotel_dept_supervisor | hotel_dept_staff
   role: string;
   hotelId?: string;
   departmentId?: { _id: string; name: string; } | string;

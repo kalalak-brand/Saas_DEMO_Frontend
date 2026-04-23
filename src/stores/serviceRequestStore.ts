@@ -239,6 +239,7 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
 
     /** Fetch service requests for staff dashboard. Time: O(n), Space: O(page_size) */
     fetchRequests: async (filters) => {
+        console.log('[DEBUG fetchRequests] CALLED with filters:', filters);
         set({ isLoadingRequests: true });
         try {
             const params: Record<string, string | number> = {};
@@ -249,14 +250,17 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
             params.page = filters?.page || 1;
             params.limit = filters?.limit || 20;
 
+            console.log('[DEBUG fetchRequests] Making API call with params:', params);
             const { data } = await apiClient.get('/service-requests', { params });
+            console.log('[DEBUG fetchRequests] API response:', data);
             set({
                 requests: data.data?.requests || [],
                 pagination: data.data?.meta || { page: 1, limit: 20, total: 0, totalPages: 0 },
                 isLoadingRequests: false,
             });
         } catch (err) {
-            console.error('[ServiceRequestStore] fetchRequests failed:', err);
+            console.error('[ServiceRequestStore] fetchRequests FAILED:', err);
+            console.error('[DEBUG fetchRequests] Error details:', (err as any)?.response?.status, (err as any)?.response?.data);
             set({ isLoadingRequests: false });
         }
     },
@@ -280,6 +284,7 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
 
     /** Fetch service request stats. Time: O(n) aggregation */
     fetchStats: async (filters) => {
+        console.log('[DEBUG fetchStats] CALLED with filters:', filters);
         set({ isLoadingStats: true });
         try {
             const params: Record<string, string> = {};
@@ -287,7 +292,9 @@ export const useServiceRequestStore = create<ServiceRequestState>((set, get) => 
             if (filters?.endDate) params.endDate = filters.endDate;
             if (filters?.department) params.department = filters.department;
 
+            console.log('[DEBUG fetchStats] Making API call with params:', params);
             const { data } = await apiClient.get('/service-requests/stats', { params });
+            console.log('[DEBUG fetchStats] API response:', data);
             set({ stats: data.data || null, isLoadingStats: false });
         } catch (err) {
             console.error('[ServiceRequestStore] fetchStats failed:', err);

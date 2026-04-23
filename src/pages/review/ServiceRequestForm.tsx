@@ -10,10 +10,52 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useServiceRequestStore } from '../../stores/serviceRequestStore';
 import { isPushSupported, subscribeToPush } from '../../utils/pushSubscription';
+import * as LucideIcons from 'lucide-react';
 import {
     ArrowLeft, CheckCircle2, Loader2, Hotel,
     Send, MessageSquare, Bell, BellOff, BellRing
 } from 'lucide-react';
+
+// ── Emoji fallback map for backend default types (Time: O(1) lookup) ──
+const EMOJI_ICON_MAP: Record<string, string> = {
+    need_towel: '🧺',
+    need_water: '💧',
+    room_cleaning: '🧹',
+    ac_not_working: '❄️',
+    room_service: '🍽️',
+    plumbing_issue: '🔧',
+    wifi_issue: '📶',
+    extra_pillow: '🛏️',
+    laundry: '👔',
+    other: '📝',
+};
+
+/**
+ * Resolves a service item icon to a renderable element.
+ * Supports:
+ *  - Emoji strings (e.g. "🧺") — rendered as <span>
+ *  - Lucide icon names (e.g. "Shirt", "Droplets") — rendered as SVG component
+ *  - Fallback: value key → EMOJI_ICON_MAP → 📋
+ * Time: O(1), Space: O(1)
+ */
+const resolveIcon = (icon: string | undefined, value: string, size = 28): React.ReactNode => {
+    // 1. Try the icon field first
+    if (icon) {
+        // Emoji: single unicode char or starts with emoji codepoint range
+        const isEmoji = /^(\p{Emoji})/u.test(icon) && icon.length <= 8;
+        if (isEmoji) {
+            return <span style={{ fontSize: size, lineHeight: 1 }}>{icon}</span>;
+        }
+        // Try as Lucide icon name (PascalCase)
+        const LucideComponent = (LucideIcons as unknown as Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>>)[icon];
+        if (LucideComponent) {
+            return <LucideComponent size={size} strokeWidth={1.8} />;
+        }
+    }
+    // 2. Fallback to emoji map keyed by request type value
+    const emoji = EMOJI_ICON_MAP[value] || '📋';
+    return <span style={{ fontSize: size, lineHeight: 1 }}>{emoji}</span>;
+};
 
 const ServiceRequestForm: React.FC = () => {
     const { hotelCode, orgSlug, roomNumber: urlRoomNumber } = useParams<{ hotelCode: string; orgSlug?: string; roomNumber?: string }>();
@@ -57,9 +99,6 @@ const ServiceRequestForm: React.FC = () => {
     }, [resetSubmitState]);
 
     const handleSubmit = async () => {
-        // #region agent log
-        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H3',location:'ServiceRequestForm.tsx:55',message:'Guest submit attempt',data:{hotelCode:hotelCode||null,hasOrgSlug:Boolean(orgSlug),selectedType,hasRoomNumber:Boolean(roomNumber?.trim()),isRoomFromQR},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
         if (!selectedType) {
             setShowError('Please select a service');
             return;
@@ -70,7 +109,7 @@ const ServiceRequestForm: React.FC = () => {
         }
         setShowError('');
 
-        const ok = await submitServiceRequest({
+        await submitServiceRequest({
             hotelCode: hotelCode || '',
             orgSlug,
             requestType: selectedType,
@@ -79,9 +118,6 @@ const ServiceRequestForm: React.FC = () => {
             guestPhone: guestPhone.trim() || undefined,
             customMessage: selectedType === 'other' ? customMessage.trim() : undefined,
         });
-        // #region agent log
-        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H3',location:'ServiceRequestForm.tsx:79',message:'Guest submit finished',data:{ok,submitSuccess,referenceId:submitResult?.referenceId||null,requestId:submitResult?.requestId||null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
     };
 
     const handleBack = () => {
@@ -288,7 +324,9 @@ const ServiceRequestForm: React.FC = () => {
                                         ...(selectedType === type.value ? styles.typeBtnSelected : {}),
                                     }}
                                 >
-                                    <span style={styles.typeIcon}>{type.icon}</span>
+                                    <span style={styles.typeIcon}>
+                                        {resolveIcon(type.icon, type.value)}
+                                    </span>
                                     <span style={{
                                         ...styles.typeLabel,
                                         color: selectedType === type.value ? '#1B4D3E' : '#475569',

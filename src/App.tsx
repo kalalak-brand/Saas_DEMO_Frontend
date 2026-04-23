@@ -68,22 +68,6 @@ const RoomQRGenerator = lazy(
   () => import("./pages/management/RoomQRGenerator")
 );
 
-// Super Admin pages
-const SuperAdminLayout = lazy(
-  () => import("./pages/superadmin/SuperAdminLayout")
-);
-const SAHotelsPage = lazy(
-  () => import("./pages/superadmin/SAHotelsPage")
-);
-const SAUsersPage = lazy(
-  () => import("./pages/superadmin/SAUsersPage")
-);
-const SADepartmentsPage = lazy(
-  () => import("./pages/superadmin/SADepartmentsPage")
-);
-
-
-
 // Loading Fallback - Premium design
 const LoadingFallback: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-screen w-screen bg-background">
@@ -97,27 +81,21 @@ const LoadingFallback: React.FC = () => (
 
 /**
  * Smart redirect for /management index based on role (Spec §3).
- * staff       → service-requests (queue only)
- * supervisor  → service-requests (all dept view)
- * dept_head   → service-requests (own dept view)
- * owner       → service-requests (analytics hub)
- * gm          → service-requests (analytics hub)
- * saas_admin  → questions (config page)
+ * staff              → service-requests (queue only)
+ * supervisor         → service-requests (all dept view)
+ * hotel_dept_supervisor → service-requests (own dept view)
+ * owner / gm         → analytics hub (feedback + service)
  * Time: O(1), Space: O(1)
  */
 const ManagementIndexRedirect: React.FC = () => {
   const { user } = useAuthStore();
   const role = user?.role;
 
-  // Intercept owners & gms if they haven't explicitly set a working hotel in state yet
+  // Platform roles (owner/gm) that haven't selected a working hotel yet
   if ((role === 'hotel_owner' || role === 'hotel_gm') && !user?.hotelId) {
     return <Navigate to="/select-hotel" replace />;
   }
 
-  // Only saas_admin goes to config; everyone else goes to service requests
-  if (role === 'saas_superAdmin') {
-    return <Navigate to="/management/questions" replace />;
-  }
   // Owners & GMs land on the analytics hub (service + feedback)
   if (role === 'hotel_owner' || role === 'hotel_gm') {
     return <Navigate to="/management/analytics" replace />;
@@ -125,12 +103,10 @@ const ManagementIndexRedirect: React.FC = () => {
   return <Navigate to="/management/service-requests" replace />;
 };
 
-
-
 /**
  * Index Redirect Logic (Spec §6)
  * staff/supervisor/dept_head → service-requests (no feedback dashboard)
- * owner/gm/saas_admin → composite analytics dashboard (feedback view)
+ * owner/gm                  → composite analytics dashboard (feedback view)
  * Time: O(1) for service roles, O(n) for analytics roles where n = composites
  */
 const IndexRedirect: React.FC = () => {
@@ -138,7 +114,7 @@ const IndexRedirect: React.FC = () => {
   const { user } = useAuthStore();
   const role = user?.role;
 
-  // Intercept owners & gms if they haven't explicitly set a working hotel in state yet
+  // Intercept platform roles if they haven't selected a working hotel in state yet
   if ((role === 'hotel_owner' || role === 'hotel_gm') && !user?.hotelId) {
     return <Navigate to="/select-hotel" replace />;
   }
@@ -192,20 +168,24 @@ const IndexRedirect: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)] text-gray-500">
         <p className="text-xl font-semibold mb-2">No Data Dashboard Configured</p>
         <p className="mb-6">There are no analytics composites set up yet.</p>
-        {user?.role === 'saas_superAdmin' && (
-          <button
-            onClick={() => navigate('/management/composites')}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-          >
-            Go to Management
-          </button>
-        )}
       </div>
     );
   }
 
   return <LoadingFallback />;
 };
+
+/** All valid hotel-frontend roles */
+const ALL_HOTEL_ROLES = [
+  "hotel_owner",
+  "hotel_gm",
+  "hotel_supervisor",
+  "hotel_dept_supervisor",
+  "hotel_dept_staff",
+] as const;
+
+/** Roles that can access analytics (feedback + service) */
+const ANALYTICS_ROLES = ["hotel_owner", "hotel_gm"] as const;
 
 function App() {
   return (
@@ -216,18 +196,19 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/select-hotel" element={<HotelSelectionPage />} />
-            {/* Admin & Viewer Routes */}
+
+            {/* Hotel Frontend Routes — all authenticated hotel roles */}
             <Route
-              element={<ProtectedRoute allowedRoles={["saas_superAdmin", "hotel_owner", "hotel_gm", "hotel_supervisor", "hotel_dept_supervisor", "hotel_dept_staff"]} />}
+              element={<ProtectedRoute allowedRoles={[...ALL_HOTEL_ROLES]} />}
             >
               <Route path="/" element={<Layout />}>
                 <Route index element={<IndexRedirect />} />
-                {/* Updated Route Path */}
                 <Route path="/view/:itemId" element={<AnalyticsDisplayPage />} />
               </Route>
               <Route path="/compare/:category" element={<ComparePage />} />
+
               {/* Management Routes */}
-              <Route element={<ProtectedRoute allowedRoles={["saas_superAdmin", "hotel_owner", "hotel_gm", "hotel_supervisor", "hotel_dept_supervisor", "hotel_dept_staff"]} />}>
+              <Route element={<ProtectedRoute allowedRoles={[...ALL_HOTEL_ROLES]} />}>
                 <Route path="/management" element={<ManagementLayout />}>
                   {/* Smart index redirect based on role */}
                   <Route index element={<ManagementIndexRedirect />} />
@@ -235,12 +216,14 @@ function App() {
                   {/* Service operations — all authenticated roles (Spec §6) */}
                   <Route path="service-requests" element={<ServiceRequestsPage />} />
                   <Route path="service-analytics" element={<ServiceAnalyticsPage />} />
-                  <Route element={<ProtectedRoute allowedRoles={["hotel_owner", "hotel_gm"]} />}>
+
+                  {/* Analytics hub — owner & gm only */}
+                  <Route element={<ProtectedRoute allowedRoles={[...ANALYTICS_ROLES]} />}>
                     <Route path="analytics" element={<AnalyticsHubPage />} />
                   </Route>
 
-                  {/* Feedback analytics — owner, gm, saas_admin only (Spec §7.3) */}
-                  <Route element={<ProtectedRoute allowedRoles={["saas_superAdmin", "hotel_owner", "hotel_gm"]} />}>
+                  {/* Feedback analytics — owner, gm only (Spec §7.3) */}
+                  <Route element={<ProtectedRoute allowedRoles={[...ANALYTICS_ROLES]} />}>
                     <Route path="responses" element={<GuestIssuesPage />} />
                     <Route
                       path="report/low-rated-questions"
@@ -252,8 +235,8 @@ function App() {
                     />
                   </Route>
 
-                  {/* Configuration — saas_admin only (Spec §3.3: owner is view-only) */}
-                  <Route element={<ProtectedRoute allowedRoles={["saas_superAdmin"]} />}>
+                  {/* Configuration — owner only in hotel frontend */}
+                  <Route element={<ProtectedRoute allowedRoles={["hotel_owner"]} />}>
                     <Route path="composites" element={<CompositesPageMngt />} />
                     <Route path="questions" element={<QuestionsPage />} />
                     <Route path="users" element={<UsersPage />} />
@@ -264,19 +247,6 @@ function App() {
                     <Route path="room-qr-codes" element={<RoomQRGenerator />} />
                   </Route>
                 </Route>
-
-              </Route>
-            </Route>
-
-            {/* Super Admin Routes — separate UI */}
-            <Route
-              element={<ProtectedRoute allowedRoles={["saas_superAdmin"]} />}
-            >
-              <Route path="/super-admin" element={<SuperAdminLayout />}>
-                <Route index element={<Navigate to="hotels" replace />} />
-                <Route path="hotels" element={<SAHotelsPage />} />
-                <Route path="departments" element={<SADepartmentsPage />} />
-                <Route path="users" element={<SAUsersPage />} />
               </Route>
             </Route>
 

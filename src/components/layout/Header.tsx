@@ -149,13 +149,16 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const notifRef = useRef<HTMLDivElement>(null);
   const [pushEnabling, setPushEnabling] = useState(false);
 
-  // Show management link only for config-capable roles (saas admin + owner)
+  // Show Management link for hotel_owner only
   // Time: O(1) via Set lookup
-  const canAccessManagement = user?.role === 'saas_superAdmin' || user?.role === 'hotel_owner';
+  const canAccessManagement = user?.role === 'hotel_owner';
 
-  // GM gets direct access to service analytics from the dashboard header
+  // Owner and GM get direct access to service analytics from the dashboard header
   // Time: O(1)
-  const canAccessServiceAnalysis = user?.role === 'hotel_gm';
+  const canAccessServiceAnalysis = user?.role === 'hotel_owner' || user?.role === 'hotel_gm';
+
+  // Owner and GM can switch hotel from the header
+  const canSwitchHotel = user?.role === 'hotel_owner' || user?.role === 'hotel_gm';
 
   // Close profile dropdown on outside click
   // Time: O(1), Space: O(1)
@@ -226,7 +229,6 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   };
 
   const roleLabels: Record<string, string> = {
-    saas_superAdmin: 'SaaS Admin',
     hotel_owner: 'Owner',
     hotel_gm: 'General Manager',
     hotel_supervisor: 'Supervisor',
@@ -234,7 +236,6 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
     hotel_dept_staff: 'Staff',
   };
   const roleColors: Record<string, string> = {
-    saas_superAdmin: 'bg-red-100 text-red-700',
     hotel_owner: 'bg-purple-100 text-purple-700',
     hotel_gm: 'bg-blue-100 text-blue-700',
     hotel_supervisor: 'bg-teal-100 text-teal-700',
@@ -261,6 +262,17 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
             <span className="hidden md:inline text-lg text-gray-700 font-semibold">
               {user?.hotelId && typeof user.hotelId === 'object' ? user.hotelId.name : 'Dashboard'}
             </span>
+            {/* Switch Hotel button for owner/gm who have selected a hotel */}
+            {canSwitchHotel && user?.hotelId && (
+              <button
+                onClick={() => navigate('/select-hotel')}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full hover:bg-indigo-100 transition-colors"
+                title="Switch to a different hotel"
+              >
+                <Building2 className="h-3.5 w-3.5" />
+                Switch Hotel
+              </button>
+            )}
           </div>
 
           <div className="flex-1 flex justify-center">
@@ -289,7 +301,7 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
               {pushEnabling ? 'Enabling…' : 'Enable Alerts'}
             </button>
 
-            {/* Management Link for Admin / Owner */}
+            {/* Management Link for hotel_owner only */}
             {canAccessManagement && (
               <Link
                 to="/management/questions"
@@ -301,7 +313,7 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
               </Link>
             )}
 
-            {/* Service Analysis Link for General Manager */}
+            {/* Service Analysis Link for Owner & GM */}
             {canAccessServiceAnalysis && (
               <Link
                 to="/management/service-analytics"
@@ -455,6 +467,19 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
                       </span>
                     </div>
                   </div>
+
+                  {/* Switch Hotel for owner/gm */}
+                  {canSwitchHotel && (
+                    <div className="border-t border-gray-100 px-3 py-2 space-y-1">
+                      <button
+                        onClick={() => { setProfileOpen(false); navigate('/select-hotel'); }}
+                        className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      >
+                        <Building2 className="w-4 h-4" />
+                        Switch Hotel
+                      </button>
+                    </div>
+                  )}
 
                   {/* Logout */}
                   <div className="border-t border-gray-100 px-3 py-2">

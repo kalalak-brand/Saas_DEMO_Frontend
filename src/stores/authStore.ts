@@ -8,7 +8,7 @@ export interface IUser {
   _id: string;
   fullName: string;
   username: string;
-  role: 'saas_superAdmin' | 'hotel_owner' | 'hotel_gm' | 'hotel_supervisor' | 'hotel_dept_supervisor' | 'hotel_dept_staff';
+  role: 'hotel_owner' | 'hotel_gm' | 'hotel_supervisor' | 'hotel_dept_supervisor' | 'hotel_dept_staff';
   organizationId?: {
     _id: string;
     name: string;
@@ -38,15 +38,15 @@ export const isAdminRole = (role: string): boolean => {
 };
 
 /**
- * Helper: check if a role can modify configuration (SaaS-level or owner)
+ * Helper: check if a role is analytics-only (read-only dashboard, no config)
  * Time: O(1)
  */
-export const isConfigRole = (role: string): boolean => {
-  return role === 'saas_superAdmin' || role === 'hotel_owner';
+export const isConfigRole = (_role: string): boolean => {
+  return false; // Config is handled by SaaS_Admin_Frontend — not hotel frontend
 };
 
 /**
- * Helper: check if a role is analytics-only (read-only dashboard)
+ * Helper: check if a role is analytics-only (owner + gm view feedback + service)
  * Time: O(1)
  */
 export const isAnalyticsOnlyRole = (role: string): boolean => {
