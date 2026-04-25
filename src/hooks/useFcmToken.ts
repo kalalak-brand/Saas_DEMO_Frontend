@@ -48,6 +48,9 @@ export function useFcmToken(): void {
         // Track if this effect is still current (prevents state updates after unmount)
         let cancelled = false;
 
+        // Start FCM initialization — cleanup is stored via outer variable
+        let onMessageCleanup: (() => void) | undefined;
+
         async function initFcm(): Promise<void> {
             try {
                 const messaging = await getMessagingInstance();
@@ -108,8 +111,10 @@ export function useFcmToken(): void {
                 console.log('[FCM] Token registered — push notifications active.');
 
                 // ── Step 4: Handle foreground messages (app is open) ──
-                // Background messages are handled by the service worker
-                const unsubscribeOnMessage = onMessage(messaging, (payload) => {
+                // Background messages are handled by the service worker.
+                // Store the unsubscribe fn in the outer scope so the useEffect cleanup can call it.
+                // NOTE: Cannot return it from an async function — Promise<void> discards return values.
+                onMessageCleanup = onMessage(messaging, (payload) => {
                     const title = payload.notification?.title || 'Kalalak Notification';
                     const body  = payload.notification?.body  || 'You have a new update.';
                     // Show an in-app toast for foreground messages
@@ -127,11 +132,6 @@ export function useFcmToken(): void {
                         }
                     );
                 });
-
-                // Return cleanup that unsubscribes the onMessage listener
-                return () => {
-                    unsubscribeOnMessage();
-                };
             } catch (err) {
                 if (!cancelled) {
                     console.error('[FCM] Failed to initialize push notifications:', err);
@@ -139,11 +139,8 @@ export function useFcmToken(): void {
             }
         }
 
-        // Start FCM initialization — store any returned cleanup fn
-        let onMessageCleanup: (() => void) | void;
-        initFcm().then((cleanup) => {
-            onMessageCleanup = cleanup;
-        });
+        // Start FCM initialization
+        initFcm();
 
         // Cleanup on unmount or when auth state changes
         return () => {

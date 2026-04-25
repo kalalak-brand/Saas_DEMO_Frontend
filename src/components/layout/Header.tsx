@@ -140,7 +140,7 @@ const NotificationCard = ({ notification: n, onMarkRead, timeAgo }: {
 
 export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const openModal = useReportStore((state) => state.openModal);
-  const { user, logout, token } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { unreadCount, notifications, loading, fetchNotifications, markAsRead, markAllAsRead, startPolling, stopPolling } = useNotificationStore();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
