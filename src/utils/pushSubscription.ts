@@ -1,50 +1,39 @@
 /**
- * Push Subscription Utility
+ * Guest Push Subscription Utility (FCM)
  *
- * Handles the complete Web Push subscription lifecycle:
- *   1. Register the service worker
- *   2. Request notification permission from the user
- *   3. Subscribe to push via PushManager with VAPID key
- *   4. Send the subscription to the backend API
+ * Handles guest notification opt-in for service request tracking.
+ * When a guest submits a request, they can opt to receive a push notification
+ * when it is completed or updated by staff.
  *
- * Uses the public VAPID key from VITE_PUBLIC_WEB_PUSH_KEY env var.
+ * Flow:
+ *   1. Check browser support (FCM requires serviceWorker + Notification API)
+ *   2. Request notification permission
+ *   3. Register firebase-messaging-sw.js service worker
+ *   4. Get FCM token via Firebase getToken()
+ *   5. Send token to backend POST /api/public/service-requests/:id/subscribe
+ *
+ * The backend stores the token on the ServiceRequest.guestFcmToken field.
+ * When staff completes the request, the backend calls sendToToken() to push
+ * a completion notification to the guest's device.
  *
  * Time: O(1), Space: O(1)
  */
 import axios from 'axios';
+import { getToken } from 'firebase/messaging';
+import { getMessagingInstance } from '../config/firebase';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_PUBLIC_WEB_PUSH_KEY;
+
+/** FCM VAPID key for guest subscriptions (same as staff — same Firebase project) */
+const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 /**
- * Convert a URL-safe base64 string to a Uint8Array.
- * Required by PushManager.subscribe() for applicationServerKey.
- *
- * Time: O(n) where n = base64 string length, Space: O(n)
- */
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; i++) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
-
-/**
- * Check if the browser supports Web Push notifications.
+ * Check if the browser supports push notifications.
  * Time: O(1), Space: O(1)
  */
 export function isPushSupported(): boolean {
     return (
         'serviceWorker' in navigator &&
-        'PushManager' in window &&
         'Notification' in window
     );
 }
@@ -59,89 +48,94 @@ export function getPermissionStatus(): NotificationPermission {
 }
 
 /**
- * Register the service worker and subscribe to push notifications.
- * After subscribing, sends the subscription to the backend for the given service request.
+ * Subscribe guest to FCM push notifications for a service request.
+ * After subscribing, the FCM token is sent to the backend and stored
+ * on the ServiceRequest document for targeted completion push.
  *
- * @param requestId - The service request ID to associate the push subscription with
+ * @param requestId - The service request MongoDB _id to link the token to
  * @returns true if successfully subscribed, false otherwise
  *
  * Time: O(1), Space: O(1)
  */
 export async function subscribeToPush(requestId: string): Promise<boolean> {
     try {
-        // ── Guard: check browser support ──
+        // ── Guard: browser support ──
         if (!isPushSupported()) {
-            console.warn('[Push] Browser does not support push notifications');
-            // #region agent log
-            fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:79',message:'Push unsupported',data:{hasSW:'serviceWorker'in navigator,hasPush:'PushManager'in window,hasNotification:'Notification'in window},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion agent log
+            console.warn('[FCM Guest] Browser does not support push notifications');
             return false;
         }
 
-        // ── Guard: check VAPID key ──
-        if (!VAPID_PUBLIC_KEY) {
-            console.warn('[Push] VITE_PUBLIC_WEB_PUSH_KEY not configured');
-            // #region agent log
-            fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:87',message:'Push missing VAPID public key',data:{hasVapidPublicKey:false},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion agent log
+        // ── Guard: VAPID key ──
+        if (!VAPID_KEY) {
+            console.warn('[FCM Guest] VITE_FIREBASE_VAPID_KEY not configured');
             return false;
         }
 
         // ── Step 1: Request permission ──
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-            console.log('[Push] Notification permission denied by user');
-            // #region agent log
-            fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:97',message:'Push permission not granted',data:{permission},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion agent log
+            console.log('[FCM Guest] Notification permission denied by user');
             return false;
         }
 
-        // ── Step 2: Register service worker ──
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-            scope: '/',
-        });
-        // #region agent log
-        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:108',message:'Service worker registered for push',data:{scope:registration.scope},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
+        // ── Step 2: Get Firebase Messaging instance ──
+        const messaging = await getMessagingInstance();
+        if (!messaging) {
+            console.warn('[FCM Guest] Firebase Messaging not available');
+            return false;
+        }
 
-        // Wait for the service worker to be ready
+        // ── Step 3: Register service worker ──
+        const registration = await navigator.serviceWorker.register(
+            '/firebase-messaging-sw.js',
+            { scope: '/' }
+        );
         await navigator.serviceWorker.ready;
 
-        // ── Step 3: Subscribe to push ──
-        const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        // Send Firebase config to SW for background message handling
+        const swTarget = registration.installing || registration.waiting || registration.active;
+        if (swTarget) {
+            swTarget.postMessage({
+                type: 'FIREBASE_CONFIG',
+                config: {
+                    apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+                    authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+                    projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+                    storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+                    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+                    appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+                },
+            });
+        }
 
-        const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: applicationServerKey as BufferSource,
+        // ── Step 4: Get FCM token ──
+        const fcmToken = await getToken(messaging, {
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: registration,
         });
-        // #region agent log
-        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:122',message:'PushManager subscribed',data:{hasEndpoint:Boolean(subscription?.endpoint)},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
 
-        // ── Step 4: Send subscription to backend ──
+        if (!fcmToken) {
+            console.warn('[FCM Guest] Could not obtain FCM token');
+            return false;
+        }
+
+        // ── Step 5: Send token to backend ──
         await axios.post(
             `${API_BASE}/public/service-requests/${requestId}/subscribe`,
-            { subscription: subscription.toJSON() }
+            { fcmToken }
         );
 
-        console.log('[Push] Successfully subscribed to push notifications');
-        // #region agent log
-        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:134',message:'Push subscription sent to backend',data:{requestIdPresent:Boolean(requestId)},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
+        console.log('[FCM Guest] Successfully subscribed to push notifications');
         return true;
     } catch (error) {
-        console.error('[Push] Failed to subscribe:', error);
-        // #region agent log
-        fetch('http://127.0.0.1:7895/ingest/c303a57e-df67-45b3-8585-27ed099f9c95',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'140225'},body:JSON.stringify({sessionId:'140225',runId:'pre-fix',hypothesisId:'H4',location:'pushSubscription.ts:139',message:'Push subscribe failed (caught)',data:{name:(error as any)?.name||null,message:(error as any)?.message||null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
+        console.error('[FCM Guest] Failed to subscribe:', error);
         return false;
     }
 }
 
 /**
- * Unregister the service worker (cleanup).
- * Time: O(1), Space: O(1)
+ * Unregister all service workers (cleanup utility).
+ * Time: O(n) where n = registered service workers, Space: O(1)
  */
 export async function unregisterServiceWorker(): Promise<void> {
     if ('serviceWorker' in navigator) {

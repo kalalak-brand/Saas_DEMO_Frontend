@@ -8,7 +8,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { useNotificationStore, NotificationItem, LowRatedQuestionItem } from '../../stores/notificationStore';
 import YearlyReportModal from '../common/YearlyReportModal';
 import { PWAInstallButton } from '../../hooks/usePWA';
-import { subscribeCurrentUserToPush } from '../../utils/userPushSubscription';
+// Push notifications are now managed via FCM through useFcmToken() in ManagementLayout
 import toast from 'react-hot-toast';
 
 interface HeaderProps {
@@ -147,7 +147,7 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
   const [notifOpen, setNotifOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
-  const [pushEnabling, setPushEnabling] = useState(false);
+  const pushPermission = 'Notification' in window ? Notification.permission : 'denied';
 
   // Show Management link for hotel_owner only
   // Time: O(1) via Set lookup
@@ -219,13 +219,20 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
     navigate('/login', { replace: true });
   };
 
-  const handleEnablePushForUser = async () => {
-    if (!token) return;
-    setPushEnabling(true);
-    const ok = await subscribeCurrentUserToPush(token);
-    setPushEnabling(false);
-    if (ok) toast.success('Notifications enabled on this device.');
-    else toast.error('Could not enable notifications. Check permission and VAPID key.');
+  const handleEnablePushForUser = () => {
+    // FCM is initialized automatically via useFcmToken() in ManagementLayout.
+    // This button now prompts the user to enable browser notification permission
+    // if they previously dismissed it.
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then((p) => {
+        if (p === 'granted') toast.success('Notifications enabled! You will now receive push alerts.');
+        else toast.error('Notifications blocked. Please enable them in browser settings.');
+      });
+    } else if (Notification.permission === 'denied') {
+      toast.error('Notifications are blocked. Enable them in your browser site settings.');
+    } else {
+      toast.success('Push notifications are already active on this device.');
+    }
   };
 
   const roleLabels: Record<string, string> = {
@@ -290,16 +297,17 @@ export const Header = ({ toggleSidebar, isMobile }: HeaderProps) => {
             
             <PWAInstallButton />
 
-            {/* Enable Push Notifications for staff/owner/gm */}
-            <button
-              onClick={handleEnablePushForUser}
-              disabled={pushEnabling}
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors text-sm font-semibold disabled:opacity-60"
-              title="Enable notifications on this device"
-            >
-              <Bell className="h-4 w-4" />
-              {pushEnabling ? 'Enabling…' : 'Enable Alerts'}
-            </button>
+            {/* Push notification status button — only shown when permission not yet granted */}
+            {pushPermission !== 'granted' && (
+              <button
+                onClick={handleEnablePushForUser}
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors text-sm font-semibold"
+                title="Enable push notifications on this device"
+              >
+                <Bell className="h-4 w-4" />
+                Enable Alerts
+              </button>
+            )}
 
             {/* Management Link for hotel_owner only */}
             {canAccessManagement && (

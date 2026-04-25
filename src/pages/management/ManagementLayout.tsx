@@ -24,6 +24,7 @@ import { useAuthStore } from '../../stores/authStore';
 import Nav from '../../components/layout/Nav';
 import clsx from 'clsx';
 import { useFilterStore } from '../../stores/filterStore';
+import { useFcmToken } from '../../hooks/useFcmToken';
 
 /**
  * Navigation item type
@@ -155,6 +156,12 @@ const ManagementLayout: React.FC = () => {
 
     const user = useAuthStore((state) => state.user);
     const role = user?.role || '';
+
+    // Initialize FCM push notifications for this authenticated staff session.
+    // Requests permission, gets token, registers with backend for topic-based pushes.
+    // Time: O(1) — runs once per auth session, self-cleans on logout.
+    useFcmToken();
+
 
         /**
          * Role-based navigation (Spec §3):
