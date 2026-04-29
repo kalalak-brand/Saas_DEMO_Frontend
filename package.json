@@ -1,6 +1,6 @@
 {
-  "name": "kalalak-insight-dashboard",
-  "description": "Kalalak Insight — Hotel Experience Intelligence Dashboard",
+  "name": "kalalak-controll-dashboard",
+  "description": "Kalalak controller — Hotel Efficiency Analyzer Dashboard",
   "private": true,
   "version": "2.0.0",
   "type": "module",

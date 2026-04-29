@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalalak Control — 20-Day Build Plan</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #07080b;
+            --bg2: #0e1016;
+            --bg3: #151820;
+            --bg4: #1c2028;
+            --border: rgba(255, 255, 255, 0.06);
+            --border2: rgba(255, 255, 255, 0.11);
+            --text: #dde2ee;
+            --muted: #5f6678;
+            --muted2: #8892aa;
+            --accent: #00e5c3;
+            --accent2: #7c6dfa;
+            --amber: #f5a623;
+            --red: #f04e4e;
+            --green: #00c896;
+            --blue: #3b8bd4;
+            --font: 'Bricolage Grotesque', sans-serif;
+            --mono: 'DM Mono', monospace;
+            --r: 10px;
+            --rl: 14px;
+
+            --c-foundation: #888780;
+            --c-backend: #378add;
+            --c-frontend: #ba7517;
+            --c-polish: #3b6d11;
+
+            --bg-foundation: rgba(136, 135, 128, 0.08);
+            --bg-backend: rgba(55, 138, 221, 0.08);
+            --bg-frontend: rgba(186, 117, 23, 0.08);
+            --bg-polish: rgba(59, 109, 17, 0.08);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── GRID TEXTURE ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── STICKY NAV ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(7, 8, 11, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            height: 52px;
+        }
+
+        .nav-logo {
+            font-family: var(--font);
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--text);
+            margin-right: 28px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .nav-logo em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .nav-phases {
+            display: flex;
+            gap: 2px;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .nav-phases::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-phase {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 5px 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            border: none;
+            background: none;
+            transition: all .15s;
+        }
+
+        .nav-phase:hover {
+            color: var(--text);
+            background: var(--bg3);
+        }
+
+        .nav-phase.active {
+            color: var(--accent);
+            background: rgba(0, 229, 195, 0.07);
+        }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .nav-progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted2);
+        }
+
+        .nav-prog-track {
+            width: 120px;
+            height: 4px;
+            background: var(--bg4);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .nav-prog-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width .4s ease;
+        }
+
+        /* ── PAGE ── */
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 52px 0 44px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 36px;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(0, 229, 195, 0.07);
+            border: 1px solid rgba(0, 229, 195, 0.18);
+            padding: 4px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            font-size: clamp(26px, 4.5vw, 44px);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .hero h1 strong {
+            color: var(--accent2);
+            font-weight: 800;
+        }
+
+        .hero-sub {
+            font-size: 14px;
+            color: var(--muted2);
+            max-width: 540px;
+            line-height: 1.65;
+            margin-bottom: 28px;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .kpi {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px 16px;
+        }
+
+        .kpi-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .kpi-val {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .global-prog {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .global-prog-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted2);
+            white-space: nowrap;
+        }
+
+        .global-prog-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg4);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .global-prog-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 3px;
+            transition: width .5s ease;
+        }
+
+        .global-prog-pct {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--accent);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* ── PHASE SECTION ── */
+        .phase-section {
+            margin-bottom: 16px;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0 14px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phase-color-bar {
+            width: 4px;
+            height: 32px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .phase-head-text {
+            flex: 1;
+        }
+
+        .phase-head-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .phase-head-sub {
+            font-size: 11px;
+            color: var(--muted2);
+            margin-top: 1px;
+            font-family: var(--mono);
+        }
+
+        .phase-head-days {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .phase-collapse-icon {
+            font-size: 14px;
+            color: var(--muted);
+            transition: transform .2s;
+        }
+
+        .phase-collapse-icon.open {
+            transform: rotate(180deg);
+        }
+
+        .phase-days-wrap {
+            overflow: hidden;
+            transition: max-height .3s ease;
+        }
+
+        /* ── DAY CARD ── */
+        .day-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--rl);
+            margin-bottom: 10px;
+            transition: border-color .2s, opacity .2s;
+            overflow: hidden;
+        }
+
+        .day-card:hover {
+            border-color: var(--border2);
+        }
+
+        .day-card.done {
+            opacity: .45;
+        }
+
+        .day-card.blocked {
+            border-left: 3px solid var(--red);
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            cursor: pointer;
+        }
+
+        .day-badge {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 500;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .day-head-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .day-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .day-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .effort-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .effort-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border2);
+        }
+
+        .effort-dot.on {
+            background: currentColor;
+        }
+
+        .day-done-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            border: 1px solid var(--border2);
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+
+        .day-done-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .day-done-btn.checked {
+            background: rgba(0, 200, 150, 0.12);
+            border-color: rgba(0, 200, 150, 0.4);
+        }
+
+        .day-done-btn.checked::after {
+            content: '';
+            display: block;
+            width: 11px;
+            height: 7px;
+            border-left: 2px solid var(--green);
+            border-bottom: 2px solid var(--green);
+            transform: rotate(-45deg) translate(1px, -1px);
+        }
+
+        .expand-icon {
+            font-size: 12px;
+            color: var(--muted);
+            margin-left: 4px;
+            transition: transform .2s;
+        }
+
+        .expand-icon.open {
+            transform: rotate(180deg);
+        }
+
+        /* ── DAY BODY ── */
+        .day-body {
+            border-top: 1px solid var(--border);
+            padding: 16px 18px;
+            display: none;
+        }
+
+        .day-body.open {
+            display: block;
+        }
+
+        .task-list {
+            margin-bottom: 14px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 5px 0;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background .1s;
+        }
+
+        .task-item:hover {
+            background: var(--bg3);
+            margin: 0 -6px;
+            padding: 5px 6px;
+        }
+
+        .task-cb {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid var(--border2);
+            background: none;
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+
+        .task-cb.checked {
+            background: rgba(0, 200, 150, 0.12);
+            border-color: rgba(0, 200, 150, 0.4);
+        }
+
+        .task-cb.checked::after {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 5px;
+            border-left: 1.5px solid var(--green);
+            border-bottom: 1.5px solid var(--green);
+            transform: rotate(-45deg) translate(1px, -1px);
+        }
+
+        .task-text {
+            font-size: 12px;
+            color: var(--muted2);
+            line-height: 1.5;
+            flex: 1;
+            transition: all .15s;
+        }
+
+        .task-text.done {
+            text-decoration: line-through;
+            color: var(--muted);
+        }
+
+        /* ── BLOCKER BOX ── */
+        .blocker-box {
+            background: rgba(240, 78, 78, 0.06);
+            border: 1px solid rgba(240, 78, 78, 0.2);
+            border-radius: var(--r);
+            padding: 9px 12px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #fca5a5;
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            line-height: 1.5;
+        }
+
+        .blocker-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(240, 78, 78, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--red);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ── DAY PROGRESS ── */
+        .day-prog-wrap {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .day-prog-track {
+            flex: 1;
+            height: 3px;
+            background: var(--bg4);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .day-prog-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width .3s;
+        }
+
+        .day-prog-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        /* ── FOOTER ── */
+        .plan-footer {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--rl);
+            padding: 24px 28px;
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            text-align: center;
+        }
+
+        .footer-stat {}
+
+        .footer-val {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .footer-label {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+            font-family: var(--mono);
+        }
+
+        /* ── LEGEND ── */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .leg {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted2);
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .leg-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadein {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .phase-section {
+            animation: fadein .4s ease both;
+        }
+
+        .phase-section:nth-child(1) {
+            animation-delay: .05s;
+        }
+
+        .phase-section:nth-child(2) {
+            animation-delay: .1s;
+        }
+
+        .phase-section:nth-child(3) {
+            animation-delay: .15s;
+        }
+
+        .phase-section:nth-child(4) {
+            animation-delay: .2s;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .kpi-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .plan-footer {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            nav {
+                padding: 0 16px;
+            }
+
+            .page {
+                padding: 0 14px 60px;
+            }
+
+            .nav-phases {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── NAV ── -->
+    <nav>
+        <div class="nav-logo">Kalalak <em>Build</em></div>
+        <div class="nav-phases">
+            <button class="nav-phase active" onclick="filterPhase('all',this)">All days</button>
+            <button class="nav-phase" onclick="filterPhase('foundation',this)">Foundation</button>
+            <button class="nav-phase" onclick="filterPhase('backend',this)">Backend</button>
+            <button class="nav-phase" onclick="filterPhase('frontend',this)">Frontend</button>
+            <button class="nav-phase" onclick="filterPhase('polish',this)">Testing &amp; deploy</button>
+        </div>
+        <div class="nav-right">
+            <div class="nav-progress-wrap">
+                <div class="nav-prog-track">
+                    <div class="nav-prog-fill" id="nav-fill" style="width:0%"></div>
+                </div>
+                <span id="nav-pct">0%</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── PAGE ── -->
+    <div class="page">
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-eyebrow">Full-stack · Solo · 20 days</div>
+            <h1>20-Day Build Plan<br><em>Kalalak</em> <strong>Control</strong></h1>
+            <p class="hero-sub">Every day has a title, specific tasks to tick off, and a blocker check where relevant.
+                Complete each day's checklist before moving forward.</p>
+            <div class="kpi-row">
+                <div class="kpi">
+                    <div class="kpi-label">Total days</div>
+                    <div class="kpi-val">20</div>
+                    <div class="kpi-sub">Solo fullstack</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Tasks done</div>
+                    <div class="kpi-val" id="kpi-tasks">0 / 74</div>
+                    <div class="kpi-sub">Across all days</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Days complete</div>
+                    <div class="kpi-val" id="kpi-days">0 / 20</div>
+                    <div class="kpi-sub">Mark top checkbox</div>
+                </div>
+            </div>
+            <div class="global-prog">
+                <span class="global-prog-label">Overall progress</span>
+                <div class="global-prog-track">
+                    <div class="global-prog-fill" id="global-fill" style="width:0%"></div>
+                </div>
+                <span class="global-prog-pct" id="global-pct">0%</span>
+            </div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="legend">
+            <div class="leg">
+                <div class="leg-dot" style="background:var(--c-foundation)"></div>Foundation (D1–2)
+            </div>
+            <div class="leg">
+                <div class="leg-dot" style="background:var(--c-backend)"></div>Backend (D3–10)
+            </div>
+            <div class="leg">
+                <div class="leg-dot" style="background:var(--c-frontend)"></div>Frontend (D11–17)
+            </div>
+            <div class="leg">
+                <div class="leg-dot" style="background:var(--c-polish)"></div>Testing &amp; deploy (D18–20)
+            </div>
+            <div class="leg" style="border-left:3px solid var(--red);border-radius:0 20px 20px 0"><span
+                    style="color:var(--red);font-family:var(--mono);font-size:10px">! blocker</span></div>
+        </div>
+
+        <!-- PLAN -->
+        <div id="plan-container"></div>
+
+        <!-- FOOTER -->
+        <div class="plan-footer">
+            <div class="footer-stat">
+                <div class="footer-val" style="color:var(--accent)">10</div>
+                <div class="footer-label">Est. days with 2 devs</div>
+            </div>
+            <div class="footer-stat">
+                <div class="footer-val" style="color:var(--accent2)">20</div>
+                <div class="footer-label">Days solo fullstack</div>
+            </div>
+            <div class="footer-stat">
+                <div class="footer-val" style="color:var(--amber)">~60%</div>
+                <div class="footer-label">Time saved vs no AI</div>
+            </div>
+            <div class="footer-stat">
+                <div class="footer-val" style="color:var(--green)">0</div>
+                <div class="footer-label">Guesswork left</div>
+            </div>
+        </div>
+
+    </div><!-- /page -->
+
+    <script>
+        const PHASES = [
+            { id: 'foundation', name: 'Foundation', color: '#888780', sub: 'Scaffold · types · config', days: [1, 2] },
+            { id: 'backend', name: 'Backend', color: '#378add', sub: 'DB · SLA engine · auth · API · sockets', days: [3, 4, 5, 6, 7, 8, 9, 10] },
+            { id: 'frontend', name: 'Frontend', color: '#ba7517', sub: 'Guest UI · staff · dashboards · admin', days: [11, 12, 13, 14, 15, 16, 17] },
+            { id: 'polish', name: 'Testing & deploy', color: '#3b6d11', sub: 'PWA · tests · CI/CD · Railway', days: [18, 19, 20] },
+        ]
+
+        const DAYS = [
+            {
+                d: 1, phase: 'foundation', effort: 2,
+                title: 'Project scaffold + CLAUDE.md',
+                tasks: [
+                    'mkdir kalalak-control && cd kalalak-control — create root folder',
+                    'Init pnpm workspace with apps/web, apps/api, packages/db, packages/shared',
+                    'Install all deps: React 18, Vite, Fastify, Drizzle, Zod, Socket.io, BullMQ, Redis',
+                    'Write CLAUDE.md: all ENUMs, roles, SLA rules, tech stack — this primes every session',
+                    'Init git, .gitignore (node_modules, .env, dist), .env.example with all vars',
+                    'Verify pnpm dev starts both web (port 5173) and api (port 3000) without errors',
+                ]
+            },
+            {
+                d: 2, phase: 'foundation', effort: 2,
+                title: 'Shared types + environment config',
+                tasks: [
+                    'Define all TypeScript types in /packages/shared/types.ts: Ticket, User, Hotel, Dept, Service, Guest, Feedback',
+                    'Define BehaviorTag union: DELAYED_ACCEPT|LATE_START|SLOW_RESOLUTION|POOR_QUALITY|MULTIPLE_ESCALATIONS|REPEAT_COMPLAINT|FAST_RESOLUTION',
+                    'Create /packages/shared/socket-events.ts — discriminated union for all 11 socket events with exact payloads',
+                    'Set up Zod env validation in both apps — crash on startup if any required env is missing',
+                    'Configure ESLint + TypeScript strict mode across all packages',
+                    'Verify: import from @kalalak/shared works in both web and api without errors',
+                ]
+            },
+            {
+                d: 3, phase: 'backend', effort: 3,
+                title: 'Database schema + first migration',
+                tasks: [
+                    'Write full Drizzle schema in /packages/db/schema.ts — all 4 ENUMs + all 10 tables',
+                    'Add behavior_tags text().array().default([]).notNull() to tickets table',
+                    'Add all foreign keys: tickets.hotel_id, dept_id, service_id, guest_id, assigned_staff_id',
+                    'Add indexes on: tickets.hotel_id, sla_status, sla_deadline, dept_id',
+                    'Run pnpm db:generate then pnpm db:migrate',
+                    'Open psql and verify: \\dt shows all 10 tables, \\dT shows all 4 ENUMs',
+                ],
+                blocker: 'Do NOT move to Day 4 until pnpm db:migrate completes without errors and all tables are visible in psql.'
+            },
+            {
+                d: 4, phase: 'backend', effort: 3,
+                title: 'SLA engine — calculation + BullMQ jobs',
+                tasks: [
+                    'Create /apps/api/src/services/sla-engine.ts',
+                    'Implement calculateSlaDeadline(base, severity, repeat, createdAt): Date — formula: base × severity × repeat (no subtraction)',
+                    'Write Vitest unit tests FIRST: standard/critical/repeat-guest/edge cases (severity=0 must throw)',
+                    'Set up BullMQ queue in /apps/api/src/queues/sla-queue.ts backed by Redis',
+                    'Implement scheduleSlaJobs(ticketId, deadline, hotelId, deptId) — 3 jobs at 50%/80%/100% with idempotent jobId = ticketId:stage',
+                    'Implement cancelSlaJobs(ticketId) — removes all 3 pending jobs on COMPLETE',
+                ]
+            },
+            {
+                d: 5, phase: 'backend', effort: 3,
+                title: 'SLA worker + behavior_tags engine',
+                tasks: [
+                    'Create /apps/api/src/workers/sla-worker.ts — BullMQ worker processing all 3 SLA job types',
+                    'WARNING_50: UPDATE sla_status=WARNING_50, prepare socket emit payload',
+                    'RISK_80: UPDATE sla_status=RISK_80, prepare supervisor notification payload',
+                    'BREACHED_100: UPDATE sla_status=BREACHED_100, prepare multi-room emit',
+                    'Create /apps/api/src/services/behavior-tags.ts — computeBehaviorTags(ticket, feedback|null, escalationCount): BehaviorTag[]',
+                    'Write Vitest unit tests for all 7 tag rules including ALL edge cases (no feedback, never accepted, boundary exact match)',
+                ]
+            },
+            {
+                d: 6, phase: 'backend', effort: 3,
+                title: 'Auth + JWT + Row Level Security',
+                tasks: [
+                    'Install and configure Better Auth with Fastify adapter',
+                    'Create /apps/api/src/middleware/auth.ts — authenticate() and requireRole() factory',
+                    'Define ROLE_RANK: guest=0, dept_staff=1, front_desk=2, dept_manager=3, supervisor=4, gm=5, owner=6, saas_admin=99',
+                    'Create /apps/api/src/middleware/tenant.ts — attach request.hotelId from JWT, validate hotel is active',
+                    'Write SQL migration: enable RLS on all hotel-scoped tables, hotel_id isolation policy',
+                    'Manual test: log in as hotel A gm, attempt to query hotel B tickets — must get 0 results',
+                ]
+            },
+            {
+                d: 7, phase: 'backend', effort: 3,
+                title: 'Socket.io server + room architecture',
+                tasks: [
+                    'Create /apps/api/src/socket/index.ts — Socket.io server with Redis adapter',
+                    'Add JWT auth middleware on socket handshake (reject unauthenticated connections)',
+                    'Auto-join rooms on connect based on role — 7 room patterns (see CLAUDE.md)',
+                    'Guest joins via socket.emit("join_ticket", ticketId) after ticket creation',
+                    'Export typed emitToRoom(room, event, payload) using SocketEvent discriminated union',
+                    'Create /apps/web/src/lib/socket.ts — singleton client, auto-reconnect, typed listeners',
+                ]
+            },
+            {
+                d: 8, phase: 'backend', effort: 3,
+                title: 'Core API — ticket lifecycle routes',
+                tasks: [
+                    'POST /api/tickets — create ticket, calculateSlaDeadline(), auto-assign by dept workload, scheduleSlaJobs()',
+                    'Also schedule 2-min escalation job (stage1) at ticket creation',
+                    'PATCH /api/tickets/:id/accept — set accepted_at, cancel stage1 escalation job',
+                    'PATCH /api/tickets/:id/start — set started_at, emit ticket_started to guest room',
+                    'PATCH /api/tickets/:id/complete — set completedAt, computeBehaviorTags(), save behavior_tags, emit feedback_prompt',
+                    'POST /api/tickets/:id/feedback — save feedback, if NOT_SATISFIED update guest.repeat_penalty_multiplier, emit feedback_not_satisfied',
+                ]
+            },
+            {
+                d: 9, phase: 'backend', effort: 3,
+                title: 'Dashboard API + analytics queries',
+                tasks: [
+                    'Write all analytics queries in /packages/db/queries/analytics.ts',
+                    'getSlaCompliance(hotelId, deptId?, from): % tickets completed on time',
+                    'getRevenueAtRisk(hotelId, date): breach count × avg_room_rate',
+                    'getBreachHeatmap(hotelId, days=30): 168-cell matrix (24h × 7d)',
+                    'getRepeatOffenderRooms(hotelId, limit=10): sorted by breach_rate DESC',
+                    'Wire into GET /api/dashboard/gm (role:gm), /owner (role:owner), /supervisor, /dept — add 60s Redis cache on all heavy queries',
+                ]
+            },
+            {
+                d: 10, phase: 'backend', effort: 2,
+                title: 'SaaS Admin routes + startup recovery',
+                tasks: [
+                    'POST /api/admin/organizations — create org, enforce max_hotels per tier (Basic=1, Pro=5, Enterprise=unlimited)',
+                    'POST /api/admin/hotels, /api/admin/users, /api/admin/departments, /api/admin/services',
+                    'POST /api/admin/users: prevent creating saas_admin via API, warn if hotel already has a GM',
+                    'Create /apps/api/src/startup/recover-sla-jobs.ts — on server ready, reschedule all missing BullMQ jobs',
+                    'Create GET /api/health — returns { status, dbConnected, redisConnected, activeTickets } for Railway healthcheck',
+                    'Run all routes through Postman/httpie and verify role guards reject wrong roles with 403',
+                ]
+            },
+            {
+                d: 11, phase: 'frontend', effort: 2,
+                title: 'Guest QR flow — mobile-first',
+                tasks: [
+                    'Create /apps/web/src/pages/GuestFlow.tsx — 3-step flow (no login required)',
+                    'Step 1: read ?hotel= and ?room= from URL, confirm to guest',
+                    'Step 2: dept selector → service selector (TanStack Query), show estimated SLA time',
+                    'Step 3: live status badge via Socket.io (RUNNING / ON THE WAY / COMPLETED) — join guest:{ticketId} room',
+                    'After COMPLETED: two large feedback buttons (Happy / Not Satisfied) — min 48px height',
+                    'Not Satisfied: animate in 3 root-cause chips [Too Slow] [Incomplete] [Staff Attitude] → POST /api/tickets/:id/feedback',
+                ]
+            },
+            {
+                d: 12, phase: 'frontend', effort: 3,
+                title: 'Staff dashboard — alarm + ACCEPT/START/COMPLETE',
+                tasks: [
+                    'Create /apps/web/src/pages/StaffDashboard.tsx with Zustand staffStore',
+                    'Socket: on new_ticket_assigned → add to store, play 30s repeating alarm (Web Audio API, 440Hz)',
+                    'Ticket cards: room number, service, priority badge, live countdown timer (setInterval 1s)',
+                    'Color coding: green <50%, yellow 50–79%, orange 80–99%, red 100%+ of SLA',
+                    'Show only relevant action: ACCEPT (if not accepted) → START (if accepted) → COMPLETE (if started)',
+                    'On mobile: navigator.vibrate([100]) on new ticket, min 48px buttons, full-width actions',
+                ]
+            },
+            {
+                d: 13, phase: 'frontend', effort: 2,
+                title: 'Department Manager dashboard',
+                tasks: [
+                    'Create /apps/web/src/pages/DeptManagerDashboard.tsx',
+                    '4-column Kanban: Running | Warning (WARNING_50) | At Risk (RISK_80) | Breached (BREACHED_100)',
+                    'Socket: stage1_escalation → highlight unaccepted ticket red + pulse, sla_warning → move card to Warning column',
+                    'Reassign modal: staff dropdown, PATCH /api/tickets/:id (assignedStaffId field)',
+                    '3 metric cards at bottom: team SLA%, avg response time, CSAT% for this dept',
+                    'Filter bar: filter tickets by individual staff member name',
+                ]
+            },
+            {
+                d: 14, phase: 'frontend', effort: 3,
+                title: 'Supervisor live control panel',
+                tasks: [
+                    'Create /apps/web/src/pages/SupervisorPanel.tsx',
+                    'Live feed sorted: BREACHED_100 (top, pulsing red) → RISK_80 (amber) → WARNING_50 (yellow) → RUNNING (neutral)',
+                    'Socket: sla_risk → move ticket + play 440Hz alert; sla_breach → move to top + pulse animation',
+                    'Top-right live counter "Revenue at Risk Today: ₹X,XXX" — updates on every sla_breach event',
+                    'Each row: room | dept | service | staff name | elapsed % bar | sla_status badge',
+                    'Use @tanstack/react-virtual for list virtualisation (handles 200+ tickets without lag)',
+                ]
+            },
+            {
+                d: 15, phase: 'frontend', effort: 2,
+                title: 'Front Desk dashboard',
+                tasks: [
+                    'Create /apps/web/src/pages/FrontDeskDashboard.tsx',
+                    'Show: (1) BREACHED_100 tickets from all depts — flashing red alerts, (2) follow-up queue — completed in last 30 min',
+                    'Manual quick-input form (top right): room number + dept + service → POST /api/tickets',
+                    'Socket: feedback_not_satisfied → toast "Room 412 — Not Satisfied — Too Slow"',
+                    'Contact panel: escalate to Supervisor button (opens system chat or phone prompt)',
+                    'Follow-up queue: "Call guest" button per row, mark called checkbox per ticket',
+                ]
+            },
+            {
+                d: 16, phase: 'frontend', effort: 3,
+                title: 'GM dashboard — heatmap + analytics',
+                tasks: [
+                    'Create /apps/web/src/pages/GMDashboard.tsx',
+                    '4 KPI cards: SLA compliance%, Revenue at Risk ₹, Active breaches (live), CSAT%',
+                    'Recharts BarChart: SLA% per department — bars colored by threshold (>90 green, 70–90 amber, <70 red)',
+                    'Custom 24×7 breach heatmap: 168 div cells, darkness by breach count, tooltip on hover',
+                    'Repeat offender rooms table: room | tickets | breaches | breach rate% — sorted DESC',
+                    'All data from GET /api/dashboard/gm. TanStack Query 30s refetch + socket increments activeBreaches live',
+                ]
+            },
+            {
+                d: 17, phase: 'frontend', effort: 3,
+                title: 'Owner dashboard + SaaS Admin panel',
+                tasks: [
+                    'Create /apps/web/src/pages/OwnerDashboard.tsx — portfolio header + property leaderboard',
+                    'Portfolio header: total revenue at risk ₹, portfolio health score%, worst performing hotel',
+                    'Property leaderboard table: hotel | SLA% | CSAT% | revenue at risk | active breaches — sorted by SLA% ASC (worst first)',
+                    'Create /apps/web/src/pages/AdminPanel.tsx with 5 shadcn Tabs',
+                    'Tabs: Organizations | Hotels | Users | Departments & Services | System Health',
+                    'All admin forms: Zod-validated, show error states, success toast on submit',
+                ]
+            },
+            {
+                d: 18, phase: 'polish', effort: 2,
+                title: 'Route guards + PWA + push notifications',
+                tasks: [
+                    'Create RoleGuard component — on login, redirect to correct dashboard based on JWT role',
+                    'Login page: email + password, Better Auth session, store JWT, handle errors',
+                    'Configure vite-plugin-pwa: NetworkFirst for /api/*, CacheFirst for static assets, offline support',
+                    'Request Web Push permission on Staff dashboard mount, POST subscription to /api/push/subscribe',
+                    'In sla-worker: if no ACCEPT within 60s, send web-push alarm to all dept staff subscriptions',
+                    'Install PWA on a real mobile device and verify push notification fires for new ticket',
+                ],
+                blocker: 'Test on a real mobile device before Day 19. Push notification on a laptop is not sufficient.'
+            },
+            {
+                d: 19, phase: 'polish', effort: 3,
+                title: 'Integration tests + E2E Playwright',
+                tasks: [
+                    'Write Vitest integration test — Path A: create ticket → accept → start → complete before breach → Happy → verify behavior_tags=[]',
+                    'Write Vitest integration test — Path B: no accept → stage1 fires → breach → NOT_SATISFIED → verify behavior_tags=[DELAYED_ACCEPT, SLOW_RESOLUTION, POOR_QUALITY]',
+                    'Write Vitest integration test — behavior_tags: all 7 tag rules with all edge cases (no feedback, never accepted, boundary)',
+                    'Write Playwright E2E: guest QR → staff ACCEPT → staff COMPLETE → Happy — verify CSAT updates in GM dashboard',
+                    'Write Playwright E2E: breach → Front Desk alert visible → NOT_SATISFIED → Total Failure quadrant visible in GM',
+                    'Set up GitHub Actions: run pnpm test + pnpm test:e2e on every PR, block merge on failure',
+                ]
+            },
+            {
+                d: 20, phase: 'polish', effort: 2,
+                title: 'Deploy + production hardening',
+                tasks: [
+                    'Create /apps/api/Dockerfile: multi-stage build (node:20-alpine), run db:migrate before start',
+                    'Create railway.toml with healthcheck: GET /api/health every 30s',
+                    'Deploy to Railway: connect GitHub, add PostgreSQL plugin + Redis plugin (vars auto-injected)',
+                    'Deploy web to Cloudflare Pages: set VITE_API_URL=https://your-api.railway.app',
+                    'Connect Sentry to Fastify (@sentry/node) — especially instrument sla-worker.ts',
+                    'Final gate: send a real test ticket as guest → trace through to COMPLETED → verify behavior_tags in psql',
+                ],
+                blocker: 'Final gate — do not sign off until you have submitted a real ticket from a guest QR code and verified behavior_tags are populated in the production database.'
+            },
+        ]
+
+        const state = { checkedTasks: new Set(), checkedDays: new Set() }
+        const TOTAL_TASKS = DAYS.reduce((s, d) => s + d.tasks.length, 0)
+
+        function updateProgress() {
+            const t = state.checkedTasks.size
+            const d = state.checkedDays.size
+            const pct = Math.round(t / TOTAL_TASKS * 100)
+            document.getElementById('kpi-tasks').textContent = t + ' / ' + TOTAL_TASKS
+            document.getElementById('kpi-days').textContent = d + ' / 20'
+            document.getElementById('global-fill').style.width = pct + '%'
+            document.getElementById('global-pct').textContent = pct + '%'
+            document.getElementById('nav-fill').style.width = pct + '%'
+            document.getElementById('nav-pct').textContent = pct + '%'
+        }
+
+        function toggleTask(key) {
+            if (state.checkedTasks.has(key)) state.checkedTasks.delete(key)
+            else state.checkedTasks.add(key)
+            const cb = document.querySelector('[data-cb="' + key + '"]')
+            if (cb) cb.classList.toggle('checked', state.checkedTasks.has(key))
+            const txt = document.querySelector('[data-ct="' + key + '"]')
+            if (txt) txt.classList.toggle('done', state.checkedTasks.has(key))
+            updateDayProgress(key.split('-')[0])
+            updateProgress()
+        }
+
+        function toggleDay(d, e) {
+            e.stopPropagation()
+            if (state.checkedDays.has(d)) state.checkedDays.delete(d)
+            else state.checkedDays.add(d)
+            const btn = document.querySelector('[data-day-btn="' + d + '"]')
+            if (btn) btn.classList.toggle('checked', state.checkedDays.has(d))
+            const card = document.getElementById('daycard-' + d)
+            if (card) card.classList.toggle('done', state.checkedDays.has(d))
+            updateProgress()
+        }
+
+        function toggleBody(d) {
+            const body = document.getElementById('daybody-' + d)
+            const icon = document.getElementById('dayicon-' + d)
+            if (!body || !icon) return
+            const open = body.classList.toggle('open')
+            icon.classList.toggle('open', open)
+        }
+
+        function updateDayProgress(dayStr) {
+            const d = parseInt(dayStr)
+            const day = DAYS.find(x => x.d === d)
+            if (!day) return
+            const total = day.tasks.length
+            const done = day.tasks.filter((_, i) => state.checkedTasks.has(d + '-' + i)).length
+            const pct = Math.round(done / total * 100)
+            const fill = document.getElementById('dayprog-' + d)
+            const label = document.getElementById('dayproglabel-' + d)
+            if (fill) fill.style.width = pct + '%'
+            if (label) label.textContent = pct + '%'
+        }
+
+        function filterPhase(phase, btn) {
+            document.querySelectorAll('.nav-phase').forEach(b => b.classList.remove('active'))
+            btn.classList.add('active')
+            document.querySelectorAll('.phase-section').forEach(s => {
+                s.style.display = (phase === 'all' || s.dataset.phase === phase) ? '' : 'none'
+            })
+        }
+
+        function getPhaseColor(phaseId) {
+            const p = PHASES.find(x => x.id === phaseId)
+            return p ? p.color : '#888'
+        }
+
+        function getEffortDots(effort, color) {
+            return [1, 2, 3].map(i => '<span class="effort-dot' + (i <= effort ? ' on' : '') + '" style="color:' + color + '"></span>').join('')
+        }
+
+        function buildPlan() {
+            const container = document.getElementById('plan-container')
+            PHASES.forEach((ph, pi) => {
+                const sec = document.createElement('div')
+                sec.className = 'phase-section'
+                sec.dataset.phase = ph.id
+                sec.style.animationDelay = (pi * 0.07) + 's'
+
+                sec.innerHTML = '<div class="phase-header" onclick="togglePhase(\'' + ph.id + '\')">' +
+                    '<div class="phase-color-bar" style="background:' + ph.color + '"></div>' +
+                    '<div class="phase-head-text">' +
+                    '<div class="phase-head-name">' + ph.name + '</div>' +
+                    '<div class="phase-head-sub">' + ph.sub + '</div>' +
+                    '</div>' +
+                    '<span class="phase-head-days">Day ' + ph.days[0] + ' – ' + ph.days[ph.days.length - 1] + '</span>' +
+                    '<span class="phase-collapse-icon open" id="phase-icon-' + ph.id + '">&#9650;</span>' +
+                    '</div>' +
+                    '<div class="phase-days-wrap" id="phase-wrap-' + ph.id + '" style="max-height:9999px">' +
+                    '</div>'
+                container.appendChild(sec)
+
+                const wrap = document.getElementById('phase-wrap-' + ph.id)
+                DAYS.filter(d => d.phase === ph.id).forEach(day => {
+                    const c = document.createElement('div')
+                    c.className = 'day-card' + (day.blocker ? ' blocked' : '')
+                    c.id = 'daycard-' + day.d
+
+                    let html = '<div class="day-header" onclick="toggleBody(' + day.d + ')">' +
+                        '<div class="day-badge" style="background:' + ph.color + '22;color:' + ph.color + '">D' + day.d + '</div>' +
+                        '<div class="day-head-body">' +
+                        '<div class="day-title">' + day.title + '</div>' +
+                        '<div class="day-meta">' +
+                        '<div class="effort-dots">' + getEffortDots(day.effort, ph.color) + '</div>' +
+                        '<span style="color:' + ph.color + '">' + ph.name + '</span>' +
+                        '<span>' + day.tasks.length + ' tasks</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '<button class="day-done-btn" data-day-btn="' + day.d + '" onclick="toggleDay(' + day.d + ',event)" title="Mark day complete"></button>' +
+                        '<span class="expand-icon open" id="dayicon-' + day.d + '">&#9650;</span>' +
+                        '</div>'
+
+                    html += '<div class="day-body open" id="daybody-' + day.d + '">'
+
+                    html += '<div class="task-list">'
+                    day.tasks.forEach((t, i) => {
+                        const key = day.d + '-' + i
+                        html += '<div class="task-item" onclick="toggleTask(\'' + key + '\')">' +
+                            '<div class="task-cb" data-cb="' + key + '"></div>' +
+                            '<span class="task-text" data-ct="' + key + '">' + t + '</span>' +
+                            '</div>'
+                    })
+                    html += '</div>'
+
+                    if (day.blocker) {
+                        html += '<div class="blocker-box"><div class="blocker-icon">!</div><div><strong>Blocker:</strong> ' + day.blocker + '</div></div>'
+                    }
+
+                    html += '<div class="day-prog-wrap">' +
+                        '<div class="day-prog-track"><div class="day-prog-fill" id="dayprog-' + day.d + '" style="width:0%;background:' + ph.color + '"></div></div>' +
+                        '<span class="day-prog-label" id="dayproglabel-' + day.d + '">0%</span>' +
+                        '</div>'
+
+                    html += '</div>'
+                    c.innerHTML = html
+                    wrap.appendChild(c)
+                })
+            })
+            updateProgress()
+        }
+
+        function togglePhase(id) {
+            const wrap = document.getElementById('phase-wrap-' + id)
+            const icon = document.getElementById('phase-icon-' + id)
+            if (!wrap || !icon) return
+            const isOpen = wrap.style.maxHeight !== '0px'
+            wrap.style.maxHeight = isOpen ? '0px' : '9999px'
+            wrap.style.overflow = isOpen ? 'hidden' : 'visible'
+            icon.classList.toggle('open', !isOpen)
+        }
+
+        buildPlan()
+    </script>
+</body>
+
+</html>
